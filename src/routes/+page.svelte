@@ -16,8 +16,12 @@
     const features_section_chariot_rental_description = t('landing.index.features_section.features.chariot_rental.description');
 
     const faq_section_title = t('landing.index.faq_section.title');
-
-
+    const faq_section_what_is_ecodeli_question = t('landing.index.faq_section.questions.what_is_ecodeli.question');
+    const faq_section_what_is_ecodeli_answer = t('landing.index.faq_section.questions.what_is_ecodeli.answer');
+    const faq_section_become_delivery_person_question = t('landing.index.faq_section.questions.become_delivery_person.question');
+    const faq_section_become_delivery_person_answer = t('landing.index.faq_section.questions.become_delivery_person.answer');
+    const faq_section_delivery_security_question = t('landing.index.faq_section.questions.delivery_security.question');
+    const faq_section_delivery_security_answer = t('landing.index.faq_section.questions.delivery_security.answer');
 </script>
 
 <div class="mt-10 color-dark-green text-center">
@@ -82,14 +86,20 @@
 
         <div class="collapse collapse-arrow">
             <input type="radio" name="my-accordion-2" checked />
-            <div class="collapse-title font-medium">Placeholder</div>
-            <div class="collapse-content">Placeholder</div>
+            <div class="collapse-title font-medium">{$faq_section_what_is_ecodeli_question}</div>
+            <div class="collapse-content">{$faq_section_what_is_ecodeli_answer}</div>
             <hr class="border-emerald-900 my-5 w-full">
         </div>
         <div class="collapse collapse-arrow">
             <input type="radio" name="my-accordion-2" />
-            <div class="collapse-title font-medium">Placeholder</div>
-            <div class="collapse-content">Placeholder</div>
+            <div class="collapse-title font-medium">{$faq_section_become_delivery_person_question}</div>
+            <div class="collapse-content">{$faq_section_become_delivery_person_answer}</div>
+            <hr class="border-emerald-900 my-5 w-full">
+        </div>
+        <div class="collapse collapse-arrow">
+            <input type="radio" name="my-accordion-2" />
+            <div class="collapse-title font-medium">{$faq_section_delivery_security_question}</div>
+            <div class="collapse-content">{$faq_section_delivery_security_answer}</div>
             <hr class="border-emerald-900 my-5 w-full">
         </div>
     </div>
