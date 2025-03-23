@@ -1,4 +1,4 @@
-export const excludedLayoutRoutes = ['/auth'];
+export const excludedLayoutRoutes = ['/auth', '/clients'];
 
 export function isExcludedLayoutRoute(pathname: string): boolean {
 	if (!pathname) return false;

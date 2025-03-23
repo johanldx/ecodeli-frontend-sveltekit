@@ -3,7 +3,6 @@
   import { fetchFromAPI } from '$lib/utils/api';
   import { flattenObject } from '$lib/utils/flatten';
 
-  // Recharge les traductions chaque fois que la langue change
   $: if ($currentLang) {
     fetchFromAPI(`/langs/${$currentLang}`)
       .then((data) => flattenObject(data as Record<string, any>))
