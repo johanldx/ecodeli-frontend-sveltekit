@@ -23,9 +23,11 @@
 	const footer_menu_legal_mentions = t('landing.global.footer.menu.legal_mentions');
 	const footer_menu_admin = t('landing.global.footer.menu.admin');
 	
-	const hideLayout = derived(page, ($page) =>
-		isExcludedLayoutRoute($page.url.pathname)
-	);
+	const hideLayout = derived(page, ($page) => {
+		if ($page.status && $page.status >= 400) return false;
+		
+		return isExcludedLayoutRoute($page.url.pathname)
+	});
 
 </script>
 
