@@ -5,16 +5,11 @@
 	import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte';
 	import Notifications from '$lib/components/Notifications.svelte';
 
-	import { notifications } from '$lib/stores/notifications';
-	notifications.success('Opération réussie ✅');
-	notifications.error('Une erreur est survenue ❌');
-	notifications.warning('Une attention est survenue ');
-
 	let { children } = $props();
 </script>
 
 <TranslationProvider lang="fr">
-	<Notifications></Notifications>
+	<Notifications/>
 	<div class="fixed top-4 right-4 z-50">
 		<LanguageSwitcher />
 	</div>

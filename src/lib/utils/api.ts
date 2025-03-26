@@ -1,7 +1,4 @@
-export async function fetchFromAPI<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
+export async function fetchFromAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   try {
     const url = import.meta.env.VITE_BACKEND_API_URL + endpoint;
     const response = await fetch(url, {
@@ -13,12 +10,22 @@ export async function fetchFromAPI<T>(
     });
 
     if (!response.ok) {
-      throw new Error(`Erreur API : ${response.statusText}`);
+      const errorData = await response.json();
+      const errorMessage = errorData?.message || 'Erreur API';
+      const errorCode = response.status;  // Code HTTP (par exemple 400)
+      const errorDetails = errorData?.errors || []; // Les erreurs spécifiques comme des champs invalides
+
+      // Lancer l'erreur avec des informations supplémentaires
+      const error = new Error(errorMessage);
+      (error as any).status = errorCode;
+      (error as any).details = errorDetails;
+
+      throw error;
     }
 
-    return await response.json() as T;
+    return await response.json() as T; // Si la réponse est valide, renvoyer les données
   } catch (error) {
     console.error('[fetchFromAPI] Erreur :', error);
-    throw error;
+    throw error;  // Propager l'erreur pour qu'elle puisse être capturée par le front-end
   }
 }
