@@ -63,7 +63,7 @@
   
   <div class="p-6 bg-base-200 min-h-screen flex flex-col items-center font-author">
     <div class="w-full max-w-7xl">
-      <h1 class="text-2xl font-bold mb-4">Nouvelle annonce</h1>
+      <h1 class="text-2xl font-author mb-4">Nouvelle annonce</h1>
 
       <div class="form-control mb-4">
         <select class="select select-bordered rounded-md">
@@ -75,22 +75,22 @@
       <div class="flex justify-between space-x-6">
         <!-- Formulaire principal à gauche -->
         <div class="w-2/3 bg-white shadow-md rounded-lg p-6">
-          <label class="label"><span class="label-text font-semibold">Titre</span></label>
+          <label class="label"><span class="label-text font-author">Titre</span></label>
           <input type="text" class="input input-bordered w-full rounded-md" bind:value={title} />
 
-          <label class="label mt-2"><span class="label-text font-semibold">Adresse</span></label>
+          <label class="label mt-2"><span class="label-text font-author">Adresse</span></label>
           <textarea class="textarea textarea-bordered w-full rounded-md" bind:value={address}></textarea>
 
-          <label class="label mt-2"><span class="label-text font-semibold">Photos</span></label>
+          <label class="label mt-2"><span class="label-text font-author">Photos</span></label>
           <div class="flex items-center space-x-2">
             <button class="btn btn-accent rounded-md">Ajouter</button>
             <input type="text" class="input input-bordered w-full rounded-md" bind:value={image} readonly />
           </div>
 
-          <label class="label mt-2"><span class="label-text font-semibold">Date de livraison souhaitée</span></label>
+          <label class="label mt-2"><span class="label-text font-author">Date de livraison souhaitée</span></label>
           <input type="date" class="input input-bordered w-full rounded-md" bind:value={deliveryDate} />
 
-          <label class="label mt-2"><span class="label-text font-semibold">Taille du colis</span></label>
+          <label class="label mt-2"><span class="label-text font-author">Taille du colis</span></label>
           <select class="select select-bordered w-full rounded-md" bind:value={packageSize}>
             <option>XS</option>
             <option>S</option>
@@ -99,7 +99,7 @@
             <option selected>XXL</option>
           </select>
 
-          <label class="label mt-2"><span class="label-text font-semibold">Prix total proposé</span></label>
+          <label class="label mt-2"><span class="label-text font-author">Prix total proposé</span></label>
           <input type="text" class="input input-bordered w-full rounded-md" bind:value={totalPrice} />
         </div>
 
@@ -107,7 +107,7 @@
         <div class="w-2/3 flex flex-col space-y-6">
             <!-- Bloc Départ -->
             <div class="bg-white shadow-md rounded-lg p-6">
-              <label class="label"><span class="label-text font-semibold">Départ</span></label>
+              <label class="label"><span class="label-text font-author">Départ</span></label>
               <br>
               <select class="select select-bordered w-20px rounded-md" bind:value={departure}>
                 <option selected>Adresse 1</option>
@@ -121,7 +121,7 @@
           
             <!-- Bloc Arrivée -->
             <div class="bg-white shadow-md rounded-lg p-6">
-              <label class="label"><span class="label-text font-semibold">Arrivée</span></label>
+              <label class="label"><span class="label-text font-author">Arrivée</span></label>
               <br>
               <select class="select select-bordered w-20px rounded-md" bind:value={arrival}>
                 <option selected>Adresse 2</option>
