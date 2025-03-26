@@ -53,8 +53,8 @@
         </figure>
         <div class="p-4">
           <div class="badge badge-primary">Prestataire pro</div>
-          <div class="text-lg font-semibold mt-2">{service.price} €</div>
-          <h3 class="text-lg font-bold mt-2">{service.title}</h3>
+          <div class="text-lg font-author mt-2">{service.price} €</div>
+          <h3 class="text-lg font-author mt-2">{service.title}</h3>
           <p class="text-sm text-gray-600">{service.description}</p>
           <div class="flex gap-2 mt-4">
             <!-- Bouton "Contacter" avec gestionnaire d'événements -->
