@@ -50,7 +50,7 @@
 					<a href="/auth/register" class="relative transition duration-200 ease-in-out after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[1px] after:bg-current after:transition-all after:duration-200 after:ease-in-out hover:after:w-full">
 						{$header_register_btn}
 					</a>
-					<a href="/auth/login" class="relative transition duration-200 ease-in-out after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[1px] after:bg-current after:transition-all after:duration-200 after:ease-in-out hover:after:w-full">
+					<a href="/auth/space" class="relative transition duration-200 ease-in-out after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[1px] after:bg-current after:transition-all after:duration-200 after:ease-in-out hover:after:w-full">
 						{$header_login_btn}
 					</a>
 					<LanguageSwitcher />
@@ -94,7 +94,7 @@
 				<div class="container mx-auto">
 					<div class="flex flex-col md:flex-row justify-between items-start md:items-end py-6 gap-6">
 						<p class="text-3xl md:text-6xl text-neutral-100 md:w-2/3 font-medium">{$footer_title}</p>
-						<a href="login" class="btn btn-primary font-normal mt-10">{$footer_cta_button}</a>
+						<a href="auth/space" class="btn btn-primary font-normal mt-10">{$footer_cta_button}</a>
 					</div>
 			
 					<hr class="border-base-200 my-6">
@@ -108,9 +108,9 @@
 							</p>
 						</div>
 						<div class="flex flex-col md:flex-row md:gap-5 text-neutral-100">
-							<a href="/login">{$footer_menu_private_space}</a>
-							<a href="/login">{$footer_menu_business_space}</a>
-							<a href="/legal">{$footer_menu_legal_mentions}</a>
+							<a href="/clients">{$footer_menu_private_space}</a>
+							<a href="/traders">{$footer_menu_business_space}</a>
+							<a href="/providers">{$footer_menu_legal_mentions}</a>
 							<a href="/admin">{$footer_menu_admin}</a>
 						</div>
 					</div>

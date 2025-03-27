@@ -55,5 +55,5 @@
 		<input type="submit" value="{$register_button}" class="btn btn-primary w-full" />
 	</form>
 
-	<a href="/auth/forgot-password" class="">{$register_login_link}</a>
+	<a href="/auth/login" class="">{$register_login_link}</a>
 </div>

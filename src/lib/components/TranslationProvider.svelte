@@ -7,7 +7,13 @@
     fetchFromAPI(`/langs/${$currentLang}`)
       .then((data) => flattenObject(data as Record<string, any>))
       .then(translations.set)
-      .catch(err => console.error('[TranslationProvider] Erreur chargement', err));
+      .catch(err => {
+        console.error('[TranslationProvider] Erreur chargement', err);
+        fetchFromAPI('/langs/fr')
+          .then((data) => flattenObject(data as Record<string, any>))
+          .then(translations.set)
+          .catch(err => console.error('[TranslationProvider] Erreur chargement langue FR', err));
+      });
   }
 </script>
 
