@@ -67,16 +67,16 @@
   </div>
   
   <!-- Section Portefeuille électronique -->
-  <h1 class="text-2xl font-bold mb-6 text-gray-800">Mon portefeuille électronique</h1>
+  <h1 class="text-2xl font-author mb-6 text-gray-800">Mon portefeuille électronique</h1>
   
   <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
     <div class="flex justify-center gap-16 mb-6">
       <div class="text-center">
-        <p class="text-2xl font-semibold text-gray-800">49,75 €</p>
+        <p class="text-2xl font-author text-gray-800">49,75 €</p>
         <p class="text-sm text-gray-600">Montant disponible</p>
       </div>
       <div class="text-center">
-        <p class="text-2xl font-semibold text-gray-800">49,75 €</p>
+        <p class="text-2xl font-auhtor text-gray-800">49,75 €</p>
         <p class="text-sm text-gray-600">Montant en attente</p>
       </div>
     </div>
