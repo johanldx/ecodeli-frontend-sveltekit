@@ -1,7 +1,17 @@
 <script lang="ts">
-    import { login } from '$lib/utils/auth';
+    import { checkAuth, login } from '$lib/utils/auth';
     import { notifications } from '$lib/stores/notifications';
     import { t, tStatic } from '$lib/utils/t';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+
+    onMount(async () => {
+		const isLoggedIn = await checkAuth();
+
+		if (isLoggedIn) {
+			goto('/auth/space');
+		}
+	});
 
     const login_title = t('auth.login.title');
     const login_email_placeholder = t('auth.login.email_placeholder');
@@ -18,16 +28,20 @@
             const { access_token, refresh_token } = await login(email, password);
             const message = tStatic('api_responses.success.auth.login_successful');
             notifications.success(message);
+            if (access_token) {
+                goto('/auth/space');
+            }
         } catch (error: any) {
+            password = '';
             if (error.status === 401) {
-            const message = tStatic('api_responses.errors.auth.invalid_credentials');
-            notifications.error(message);
+                const message = tStatic('api_responses.errors.auth.invalid_credentials');
+                notifications.error(message);
             } else if (error.status === 400) {
-            const message = tStatic('api_responses.errors.auth.bad_request');
-            notifications.error(message);
+                const message = tStatic('api_responses.errors.auth.bad_request');
+                notifications.error(message);
             } else {
-            const message = tStatic('api_responses.general.error_occurred');
-            notifications.error(message);
+                const message = tStatic('api_responses.general.error_occurred');
+                notifications.error(message);
             }
         }
     };

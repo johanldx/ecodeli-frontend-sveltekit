@@ -1,4 +1,37 @@
+import { user } from '$lib/stores/user';
 import { fetchFromAPI } from '$lib/utils/api';
+
+export async function checkAuth(): Promise<boolean> {
+	if (typeof window === 'undefined') return false;
+
+	const token = localStorage.getItem('access_token');
+	if (!token) {
+		clearTokens();
+		user.set(null);
+		return false;
+	}
+
+	try {
+    const userInfo = await fetchFromAPI<{ email: string; id: string; name?: string }>('/auth/me', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+		user.set(userInfo);
+		return true;
+	} catch (err) {
+		clearTokens();
+		user.set(null);
+		return false;
+	}
+}
+
+export function clearTokens() {
+	localStorage.removeItem('access_token');
+	localStorage.removeItem('refresh_token');
+}
 
 // Connexion
 export async function login(email: string, password: string) {
