@@ -3,17 +3,14 @@
   // Fonctions de gestion des clics
   function handleEditAddress() {
     alert('Modification de l\'adresse...');
-    // Ici, vous pouvez rediriger l'utilisateur vers une page de modification d'adresse
   }
 
   function handleDeleteAddress() {
     alert('Suppression de l\'adresse...');
-    // Ici, vous pouvez implémenter la logique de suppression d'adresse
   }
 
   function handleAddAddress() {
     alert('Ajout d\'une nouvelle adresse...');
-    // Ici, vous pouvez rediriger l'utilisateur vers une page d'ajout d'adresse
   }
 </script>
 

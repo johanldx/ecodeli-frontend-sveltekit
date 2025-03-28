@@ -1,6 +1,5 @@
 <script lang="ts">
   
-  // Fonctions de gestion des clics
   function handleManageDocuments() {
     alert('Redirection vers la gestion des pièces justificatives...');
   }
@@ -31,9 +30,7 @@
     <h1 class="text-2xl font-author mb-6 text-gray-800">Mon compte commerçants</h1>
     
     <div class="flex flex-col lg:flex-row lg:gap-6">
-      <!-- Colonne de gauche -->
       <div class="lg:w-2/3">
-        <!-- Section Compte -->
         <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
           <div class="space-y-4">
             <button 
@@ -59,7 +56,6 @@
           </div>
         </div>
         
-        <!-- Section Prélèvements -->
         <h2 class="text-xl font-author mb-4 text-gray-800">Mes prélèvements SEPA</h2>
         <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div class="flex flex-col items-center mb-6">
@@ -76,9 +72,7 @@
         </div>
       </div>
       
-      <!-- Colonne de droite -->
       <div class="lg:w-1/3 mt-6 lg:mt-0">
-        <!-- Section Tarification -->
         <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
           <h2 class="text-xl font-author mb-2">Tarification spécial : -15%</h2>
           <p class="text-sm text-gray-600 mb-4">Vous pouvez contacter le service client pour toute demande.</p>
@@ -91,7 +85,6 @@
           </button>
         </div>
 
-        <!-- Section Factures -->
         <h2 class="text-xl font-author mb-4 text-gray-800">Mes factures</h2>
         <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div class="space-y-3">

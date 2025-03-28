@@ -1,6 +1,5 @@
 <script lang="ts">
     
-    // Fonctions de gestion des clics
     function handleManageDocuments() {
       alert('Redirection vers la gestion des pièces justificatives...');
     }
@@ -37,9 +36,7 @@
       <h1 class="text-2xl font-author mb-6 text-gray-800">Mon compte commerçants</h1>
       
       <div class="flex flex-col lg:flex-row lg:gap-6">
-        <!-- Colonne de gauche -->
         <div class="lg:w-2/3">
-          <!-- Section Compte -->
           <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
             <div class="space-y-4">
               <button 
@@ -71,7 +68,6 @@
             </div>
           </div>
           
-          <!-- Section Prélèvements -->
           <h2 class="text-xl font-author mb-4 text-gray-800">Mes revenus du mois </h2>
           <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
             <div class="flex justify-center gap-16 mb-6">
@@ -81,14 +77,12 @@
               </div>
             </div>
             
-            <!-- Champ IBAN et bouton "Valider" avec hover -->
             <div class="flex items-center gap-2 mb-4">
               <input 
                 type="text" 
                 placeholder="Mon IBAN" 
                 class="flex-[1_1_auto] w-0 bg-gray-100 py-2 px-4 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
               />
-              <!-- Bouton "Valider l'IBAN" avec hover -->
               <button 
                 on:click={handleValidateIBAN} 
                 class="flex-none bg-primary text-primary-content py-2 px-6 rounded-md text-sm hover:bg-primary-focus transition-colors"
@@ -99,9 +93,7 @@
           </div>
         </div>
         
-        <!-- Colonne de droite -->
         <div class="lg:w-1/3 mt-6 lg:mt-0">
-          <!-- Section Tarification -->
           <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
             <h2 class="text-xl font-author mb-2">Mes services accréditées</h2>
             <p class="text-x1 font-author text-primary-content mb-4">Tranport de personnes (43€) <br> Jardinage (124€ / heure) <br> Garde d'enfant (60€ / heure)</p>
@@ -114,7 +106,6 @@
             </button>
           </div>
   
-          <!-- Section Factures -->
           <h2 class="text-xl font-author mb-4 text-gray-800">Mes factures</h2>
           <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
             <div class="space-y-3">

@@ -5,7 +5,6 @@
         address: string;
     }
 
-    // Données initiales (style préservé)
     let title = "Besoin de déplacer un canapé";
     let address = "J'aurai besoin de faire transporter mon magnifique canapé de Paris vers Lyon.";
     let image = "/mnt/data/image.png";
@@ -20,7 +19,6 @@
     let steps: Step[] = [];
     let stepId = 1;
 
-    // Fonctions d'étape (style préservé)
     function addStep() {
         steps = [...steps, { id: stepId++, address: "" }];
     }
@@ -29,16 +27,13 @@
         steps = steps.filter(step => step.id !== id);
     }
 
-    // Fonction de soumission améliorée (back-end)
     async function submitAnnouncement() {
-        // Validation simple
         if (!title || !address || !deliveryDate) {
             alert("Veuillez remplir les champs obligatoires");
             return;
         }
 
         try {
-            // Préparation des données pour l'API
             const [priceValue, currency] = totalPrice.split(" ");
             const announcementData = {
                 title,
@@ -60,7 +55,6 @@
                 createdAt: new Date().toISOString()
             };
 
-            // Simulation d'appel API (à remplacer par votre vrai endpoint)
             const response = await mockApiCall(announcementData);
             
             console.log("Réponse du serveur:", response);
@@ -73,12 +67,9 @@
         }
     }
 
-    // Fonction de simulation d'API (à remplacer par un vrai fetch)
     async function mockApiCall(data: any) {
         console.log("Données envoyées au serveur:", data);
-        // Simule un délai réseau
         await new Promise(resolve => setTimeout(resolve, 1000));
-        // Retourne une réponse simulée
         return { 
             success: true, 
             id: Math.floor(Math.random() * 1000),
@@ -86,7 +77,6 @@
         };
     }
 
-    // Reset (style préservé)
     function resetForm() {
         title = "Besoin de déplacer un canapé";
         address = "J'aurai besoin de faire transporter mon magnifique canapé de Paris vers Lyon.";
@@ -101,7 +91,6 @@
     }
 </script>
 
-<!-- Le reste de votre template HTML reste EXACTEMENT le même -->
 <div class="p-6 bg-base-200 min-h-screen flex flex-col items-start font-author">
   <div class="w-full max-w-7xl">
     <h1 class="text-2xl font-author mb-4">Nouvelle Demande</h1>
@@ -112,9 +101,7 @@
       </select>
     </div>
 
-    <!-- Conteneur principal pour aligner horizontalement -->
     <div class="flex justify-between space-x-6">
-      <!-- Formulaire principal à gauche -->
       <div class="w-2/3 bg-white shadow-md rounded-lg p-4 flex flex-col space-y-1">
         <label class="label"><span class="label-text font-author">Titre</span></label>
         <input type="text" class="input input-bordered w-1/2 rounded-md" bind:value={title} />
@@ -145,9 +132,7 @@
       </div>
 
       <div class="w-2/3 flex flex-col space-y-6">
-          <!-- Bloc Email, Départ, Arrivée -->
           <div class="bg-white shadow-md rounded-lg p-6 flex flex-col space-y-4">
-              <!-- Bloc Email -->
               <div class="flex flex-col">
                   <label class="label">
                       <span class="label-text font-author">Email du client</span>
@@ -155,7 +140,6 @@
                   <input type="email" class="input input-bordered w-1/2 rounded-md" bind:value={clientEmail} />
               </div>
 
-              <!-- Bloc Départ -->
               <div class="flex flex-col">
                   <label class="label">
                       <span class="label-text font-author">Départ</span>
@@ -165,7 +149,6 @@
                   </select>
               </div>
 
-              <!-- Bloc Arrivée -->
               <div class="flex flex-col">
                   <label class="label">
                       <span class="label-text font-author">Arrivée</span>
@@ -178,7 +161,6 @@
       </div>
     </div>
 
-    <!-- Étapes supplémentaires -->
     <div class="mt-4">
       {#each steps as step (step.id)}
         <div class="flex items-center mt-2 space-x-2">
@@ -188,7 +170,6 @@
       {/each}
     </div>
 
-    <!-- Boutons -->
     <div class="flex justify-center mt-6">
       <button class="btn btn-primary w-1/9 mr-2 rounded-md" on:click={submitAnnouncement}>Ajouter</button>
       <button class="btn btn-error w-1/9 ml-2 rounded-md" on:click={resetForm}>Annuler</button>

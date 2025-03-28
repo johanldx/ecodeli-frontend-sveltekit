@@ -8,7 +8,7 @@
   
     let title = "Besoin de déplacer un canapé";
     let address = "J'aurai besoin de faire transporter mon magnifique canapé de Paris vers Lyon.";
-    let image = "/mnt/data/image.png"; // Remplace par un chemin local si nécessaire
+    let image = "/mnt/data/image.png";
     let deliveryDate = "2025-04-04";
     let packageSize = "XXL";
     let totalPrice = "120 €";
@@ -28,7 +28,6 @@
     }
   
     function submitAnnouncement() {
-      // Logique pour soumettre l'annonce
       const announcement = {
         title,
         address,
@@ -45,7 +44,6 @@
     }
   
     function resetForm() {
-      // Réinitialiser tous les champs du formulaire
       title = "Besoin de déplacer un canapé";
       address = "J'aurai besoin de faire transporter mon magnifique canapé de Paris vers Lyon.";
       image = "/mnt/data/image.png";
@@ -70,9 +68,7 @@
         </select>
       </div>
 
-      <!-- Conteneur principal pour aligner horizontalement -->
       <div class="flex justify-between space-x-6">
-        <!-- Formulaire principal à gauche -->
         <div class="w-2/3 bg-white shadow-md rounded-lg p-6">
           <label class="label"><span class="label-text font-author">Titre</span></label>
           <input type="text" class="input input-bordered w-full rounded-md" bind:value={title} />
@@ -102,9 +98,7 @@
           <input type="text" class="input input-bordered w-full rounded-md" bind:value={totalPrice} />
         </div>
 
-        <!-- Conteneur droit pour Départ et Arrivée -->
         <div class="w-2/3 flex flex-col space-y-6">
-            <!-- Bloc Départ -->
             <div class="bg-white shadow-md rounded-lg p-6">
               <label class="label"><span class="label-text font-author">Départ</span></label>
               <br>
@@ -113,12 +107,10 @@
               </select>
             </div>
           
-            <!-- Bouton Ajouter une étape -->
-            <div class="flex justify-center"> <!-- Ajout d'un conteneur flex pour centrer le bouton -->
+            <div class="flex justify-center">
               <button class="btn btn-accent w-1/3 rounded-md" on:click={addStep}>Ajouter une étape</button>
             </div>
           
-            <!-- Bloc Arrivée -->
             <div class="bg-white shadow-md rounded-lg p-6">
               <label class="label"><span class="label-text font-author">Arrivée</span></label>
               <br>
@@ -129,7 +121,6 @@
           </div>
       </div>
       
-      <!-- Étapes supplémentaires -->
       <div class="mt-4">
         {#each steps as step (step.id)}
           <div class="flex items-center mt-2 space-x-2">
@@ -139,7 +130,6 @@
         {/each}
       </div>
 
-      <!-- Boutons -->
       <div class="flex justify-center mt-6">
         <button class="btn btn-primary w-1/9 mr-2 rounded-md" on:click={submitAnnouncement}>Ajouter</button>
         <button class="btn btn-error w-1/9 ml-2 rounded-md" on:click={resetForm}>Annuler</button>

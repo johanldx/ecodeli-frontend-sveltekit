@@ -1,19 +1,15 @@
 <script lang="ts">
   
-    // Fonctions de gestion des clics
     function handleEditAddress() {
       alert('Modification de l\'adresse...');
-      // Ici, vous pouvez rediriger l'utilisateur vers une page de modification d'adresse
     }
   
     function handleDeleteAddress() {
       alert('Suppression de l\'adresse...');
-      // Ici, vous pouvez implémenter la logique de suppression d'adresse
     }
   
     function handleAddAddress() {
       alert('Ajout d\'une nouvelle adresse...');
-      // Ici, vous pouvez rediriger l'utilisateur vers une page d'ajout d'adresse
     }
   </script>
   
@@ -21,7 +17,6 @@
     <h1 class="text-2xl font-author mb-6 text-gray-800">Mes adresses</h1>
   
     <div class="flex gap-6 flex-wrap">
-      <!-- Adresse 1 -->
       <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 w-96">
         <label class="text-lg font-author mb-2 text-gray-700 block">Nom</label>
         <input 
@@ -63,7 +58,6 @@
           class="w-full p-2 border border-gray-300 rounded-md mb-4 bg-gray-100 input input-bordered focus:outline-none focus:ring focus:ring-primary/50 focus:border-primary"
         />
         
-        <!-- Boutons Modifier et Supprimer avec hover -->
         <div class="mt-4 flex gap-4">
           <button 
             on:click={handleEditAddress} 
@@ -81,7 +75,6 @@
       </div>
     </div>
   
-    <!-- Bouton Ajouter une adresse avec hover -->
     <div class="mt-8">
       <button 
         on:click={handleAddAddress} 
