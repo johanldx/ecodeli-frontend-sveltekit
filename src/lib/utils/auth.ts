@@ -1,36 +1,55 @@
-import { user } from '$lib/stores/user';
+import { goto } from '$app/navigation';
+import { user, type User } from '$lib/stores/user';
+import { accessToken, refreshToken as refreshTokenStore } from '$lib/stores/token';
 import { fetchFromAPI } from '$lib/utils/api';
+import { get } from 'svelte/store';
+import { jwtDecode } from "jwt-decode";
+
+interface JwtPayload {
+  exp: number;
+  email: string;
+  sub: number;
+}
 
 export async function checkAuth(): Promise<boolean> {
-	if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') return false;
 
-	const token = localStorage.getItem('access_token');
-	if (!token) {
-		clearTokens();
-		user.set(null);
-		return false;
-	}
+  // Récupérer le token depuis le store
+  let token = get(accessToken);
+  if (!token) {
+    clearTokens();
+    user.set(null);
+    return false;
+  }
 
-	try {
-    const userInfo = await fetchFromAPI<{ email: string; id: string; name?: string }>('/auth/me', {
+  try {
+    const decoded: JwtPayload = jwtDecode(token);
+    const now = Date.now() / 1000;
+
+    if (decoded.exp && decoded.exp - now < 300) {
+      token = await refreshToken();
+    }
+
+    const userInfo = await fetchFromAPI<User>('/auth/me', {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-
-		user.set(userInfo);
-		return true;
-	} catch (err) {
-		clearTokens();
-		user.set(null);
-		return false;
-	}
+    user.set(userInfo);
+    return true;
+  } catch (err) {
+    clearTokens();
+    user.set(null);
+    goto('/auth/login');
+    return false;
+  }
 }
 
 export function clearTokens() {
-	localStorage.removeItem('access_token');
-	localStorage.removeItem('refresh_token');
+  // Mettre à jour le store pour supprimer les tokens
+  accessToken.set('');
+  refreshTokenStore.set('');
 }
 
 // Connexion
@@ -40,8 +59,8 @@ export async function login(email: string, password: string) {
     body: JSON.stringify({ email, password }),
   });
 
-  localStorage.setItem('access_token', data.access_token);
-  localStorage.setItem('refresh_token', data.refresh_token);
+  accessToken.set(data.access_token);
+  refreshTokenStore.set(data.refresh_token);
 
   return data;
 }
@@ -53,23 +72,23 @@ export async function register(email: string, password: string, first_name: stri
     body: JSON.stringify({ email, password, first_name, last_name }),
   });
 
-  localStorage.setItem('access_token', data.access_token);
-  localStorage.setItem('refresh_token', data.refresh_token);
+  accessToken.set(data.access_token);
+  refreshTokenStore.set(data.refresh_token);
 
   return data;
 }
 
 // Rafraîchir le token
-export async function refreshToken() {
-  const refreshToken = localStorage.getItem('refresh_token');
-  if (!refreshToken) throw new Error('No refresh token available.');
+export async function refreshToken(): Promise<string> {
+  const currentRefreshToken = get(refreshTokenStore);
+  if (!currentRefreshToken) throw new Error('No refresh token available.');
 
   const data = await fetchFromAPI<{ access_token: string }>('/auth/refresh', {
     method: 'POST',
-    body: JSON.stringify({ refresh_token: refreshToken }),
+    body: JSON.stringify({ refresh_token: currentRefreshToken }),
   });
 
-  localStorage.setItem('access_token', data.access_token);
+  accessToken.set(data.access_token);
   return data.access_token;
 }
 

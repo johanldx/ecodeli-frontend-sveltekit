@@ -1,7 +1,19 @@
 <script lang="ts">
-	import { register } from '$lib/utils/auth';
+	import { checkAuth, register } from '$lib/utils/auth';
 	import { notifications } from '$lib/stores/notifications';
 	import { t, tStatic } from '$lib/utils/t';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+
+	onMount(async () => {
+		const isLoggedIn = await checkAuth();
+
+		if (isLoggedIn) {
+            const message = tStatic('api_responses.auth.global.already_logged_in');
+            notifications.success(message);
+			goto('/auth/space');
+		}
+	});
 
 	const register_title = t('auth.register.title');
 	const register_first_name_placeholder = t('auth.register.first_name_placeholder');
@@ -20,17 +32,19 @@
 		try {
 			const { access_token, refresh_token } = await register(email, password, first_name, last_name);
 
-			const message = tStatic('api_responses.success.auth.register_successful');
+			const message = tStatic('api_responses.auth.register.register_successful');
 			notifications.success(message);
 
 		} catch (error: any) {
 			if (error.status === 400) {
-
-				const message = tStatic('api_responses.errors.auth.bad_request');
+				const message = tStatic('api_responses.auth.register.bad_request');
+				notifications.error(message);
+			} else if (error.status === 409) {
+				const message = tStatic('api_responses.auth.register.user_already_exists');
 				notifications.error(message);
 			} else {
 				
-				const message = tStatic('api_responses.general.error_occurred');
+				const message = tStatic('api_responses.auth.global.unknown_error');
 				notifications.error(message);
 			}
 		}

@@ -9,6 +9,8 @@
 		const isLoggedIn = await checkAuth();
 
 		if (isLoggedIn) {
+            const message = tStatic('api_responses.auth.global.already_logged_in');
+            notifications.success(message);
 			goto('/auth/space');
 		}
 	});
@@ -26,7 +28,7 @@
     const handleLogin = async () => {
         try {
             const { access_token, refresh_token } = await login(email, password);
-            const message = tStatic('api_responses.success.auth.login_successful');
+            const message = tStatic('api_responses.auth.login.login_successful');
             notifications.success(message);
             if (access_token) {
                 goto('/auth/space');
@@ -34,13 +36,13 @@
         } catch (error: any) {
             password = '';
             if (error.status === 401) {
-                const message = tStatic('api_responses.errors.auth.invalid_credentials');
+                const message = tStatic('api_responses.auth.login.invalid_credentials');
                 notifications.error(message);
-            } else if (error.status === 400) {
-                const message = tStatic('api_responses.errors.auth.bad_request');
+            } else if (error.status === 403) {
+                const message = tStatic('api_responses.auth.login.account_inactive');
                 notifications.error(message);
             } else {
-                const message = tStatic('api_responses.general.error_occurred');
+                const message = tStatic('api_responses.auth.global.unknown_error');
                 notifications.error(message);
             }
         }

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { guardRoute } from '$lib/utils/guards';
-  import '../../app.css';
+  import '../../../app.css';
 	import { onMount } from 'svelte';
   let { children } = $props();
 

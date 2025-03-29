@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { t } from '$lib/utils/t';
+    import { user } from '$lib/stores/user';
     import GuardWrapper from "$lib/components/GuardWrapper.svelte";
 
-	const title = t('auth.profile_choice.title', { name: 'John' });
+	$: title = t('auth.profile_choice.title', { name: $user?.first_name || 'utilisateur' });
 
 	const client_label = t('auth.profile_choice.options.client_link');
 	const delivery_label = t('auth.profile_choice.options.delivery_link');
@@ -25,7 +26,7 @@
         </div>
         
         <div class="mt-6">
-            <a href="/logout" class="link text-sm underline">{$logout_label}</a>
+            <a href="/auth/logout" class="link text-sm underline">{$logout_label}</a>
         </div>
     </div>
 </GuardWrapper>
