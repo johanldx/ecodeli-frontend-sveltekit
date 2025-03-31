@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../../app.css';
-	import { t } from '$lib/utils/t';
 	import TranslationProvider from '$lib/components/TranslationProvider.svelte';
 	import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte';
 	import Notifications from '$lib/components/Notifications.svelte';
