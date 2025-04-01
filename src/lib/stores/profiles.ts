@@ -14,4 +14,19 @@ const defaultValues: ProfileIds = {
   traderId: null,
 };
 
-export const profileIds = writable<ProfileIds>(defaultValues);
+let savedProfileIds: ProfileIds | null = null;
+if (typeof window !== 'undefined') {
+  savedProfileIds = localStorage.getItem('profileIds')
+    ? JSON.parse(localStorage.getItem('profileIds')!)
+    : null;
+}
+
+const profileIds = writable<ProfileIds>(savedProfileIds || defaultValues);
+
+if (typeof window !== 'undefined') {
+  profileIds.subscribe(($profileIds) => {
+    localStorage.setItem('profileIds', JSON.stringify($profileIds));
+  });
+}
+
+export { profileIds };

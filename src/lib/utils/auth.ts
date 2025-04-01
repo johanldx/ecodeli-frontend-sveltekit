@@ -4,6 +4,7 @@ import { accessToken, refreshToken as refreshTokenStore } from '$lib/stores/toke
 import { fetchFromAPI } from '$lib/utils/api';
 import { get } from 'svelte/store';
 import { jwtDecode } from "jwt-decode";
+import { profileIds } from '$lib/stores/profiles';
 
 interface JwtPayload {
   exp: number;
@@ -106,4 +107,48 @@ export async function resetPassword(resetPasswordToken: string, newPassword: str
     method: 'POST',
     body: JSON.stringify({ resetPasswordToken, password: newPassword }),
   });
+}
+
+export async function updateAllProfiles() {
+  const token = get(accessToken);
+  const namespaces = ['clients', 'delivery-persons', 'providers', 'traders'];
+
+  for (const namespace of namespaces) {
+    try {
+      const res = await fetchFromAPI<any>(`/auth/me/${namespace}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      });
+
+      if (res && res.id) {
+        profileIds.update((ids) => {
+          let updatedIds = { ...ids };
+
+          switch (namespace) {
+            case 'clients':
+              updatedIds.clientId = res.id;
+              break;
+            case 'delivery-persons':
+              updatedIds.deliveryPersonId = res.id;
+              break;
+            case 'providers':
+              updatedIds.providerId = res.id;
+              break;
+            case 'traders':
+              updatedIds.traderId = res.id;
+              break;
+          }
+
+          // Met à jour localStorage avec les nouvelles valeurs
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('profileIds', JSON.stringify(updatedIds));
+          }
+
+          return updatedIds;
+        });
+      }
+    } catch (error) {
+      console.error(`Error fetching ${namespace}:`, error);
+    }
+  }
 }

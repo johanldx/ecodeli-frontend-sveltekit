@@ -14,7 +14,7 @@
 		class={`relative flex items-center justify-between gap-4 p-4 rounded-lg shadow-md 
 		  ${notif.type === 'success' ? 'bg-primary text-primary-content' :
 			notif.type === 'error'   ? 'bg-red-600 text-base-200'   :
-			notif.type === 'warning' ? 'bg-yellow-300 text-primary-content' :
+			notif.type === 'warning' ? 'bg-orange-400 text-primary-content' :
 			'bg-blue-600'}
 		`}
 	  >

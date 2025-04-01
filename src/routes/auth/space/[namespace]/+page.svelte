@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { get } from 'svelte/store';
+	import { get, writable } from 'svelte/store';
 	import GuardWrapper from '$lib/components/GuardWrapper.svelte';
 	import { notifications } from '$lib/stores/notifications';
 	import { t, tStatic } from '$lib/utils/t';
@@ -89,7 +89,7 @@
 					body: JSON.stringify({ user_id: currentUser.id })
 				});
 			} else {
-				notifications.error(tStatic('api_responses.auth.global.unknown_error'));
+				notifications.warning(tStatic(`auth.space_validation.${namespace}.not_found`));
 			}
 		} finally {
 			loading = false;
@@ -141,11 +141,15 @@
 					form.append('driver_license_document', formData.driver_license_document);
 				}
 			} else if (namespace === 'providers') {
-				form.append('company', String(formData.company || ''));
-				form.append('website', String(formData.website || ''));
+				// a faire
 			} else if (namespace === 'traders') {
-				form.append('discord', String(formData.discord || ''));
-				form.append('role', String(formData.role || ''));
+				form.append('bank_account', String(formData.bank_account || ''));
+				if (formData.identity_card_document instanceof File) {
+					form.append('identity_card_document', formData.identity_card_document);
+				}
+				if (formData.proof_of_business_document instanceof File) {
+					form.append('proof_of_business_document', formData.proof_of_business_document);
+				}
 			}
 
 			console.log('Contenu FormData :');
@@ -169,6 +173,15 @@
 			notifications.error(tStatic('api_responses.namespace.request_error'));
 		}
 	};
+
+	let files = writable<File[]>([]);
+
+	const handleFileChange = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+		if (input?.files) {
+		files.set(Array.from(input.files));
+		}
+  	};
 
 	const title = t(`auth.space_validation.${$page.params.namespace}.title`);
 	const subtitle = t(`auth.space_validation.${$page.params.namespace}.subtitle`);
@@ -212,16 +225,117 @@
 						title="Vidéo d'onboarding" frameborder="0" allowfullscreen></iframe>
 
 				{:else if namespace === 'providers'}
-					<input type="text" class="input w-full" placeholder="Entreprise" bind:value={formData.company} required />
-					<input type="url" class="input w-full" placeholder="Site web" bind:value={formData.website} />
+					<label class="form-control w-full my-5 block">
+						<div class="label">
+							<span class="label-text">IBAN</span>
+						</div>
+						<input
+							type="text"
+							class="input w-full"
+							placeholder="IBAN / RIB"
+							bind:value={formData.bank_account}
+							required
+						/>
+					</label>
+				
+					<label class="form-control w-full my-5 block">
+						<div class="label">
+							<span class="label-text">Carte d'identité du dirigent (PDF, JPG, PNG)</span>
+						</div>
+						<input
+							type="file"
+							accept=".pdf,.jpg,.jpeg,.png"
+							class="file-input w-full"
+							on:change={(e) => {
+								const input = e.target as HTMLInputElement;
+								if (input?.files?.[0]) {
+									formData.identity_card_document = input.files[0];
+								}
+							}}	
+							required
+						/>
+					</label>
+
+					<label class="form-control w-full my-5 block">
+						<div class="label">
+							<span class="label-text">Extrait de KBIS (PDF, JPG, PNG)</span>
+						</div>
+						<input
+							type="file"
+							accept=".pdf,.jpg,.jpeg,.png"
+							class="file-input w-full"
+							on:change={(e) => {
+								const input = e.target as HTMLInputElement;
+								if (input?.files?.[0]) {
+									formData.proof_of_business_document = input.files[0];
+								}
+							}}							
+							required
+						/>
+					</label>
+
+					<label class="form-control w-full my-5 block">
+						<div class="label">
+							<span class="label-text">Certificats de prestation</span>
+						</div>
+						<input
+							type="file"
+							multiple
+							class="file-input file-input-bordered w-full"
+							on:change={handleFileChange}
+							required
+						/>
+					</label>
 
 				{:else if namespace === 'traders'}
-					<input type="text" class="input w-full" placeholder="Pseudo Discord" bind:value={formData.discord} required />
-					<select class="select w-full" bind:value={formData.role} required>
-						<option disabled selected>Choisissez un rôle</option>
-						<option value="moderateur">Modérateur</option>
-						<option value="partenaire">Partenaire</option>
-					</select>
+					<label class="form-control w-full my-5 block">
+						<div class="label">
+							<span class="label-text">IBAN</span>
+						</div>
+						<input
+							type="text"
+							class="input w-full"
+							placeholder="IBAN / RIB"
+							bind:value={formData.bank_account}
+							required
+						/>
+					</label>
+				
+					<label class="form-control w-full my-5 block">
+						<div class="label">
+							<span class="label-text">Carte d'identité du dirigent (PDF, JPG, PNG)</span>
+						</div>
+						<input
+							type="file"
+							accept=".pdf,.jpg,.jpeg,.png"
+							class="file-input w-full"
+							on:change={(e) => {
+								const input = e.target as HTMLInputElement;
+								if (input?.files?.[0]) {
+									formData.identity_card_document = input.files[0];
+								}
+							}}	
+							required
+						/>
+					</label>
+				
+					<label class="form-control w-full my-5 block">
+						<div class="label">
+							<span class="label-text">Extrait de KBIS (PDF, JPG, PNG)</span>
+						</div>
+						<input
+							type="file"
+							accept=".pdf,.jpg,.jpeg,.png"
+							class="file-input w-full"
+							on:change={(e) => {
+								const input = e.target as HTMLInputElement;
+								if (input?.files?.[0]) {
+									formData.proof_of_business_document = input.files[0];
+								}
+							}}							
+							required
+						/>
+					</label>
 
 					{:else if namespace === 'delivery-persons'}
 					<label class="form-control w-full my-5 block">

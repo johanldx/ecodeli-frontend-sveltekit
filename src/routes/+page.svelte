@@ -25,7 +25,7 @@
 </script>
 
 <div class="mt-10 color-dark-green text-center">
-    <h1 class="text-center m-auto font-semibold text-3xl md:text-7xl md:w-2/3 color-dark-green"></h1>
+    <h1 class="text-center m-auto font-semibold text-3xl md:text-7xl md:w-2/3 color-dark-green">{$hero_section_title}</h1>
     <p class="text-center m-auto mt-10 text-md md:w-3/4 text-nexus-blue">{$hero_section_subtitle}</p>
     <a href="login" class="btn btn-primary font-normal mt-10">{$hero_section_cta_btn}</a>
 </div>

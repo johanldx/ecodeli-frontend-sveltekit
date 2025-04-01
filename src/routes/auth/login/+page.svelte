@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { checkAuth, login } from '$lib/utils/auth';
+    import { checkAuth, login, updateAllProfiles } from '$lib/utils/auth';
     import { notifications } from '$lib/stores/notifications';
     import { t, tStatic } from '$lib/utils/t';
 	import { onMount } from 'svelte';
@@ -29,6 +29,7 @@
         try {
             const { access_token, refresh_token } = await login(email, password);
             const message = tStatic('api_responses.auth.login.login_successful');
+            updateAllProfiles()
             notifications.success(message);
             if (access_token) {
                 goto('/auth/space');
