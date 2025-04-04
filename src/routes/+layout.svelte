@@ -110,7 +110,7 @@
 						<div class="flex flex-col md:flex-row md:gap-5 text-neutral-100">
 							<a href="/clients">{$footer_menu_private_space}</a>
 							<a href="/traders">{$footer_menu_business_space}</a>
-							<a href="/providers">{$footer_menu_legal_mentions}</a>
+							<a href="/legal">{$footer_menu_legal_mentions}</a>
 							<a href="/admin">{$footer_menu_admin}</a>
 						</div>
 					</div>
