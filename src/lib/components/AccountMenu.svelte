@@ -22,15 +22,14 @@
 
     onMount(async () => {
         await waitUntil(() => !!get(user));
-        console.log(get(user));
 
         const path = window.location.pathname;
         const match = path.split('/app/')[1]?.split('/')[0];
 
         if (match) {
-            sectionName = match;
+            sectionName = '/app/' + match;
         } else {
-            sectionName = "auth";
+            sectionName = "/auth";
         }
     });
 
@@ -90,7 +89,7 @@
                 <a class="py-2.5" href="/auth/account">{$account_link}</a>
             </li>
             <li>
-                <a class="py-2.5" href="/app/{sectionName}/account">{$profile_link}</a>
+                <a class="py-2.5" href="{sectionName}/account">{$profile_link}</a>
             </li>
             <li>
                 <a class="py-2.5 text-error" href="/auth/logout">{$logout_link}</a>

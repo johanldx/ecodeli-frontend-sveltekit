@@ -4,9 +4,9 @@
     import GuardWrapper from '$lib/components/GuardWrapper.svelte';
     import { user, type User } from '$lib/stores/user';
     import { fetchFromAPI } from '$lib/utils/api';
-	import { accessToken } from '$lib/stores/token';
-	import { get } from 'svelte/store';
-	import { notifications } from '$lib/stores/notifications';
+    import { accessToken } from '$lib/stores/token';
+    import { get } from 'svelte/store';
+    import { notifications } from '$lib/stores/notifications';
   
     const title = t('auth.account.title');
     const first_name_placeholder = t('auth.account.profile.first_name_placeholder');

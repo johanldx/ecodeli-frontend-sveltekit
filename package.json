@@ -37,6 +37,7 @@
 		"@dicebear/collection": "^9.2.2",
 		"@dicebear/core": "^9.2.2",
 		"daisyui": "^5.0.9",
+		"dayjs": "^1.11.13",
 		"jwt-decode": "^4.0.0"
 	}
 }
