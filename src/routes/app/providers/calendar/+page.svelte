@@ -19,7 +19,7 @@
     // Données des rendez-vous
     const appointments: Appointment[] = [
       { id: '1', day: 'Lundi', hour: '8h', title: 'Jardinage et élagage' },
-      { id: '2', day: 'Lundi', hour: '9h', title: 'Jardinage et élagage' },
+      { id: '2', day: 'Lundi', hour: '9h', title: 'Jardinagse et élagage' },
       { id: '3', day: 'Lundi', hour: '10h', title: 'Jardinage et élagage' },
       { id: '4', day: 'Mardi', hour: '8h', title: 'Jardinage et élagage', location: 'Paris', special: true },
     ];
