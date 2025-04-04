@@ -1,4 +1,15 @@
 <script>
+
+import { t } from '$lib/utils/t';
+
+const all_services = t('app.clients.discover.all_services');
+const taxi = t('app.clients.discover.taxi');
+const gardening = t('app.clients.discover.gardening');
+const childcare = t('app.clients.discover.childcare');
+const professional_service_provider = t('app.clients.discover.professional_service_provider');
+const contact = t('app.clients.discover.contact');
+const details = t('app.clients.discover.details');
+
   let services = [
     { id: 1, category: "Taxi", title: "Transport à l’aéroport", price: 62, description: "Nous transportons de 1 à 4 personnes depuis toute l'IDF vers CDG et Orly.", image: "/taxi.jpg" },
     { id: 2, category: "Jardinage", title: "Entretien de jardin", price: 50, description: "Tonte de pelouse, taille des haies et entretien des espaces verts.", image: "/jardinage.jpg" },
@@ -30,10 +41,10 @@
 <div class="p-6 bg-base-200 min-h-screen">
   <div class="flex flex-wrap gap-4 mb-6">
     <select bind:value={selectedCategory} class="w-full md:w-80 p-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary">
-      <option>Tous les services</option>
-      <option>Taxi</option>
-      <option>Jardinage</option>
-      <option>Garde d'enfant</option>
+      <option>{$all_services}</option>
+      <option>{$taxi}</option>
+      <option>{$gardening}</option>
+      <option>{$childcare}</option>
     </select>
   
     <input type="text" placeholder="Ville" class="w-full md:w-80 p-2 border border-gray-300 rounded-md focus:outline-none focus:border-primary" />
@@ -46,16 +57,16 @@
           <img src={service.image} alt={service.title} class="w-full h-40 object-cover rounded-t-lg" />
         </figure>
         <div class="p-4">
-          <div class="badge badge-primary">Prestataire pro</div>
+          <div class="badge badge-primary">{$professional_service_provider}</div>
           <div class="text-lg font-author mt-2">{service.price} €</div>
           <h3 class="text-lg font-author mt-2">{service.title}</h3>
           <p class="text-sm text-gray-600">{service.description}</p>
           <div class="flex gap-2 mt-4">
             <button on:click={() => handleContact(service)} class="bg-primary text-black py-2 px-4 rounded-md text-sm h-10 hover:bg-gray-100 flex items-center justify-center">
-              Contacter
+              {$contact}
             </button>
             <button on:click={() => handleDetails(service)} class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm h-10 hover:bg-gray-300 transition-colors">
-              Détails
+              {$details}
             </button>
           </div>
         </div>
