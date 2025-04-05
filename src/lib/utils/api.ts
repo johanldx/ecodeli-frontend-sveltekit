@@ -23,7 +23,12 @@ export async function fetchFromAPI<T>(endpoint: string, options: RequestInit = {
       throw error;
     }
 
-    return await response.json() as T; // Si la réponse est valide, renvoyer les données
+    if (response.status === 204) {
+      return null as unknown as T;
+    }
+
+
+    return await response.json() as T;
   } catch (error) {
     console.error('[fetchFromAPI] Erreur :', error);
     throw error;  // Propager l'erreur pour qu'elle puisse être capturée par le front-end

@@ -34,7 +34,7 @@
 
 			const message = tStatic('api_responses.auth.register.register_successful');
 			notifications.success(message);
-
+			goto('/auth/space');
 		} catch (error: any) {
 			if (error.status === 400) {
 				const message = tStatic('api_responses.auth.register.bad_request');
