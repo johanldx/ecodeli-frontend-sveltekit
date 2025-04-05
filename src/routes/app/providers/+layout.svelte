@@ -1,51 +1,21 @@
 <script lang="ts">
+	import AppMenu from '$lib/components/AppMenu.svelte';
+	import GuardWrapper from '$lib/components/GuardWrapper.svelte';
+	import Notifications from '$lib/components/Notifications.svelte';
   import '../../../app.css';
-	let { children } = $props();
-	</script>
-	
-	<div class="min-h-screen bg-[#FEFCF3]" data-theme="ecodeli">
-	   
-	  <header class="navbar bg-[#FEFCF3] px-4 sm:px-8 py-4">
-		
-		<div class="navbar-start w-1/3">
-		  <a href="/" class="flex items-center">
-			<img src="/images/logo/ecodeli-light.png" alt="EcoDeli" class="h-8 w-auto">
-		  </a>
-		</div>
-	  
-		<div class="navbar-end flex items-center w-2/3">
-		  <div class="hidden lg:flex overflow-hidden">
-			<ul class="menu menu-horizontal px-1 whitespace-nowrap space-x-4">
-			<li><a href="/decouvrir">Mes conversations</a></li>
-			<li><a href="/clients/mes-conversations">Mes services</a></li>
-			<li><a href="/clients/mes-annonces">Mon planning</a></li>
-			<li><a href="/clients/mon-compte">Mon compte</a></li>
-			</ul>
-		  </div>
-		  
-		  <div class="dropdown dropdown-end lg:hidden">
-			<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
-			  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
-			  </svg>
-			</div>
-			<ul tabindex="0" class="menu menu-sm dropdown-content mt-2 z-[1] p-2 shadow bg-base-100 rounded-box w-52 absolute right-0">
-			  <li><a href="/decouvrir">Mes conversations</a></li>
-			  <li><a href="/clients/mes-conversations">Mes services</a></li>
-			  <li><a href="/clients/mes-annonces">Mes planning</a></li>
-			  <li><a href="/clients/mon-compte">Mon compte</a></li>
-			</ul>
-		  </div>
-		  
-		  <div class="avatar placeholder ml-4">
-			<div class="bg-accent text-accent-content rounded-full w-10 h-10">
-			  <span>JD</span>
-			</div>
-		  </div>
-		</div>
-	  
-	  </header>
-	
-	  {@render children()}
-	  
-	</div>
+  let { children } = $props();
+
+  const pages = [
+    { name: "Mes conversations", url: "/app/providers/conversations" },
+    { name: "Mes services", url: "/app/providers/services" },
+    { name: "Mon planning", url: "/app/providers/calendar " },
+  ];
+</script>
+
+<GuardWrapper>
+  <Notifications />
+  <AppMenu pages={pages} />
+  <div class="container mx-auto">
+    {@render children()}
+  </div>
+</GuardWrapper>

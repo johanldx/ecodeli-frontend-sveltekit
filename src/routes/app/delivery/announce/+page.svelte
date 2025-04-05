@@ -1,4 +1,13 @@
 <script lang="ts">
+
+import { t } from '$lib/utils/t';
+const all_services = t('app.delivery.announce.all_services');
+const delivery = t('app.delivery.announce.delivery');
+const transport = t('app.delivery.announce.transport');
+const city = t('app.delivery.announce.city');
+const contact = t('app.delivery.announce.contact');
+const details = t('app.delivery.announce.details');
+
     interface Service {
       id: number;
       type: 'transport' | 'livraison';
@@ -108,13 +117,13 @@
             <div class="fixed inset-0 z-40" on:click={() => showServiceMenu = false}></div>
             <div class="absolute top-full left-0 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 overflow-visible">
               <div class="p-2 hover:bg-gray-100 cursor-pointer" on:click={() => selectService('Tous les services')}>
-                Tous les services
+                {$all_services}
               </div>
               <div class="p-2 bg-primary text-white cursor-pointer" on:click={() => selectService('Transport')}>
-                Transport
+                {$transport}
               </div>
               <div class="p-2 hover:bg-gray-100 cursor-pointer" on:click={() => selectService('Livraison')}>
-                Livraison
+                {$delivery}
               </div>
             </div>
           {/if}
@@ -160,13 +169,13 @@
                   on:click={() => handleContact(service.id)} 
                   class="btn btn-primary btn-xs sm:btn-sm rounded-md"
                 >
-                  Contacter
+                  {$contact}
                 </button>
                 <button 
                   on:click={() => handleDetails(service.id)} 
                   class="btn btn-neutral-content btn-xs sm:btn-sm rounded-md"
                 >
-                  Détails
+                  {$details}
                 </button>
               </div>
             </div>

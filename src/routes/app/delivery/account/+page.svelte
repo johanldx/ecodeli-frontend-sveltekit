@@ -1,5 +1,18 @@
 <script lang="ts">
     import '../../../../app.css';
+    import { t } from '$lib/utils/t';
+
+    const title = t('app.delivery.account.title');
+    const manage_supporting_documents = t('app.delivery.account.manage_supporting_documents');
+    const manage_global_account = t('app.delivery.account.manage_global_account');
+    const manage_addresses = t('app.delivery.account.manage_addresses');
+    const titles = t('app.delivery.my_electronic_wallet.title'); 
+    const amount_available = t('app.delivery.my_electronic_wallet.amount_available');
+    const amount_pending = t('app.delivery.my_electronic_wallet.amount_pending');
+    const to_validate = t('app.delivery.my_electronic_wallet.to_validate');
+    const transfer_bank_account = t('app.delivery.my_electronic_wallet.transfer_bank_account');
+    const delivery_notification = t('app.delivery.notification.delivery_notification');
+    const confirmation = t('app.delivery.notification.confirmation');
     
     // Fonction de validation de l'IBAN
     function handleValidateIBAN() {
@@ -48,7 +61,7 @@
 </script>
 
 <main class="flex flex-col w-full max-w-screen-lg mx-auto px-4 py-6">
-    <h1 class="font-author text-2xl mb-6">Mon compte livreur</h1>
+    <h1 class="font-author text-2xl mb-6">{$title}</h1>
   
     <!-- Conteneur principal avec disposition en grille -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -61,37 +74,37 @@
                         on:click={handleManageDocuments} 
                         class="bg-primary text-primary-content py-2 w-full rounded-md text-sm hover:bg-emerald-500 transition-colors"
                     >
-                        Gérer mes pièces justificatives
+                        {$manage_supporting_documents}
                     </button>
                     
                     <button 
                         on:click={handleManageAccount} 
                         class="bg-primary text-primary-content py-2 w-full rounded-md text-sm hover:bg-emerald-500 transition-colors"
                     >
-                        Gérer mon compte global
+                        {$manage_global_account}
                     </button>
                     
                     <button 
                         on:click={handleManageAddresses} 
                         class="bg-neutral text-white py-2 w-full rounded-md text-sm hover:bg-gray-700 transition-colors"
                     >
-                        Gérer mes adresses
+                        {$manage_addresses}
                     </button>
                 </div>
             </div>
 
             <!-- Carte Portefeuille électronique -->
             <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                <h2 class="font-author text-2xl mb-4">Mon portefeuille électronique</h2>
+                <h2 class="font-author text-2xl mb-4">{$titles}</h2>
                 
                 <div class="flex justify-center gap-16 mb-6">
                     <div class="text-center">
                         <p class="text-2xl font-author text-gray-800">49,75 €</p>
-                        <p class="text-sm text-gray-600">Montant disponible</p>
+                        <p class="text-sm text-gray-600">{$amount_available}</p>
                     </div>
                     <div class="text-center">
                         <p class="text-2xl font-author text-gray-800">49,75 €</p>
-                        <p class="text-sm text-gray-600">Montant en attente</p>
+                        <p class="text-sm text-gray-600">{$amount_pending}</p>
                     </div>
                 </div>
                 
@@ -105,7 +118,7 @@
                         on:click={handleValidateIBAN} 
                         class="bg-primary text-primary-content py-2 px-6 rounded-md text-sm hover:bg-emerald-500 transition-colors"
                     >
-                        Valider
+                        {$to_validate}
                     </button>
                 </div>
                 
@@ -113,7 +126,7 @@
                     on:click={handleTransferToBank} 
                     class="bg-primary text-primary-content py-3 w-full rounded-md text-sm hover:bg-emerald-500 transition-colors"
                 >
-                    Transférer vers un compte bancaire
+                    {$transfer_bank_account}
                 </button>
             </div>
         </div>
@@ -129,14 +142,14 @@
                             on:change={handleToggleNotification}
                         />
                         <h3 class="ml-2 text-center">
-                            Notifications de concordance de livraisons par mail
+                            {$delivery_notification}
                         </h3>
                     </div>
                     <button 
                         on:click={handleConfirmNotifications} 
                         class="bg-primary text-primary-content py-2 px-6 rounded-md text-sm hover:bg-emerald-500 transition-colors"
                     >
-                        Confirmer
+                        {$confirmation}
                     </button>
                 </div>
             </div>
