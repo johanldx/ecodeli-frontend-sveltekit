@@ -1,4 +1,11 @@
 <script lang="ts">
+  import { t } from '$lib/utils/t';
+
+  const title = t('app.providers.my_announces.title');
+  const modify = t('app.providers.my_announces.modify');
+  const cancel = t('app.providers.my_announces.cancel');
+  const details = t('app.providers.my_announces.details');
+  const add_new_ads = t('app.providers.my_announces.add_new_ads');
   
     const announcements = [
       {
@@ -46,7 +53,7 @@
   
   <div class="p-4 md:p-6 bg-base-200 min-h-screen">
     <div class="max-w-7xl mx-auto">
-      <h1 class="text-2xl font-author mb-4 md:mb-6 text-gray-800">Mes annonces</h1>
+      <h1 class="text-2xl font-author mb-4 md:mb-6 text-gray-800">{$title}</h1>
   
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {#each announcements as announcement}
@@ -77,19 +84,19 @@
                   on:click={() => handleEditAnnouncement(announcement.id)} 
                   class="btn btn-primary btn-xs sm:btn-sm rounded-md"
                 >
-                  Modifier
+                  {$modify}
                 </button>
                 <button 
                   on:click={() => handleViewDetails(announcement.id)} 
                   class="btn btn-neutral-content btn-xs sm:btn-sm rounded-md"
                 >
-                  Détails
+                  {$details}
                 </button>
                 <button 
                   on:click={() => handleCancelAnnouncement(announcement.id)} 
                   class="btn btn-error btn-xs sm:btn-sm rounded-md"
                 >
-                  Annuler
+                  {$cancel}
                 </button>
               </div>
             </div>
@@ -102,7 +109,7 @@
           on:click={handleAddAnnouncement} 
           class="btn btn-primary btn-sm sm:btn-md rounded-md"
         >
-          Ajouter une nouvelle annonce !
+          {$add_new_ads}
         </button>
       </div>
   

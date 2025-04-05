@@ -1,4 +1,27 @@
 <script lang="ts">
+
+import { t } from '$lib/utils/t';
+
+const account_title = t('app.providers.account.title');
+const manage_my_documents = t('app.providers.account.manage_my_documents');
+const manage_global_account = t('app.providers.account.manage_global_account');
+const manage_addresses = t('app.providers.account.manage_addresses');
+const manage_my_profil = t('app.providers.account.manage_my_profil');
+
+const income = t('app.providers.income.title');
+const amount_raised_month = t('app.providers.income.amount_raised_month');
+const iban = t('app.providers.income.iban');
+const valid = t('app.providers.income.valid');
+
+const title_service = t('app.providers.service.title');
+const transport = t('app.providers.service.transport');
+const gardening = t('app.providers.service.gardening');
+const childcare = t('app.providers.service.childcare');
+const request = t('app.providers.service.request');
+const customer_service = t('app.providers.service.customer_service');
+
+const invoice = t('app.providers.invoice.title');
+
     
     function handleManageDocuments() {
       alert('Redirection vers la gestion des pièces justificatives...');
@@ -33,7 +56,7 @@
     
   <div class="p-6 bg-[#FEFCF3]">
     <div class="max-w-6xl mx-auto">
-      <h1 class="text-2xl font-author mb-6 text-gray-800">Mon compte commerçants</h1>
+      <h1 class="text-2xl font-author mb-6 text-gray-800">{$account_title}</h1>
       
       <div class="flex flex-col lg:flex-row lg:gap-6">
         <div class="lg:w-2/3">
@@ -43,37 +66,37 @@
                 on:click={handleManageDocuments} 
                 class="bg-primary text-primary-content py-2 w-full rounded-md text-sm hover:bg-emerald-500 transition-colors"
               >
-                Gérer mes pièces justificatives
+                {$manage_my_documents}
               </button>
               
               <button 
                 on:click={handleManageAccount} 
                 class="bg-primary text-primary-content py-2 w-full rounded-md text-sm hover:bg-emerald-500 transition-colors"
               >
-                Gérer mon compte global
+                {$manage_global_account}
               </button>
               
               <button 
                 on:click={handleManageAddresses} 
                 class="bg-neutral text-white py-2 w-full rounded-md text-sm hover:bg-gray-700 transition-colors"
               >
-                Gérer mes adresses
+                {$manage_addresses}
               </button>
               <button 
                 on:click={handleManageProfil} 
                 class="bg-neutral text-white py-2 w-full rounded-md text-sm hover:bg-gray-700 transition-colors"
               >
-                Gérer mon profil
+                {$manage_my_profil}
               </button>
             </div>
           </div>
           
-          <h2 class="text-xl font-author mb-4 text-gray-800">Mes revenus du mois </h2>
+          <h2 class="text-xl font-author mb-4 text-gray-800">{$income} </h2>
           <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
             <div class="flex justify-center gap-16 mb-6">
               <div class="text-center">
                 <p class="text-2xl font-author text-gray-800">490,75 €</p>
-                <p class="text-sm text-gray-600">Montant récolté ce mois-ci</p>
+                <p class="text-sm text-gray-600">{$amount_raised_month}</p>
               </div>
             </div>
             
@@ -87,7 +110,7 @@
                 on:click={handleValidateIBAN} 
                 class="flex-none bg-primary text-primary-content py-2 px-6 rounded-md text-sm hover:bg-primary-focus transition-colors"
               >
-                Valider
+                {$valid}
               </button>
             </div>
           </div>
@@ -95,18 +118,18 @@
         
         <div class="lg:w-1/3 mt-6 lg:mt-0">
           <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
-            <h2 class="text-xl font-author mb-2">Mes services accréditées</h2>
-            <p class="text-x1 font-author text-primary-content mb-4">Tranport de personnes (43€) <br> Jardinage (124€ / heure) <br> Garde d'enfant (60€ / heure)</p>
-            <p class="text-sm text-gray-200 mb-4">Vous pouvez contactez le service client pour toute demande</p>
+            <h2 class="text-xl font-author mb-2">{$title_service}</h2>
+            <p class="text-x1 font-author text-primary-content mb-4">{$transport} (43€) <br> {$gardening} (124€ / heure) <br> {$childcare} (60€ / heure)</p>
+            <p class="text-sm text-gray-200 mb-4">{$request}</p>
             <button 
               on:click={handleContactSupport} 
               class="w-full py-2 px-4 bg-neutral text-white rounded-md hover:bg-gray-700 transition-colors text-sm"
             >
-              Contacter le service client
+              {$customer_service}
             </button>
           </div>
   
-          <h2 class="text-xl font-author mb-4 text-gray-800">Mes factures</h2>
+          <h2 class="text-xl font-author mb-4 text-gray-800">{$invoice}</h2>
           <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
             <div class="space-y-3">
               <button 

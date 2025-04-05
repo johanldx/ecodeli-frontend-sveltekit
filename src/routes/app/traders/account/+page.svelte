@@ -1,5 +1,21 @@
 <script lang="ts">
   
+
+  import { t } from '$lib/utils/t';
+
+const title = t('app.traders.account.title');
+const manage_my_documents = t('app.traders.account.manage_my_documents');
+const manage_global_account = t('app.traders.account.manage_global_account');
+const manage_my_addresses = t('app.traders.account.manage_my_addresses');
+const samples_title = t('app.traders.samples.title');
+const amount_billed_month = t('app.traders.samples.amount_billed_month');
+const manage_samples = t('app.traders.samples.manage_samples');
+const pricing_title = t('app.traders.pricing.title');
+const customer_service = t('app.traders.pricing.title');
+const customer_contact = t('app.traders.pricing.customer_contact');
+const invoice_title = t('app.traders.invoice.title');
+
+
   function handleManageDocuments() {
     alert('Redirection vers la gestion des pièces justificatives...');
   }
@@ -27,7 +43,7 @@
   
 <div class="p-6 bg-[#FEFCF3]">
   <div class="max-w-6xl mx-auto">
-    <h1 class="text-2xl font-author mb-6 text-gray-800">Mon compte commerçants</h1>
+    <h1 class="text-2xl font-author mb-6 text-gray-800">{$title}</h1>
     
     <div class="flex flex-col lg:flex-row lg:gap-6">
       <div class="lg:w-2/3">
@@ -37,55 +53,55 @@
               on:click={handleManageDocuments} 
               class="bg-primary text-primary-content py-2 w-full rounded-md text-sm hover:bg-emerald-500 transition-colors"
             >
-              Gérer mes pièces justificatives
+              {$manage_my_documents}
             </button>
             
             <button 
               on:click={handleManageAccount} 
               class="bg-primary text-primary-content py-2 w-full rounded-md text-sm hover:bg-emerald-500 transition-colors"
             >
-              Gérer mon compte global
+              {$manage_global_account}
             </button>
             
             <button 
               on:click={handleManageAddresses} 
               class="bg-neutral text-white py-2 w-full rounded-md text-sm hover:bg-gray-700 transition-colors"
             >
-              Gérer mes adresses
+              {$manage_my_addresses}
             </button>
           </div>
         </div>
         
-        <h2 class="text-xl font-author mb-4 text-gray-800">Mes prélèvements SEPA</h2>
+        <h2 class="text-xl font-author mb-4 text-gray-800">{$samples_title}</h2>
         <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div class="flex flex-col items-center mb-6">
             <p class="text-2xl font-author text-gray-800">49,75 €</p>
-            <p class="text-sm text-gray-600">Montant facturé ce mois-ci</p>
+            <p class="text-sm text-gray-600">{$amount_billed_month}</p>
           </div>
           
           <button 
             on:click={handleManageSEPA} 
             class="bg-primary text-primary-content py-2 w-full rounded-md text-sm hover:bg-emerald-500 transition-colors"
           >
-            Gérer mes prélèvements
+            {$manage_samples}
           </button>
         </div>
       </div>
       
       <div class="lg:w-1/3 mt-6 lg:mt-0">
         <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
-          <h2 class="text-xl font-author mb-2">Tarification spécial : -15%</h2>
-          <p class="text-sm text-gray-600 mb-4">Vous pouvez contacter le service client pour toute demande.</p>
+          <h2 class="text-xl font-author mb-2">{$pricing_title} -15%</h2>
+          <p class="text-sm text-gray-600 mb-4">{$customer_service}</p>
           
           <button 
             on:click={handleContactSupport} 
             class="w-full py-2 px-4 bg-neutral text-white rounded-md hover:bg-gray-700 transition-colors text-sm"
           >
-            Contacter le service client
+            {$customer_contact}
           </button>
         </div>
 
-        <h2 class="text-xl font-author mb-4 text-gray-800">Mes factures</h2>
+        <h2 class="text-xl font-author mb-4 text-gray-800">{$invoice_title}</h2>
         <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div class="space-y-3">
             <button 

@@ -1,4 +1,15 @@
 <script lang="ts">
+  import { t } from '$lib/utils/t';
+  const title = t('app.delivery.addresses.title');
+  const name = t('app.delivery.addresses.name');
+  const address = t('app.delivery.addresses.address');
+  const postal_code = t('app.delivery.addresses.postal_code');
+  const city = t('app.delivery.addresses.city');
+  const country = t('app.delivery.addresses.country');
+  const add_address = t('app.delivery.addresses.add_address');
+  const modify = t('app.delivery.addresses.modify');
+  const delete_address = t('app.delivery.addresses.delete_address');
+
   
     function handleEditAddress() {
       alert('Modification de l\'adresse...');
@@ -14,18 +25,18 @@
   </script>
   
   <div class="p-6 bg-[#FEFCF3] min-h-screen">
-    <h1 class="text-2xl font-author mb-6 text-gray-800">Mes adresses</h1>
+    <h1 class="text-2xl font-author mb-6 text-gray-800">{$title}</h1>
   
     <div class="flex gap-6 flex-wrap">
       <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 w-96">
-        <label class="text-lg font-author mb-2 text-gray-700 block">Nom</label>
+        <label class="text-lg font-author mb-2 text-gray-700 block">{$name}</label>
         <input 
           type="text" 
           placeholder="Chez moi" 
           class="w-full p-2 border border-gray-300 rounded-md mb-4 bg-gray-100 input input-bordered focus:outline-none focus:ring focus:ring-primary/50 focus:border-primary"
         />
   
-        <label class="font-medium text-gray-700 block">Adresse</label>
+        <label class="font-medium text-gray-700 block">{$address}</label>
         <input 
           type="text" 
           placeholder="21 cours Mgr Romero"
@@ -34,7 +45,7 @@
   
         <div class="flex gap-2">
           <div class="w-1/2">
-            <label class="font-medium text-gray-700 block">Code postal</label>
+            <label class="font-medium text-gray-700 block">{$postal_code}</label>
             <input 
               type="text" 
               placeholder="91000"
@@ -42,7 +53,7 @@
             />
           </div>
           <div class="w-1/2">
-            <label class="font-medium text-gray-700 block">Ville</label>
+            <label class="font-medium text-gray-700 block">{$city}</label>
             <input 
               type="text" 
               placeholder="Evry"
@@ -51,7 +62,7 @@
           </div>
         </div>
         
-        <label class="font-medium text-gray-700 block mt-2">Pays</label>
+        <label class="font-medium text-gray-700 block mt-2">{$country}</label>
         <input 
           type="text" 
           placeholder="France"
@@ -63,13 +74,13 @@
             on:click={handleEditAddress} 
             class="bg-primary text-primary-content py-2 px-4 rounded-md text-sm hover:bg-opacity-90 transition-colors"
           >
-            Modifier
+            {$modify}
           </button>
           <button 
             on:click={handleDeleteAddress} 
             class="bg-error text-error-content py-2 px-4 rounded-md text-sm hover:bg-opacity-90 transition-colors"
           >
-            Supprimer
+            {$delete_address}
           </button>
         </div>
       </div>
@@ -80,7 +91,7 @@
         on:click={handleAddAddress} 
         class="bg-secondary text-secondary-content py-2 px-6 rounded-md text-sm hover:bg-opacity-90 transition-colors"
       >
-        Ajouter une adresse
+        {$add_address}
       </button>
     </div>
   </div>

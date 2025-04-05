@@ -1,4 +1,14 @@
 <script lang="ts">
+
+import { t } from '$lib/utils/t';
+const title = t('app.delivery.my_planned_trips.title');
+const departure = t('app.delivery.my_planned_trips.departure');
+const arrival = t('app.delivery.my_planned_trips.arrival');
+const date = t('app.delivery.my_planned_trips.date');
+const modify = t('app.delivery.my_planned_trips.modify');
+const cancel = t('app.delivery.my_planned_trips.cancel');
+
+
   // Définition de l'interface pour un trajet
   interface Trajet {
     id: number;
@@ -34,14 +44,14 @@ function handleSupprimer(id: number): void {
 </script>
 
 <div class="p-6 bg-[#FEFCF3] min-h-screen">
-  <h1 class="text-2xl font-author mb-6 text-gray-800">Mes trajets prévus</h1>
+  <h1 class="text-2xl font-author mb-6 text-gray-800">{$title}</h1>
   
   <div class="flex gap-6 flex-wrap">
     {#each trajets as trajet (trajet.id)}
       <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 w-96">
         <div class="space-y-4">
           <div>
-            <label class="font-author text-gray-700 block">Ville de départ</label>
+            <label class="font-author text-gray-700 block">{$departure}</label>
             <input 
               type="text" 
               bind:value={trajet.villeDepart} 
@@ -50,7 +60,7 @@ function handleSupprimer(id: number): void {
           </div>
           
           <div>
-            <label class="font-author text-gray-700 block">Ville d'arrivée</label>
+            <label class="font-author text-gray-700 block">{$arrival}</label>
             <input 
               type="text" 
               bind:value={trajet.villeArrivee} 
@@ -59,7 +69,7 @@ function handleSupprimer(id: number): void {
           </div>
           
           <div>
-            <label class="font-author text-gray-700 block">Jour</label>
+            <label class="font-author text-gray-700 block">{$date}</label>
             <input 
               type="text" 
               bind:value={trajet.jour} 
@@ -72,14 +82,14 @@ function handleSupprimer(id: number): void {
               on:click={() => handleModifier(trajet.id)} 
               class="bg-primary text-primary-content py-2 px-4 rounded-md text-sm hover:bg-opacity-90 transition-colors"
             >
-              Modifier
+              {$modify}
             </button>
             
             <button 
               on:click={() => handleSupprimer(trajet.id)} 
               class="bg-error text-error-content py-2 px-4 rounded-md text-sm hover:bg-opacity-90 transition-colors"
             >
-              Supprimer
+              {$cancel}
             </button>
           </div>
         </div>
