@@ -25,7 +25,6 @@
   function filterData() {
     // Si la recherche est vide, retourner toutes les données
     if (searchQuery === '') {
-      console.log("Données sans filtre : ", data);
       return data;
     }
 
@@ -83,7 +82,6 @@
 
   // Lors du montage, mettre à jour les données de la page initiale
   onMount(() => {
-    console.log("Données initiales : ", data);
     updateCurrentData();
   });
 </script>

@@ -1,5 +1,9 @@
 <script lang="ts">
     import { t } from '$lib/utils/t';
+	import { tabTitle } from '$lib/utils/tabTitle';
+	import { onDestroy, onMount } from 'svelte';
+
+    onMount(() => onDestroy(tabTitle('landing.legal_mentions')));
 
     const legal_mentions_title = t('landing.legal_mentions.title');
     const legal_mentions_intro = t('landing.legal_mentions.intro');

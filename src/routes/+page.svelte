@@ -1,5 +1,9 @@
 <script lang="ts">
     import { t } from '$lib/utils/t';
+	import { tabTitle } from '$lib/utils/tabTitle';
+	import { onDestroy, onMount } from 'svelte';
+
+    onMount(() => onDestroy(tabTitle('landing.index')));
 
     const hero_section_title = t('landing.index.hero_section.title');
     const hero_section_subtitle = t('landing.index.hero_section.subtitle');
