@@ -1,23 +1,36 @@
 <script lang="ts">
-	import AppMenu from '$lib/components/AppMenu.svelte';
-	import GuardWrapper from '$lib/components/GuardWrapper.svelte';
-	import Notifications from '$lib/components/Notifications.svelte';
+  import AppMenu from '$lib/components/AppMenu.svelte';
+  import GuardWrapper from '$lib/components/GuardWrapper.svelte';
+  import Notifications from '$lib/components/Notifications.svelte';
+  import { t } from '$lib/utils/t';
+  import { derived, type Readable } from 'svelte/store';
+
   import '../../../app.css';
+
   let { children } = $props();
 
-  const pages = [
-    { name: "Découvir", url: "/app/clients/discover" },
-    { name: "Mes livraisons", url: "/app/clients/deliveries" },
-    { name: "Mon planning", url: "/app/clients/planning" },
+  type Page = { name: string; url: string };
+
+  const links: { key: string; url: string }[] = [
+    { key: 'discover_link', url: '/app/clients/discover' },
+    { key: 'delivery_link', url: '/app/clients/deliveries' },
+    { key: 'schedule_link', url: '/app/clients/planning' }
   ];
+
+  const translationStores = links.map(link => t(`app.global.menu.${link.key}`));
+
+  const pages: Readable<Page[]> = derived(translationStores, (translations) =>
+    translations.map((name, i) => ({
+      name,
+      url: links[i].url
+    }))
+  );
 </script>
 
 <GuardWrapper>
   <Notifications />
-  <AppMenu pages={pages} />
+  <AppMenu pages={$pages} />
   <div class="container mx-auto">
     {@render children()}
   </div>
 </GuardWrapper>
-
-

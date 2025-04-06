@@ -1,21 +1,36 @@
 <script lang="ts">
-	import AppMenu from '$lib/components/AppMenu.svelte';
-	import GuardWrapper from '$lib/components/GuardWrapper.svelte';
-	import Notifications from '$lib/components/Notifications.svelte';
-  import '../../../app.css';
+  import AppMenu from '$lib/components/AppMenu.svelte';
+  import GuardWrapper from '$lib/components/GuardWrapper.svelte';
+  import Notifications from '$lib/components/Notifications.svelte';
+  import { t } from '$lib/utils/t';
+  import { derived, type Readable } from 'svelte/store';
+
   let { children } = $props();
 
-  const pages = [
-    { name: "Découvir", url: "/app/clients/discover" },
-    { name: "Mes conversations", url: "/app/clients/conversations" },
-    { name: "Mes annonces", url: "/app/clients/ads" },
-    { name: "Mes adresses", url: "/app/clients/addresses" },
+  type Page = { name: string; url: string };
+
+  const links: { key: string; url: string }[] = [
+    { key: 'discover_link', url: '/app/clients/discover' },
+    { key: 'discussion_link', url: '/app/clients/conversations' },
+    { key: 'announces_link', url: '/app/clients/ads' },
+    { key: 'addresses_link', url: '/app/clients/addresses' }
   ];
+
+  // Création d'un tableau de stores de traduction
+  const translationStores = links.map(link => t(`app.global.menu.${link.key}`));
+
+  // Création d'une store dérivée de toutes les stores de traduction
+  const pages: Readable<Page[]> = derived(translationStores, (translations) =>
+    translations.map((name, i) => ({
+      name,
+      url: links[i].url
+    }))
+  );
 </script>
 
 <GuardWrapper>
   <Notifications />
-  <AppMenu pages={pages} />
+  <AppMenu pages={$pages} />
   <div class="container mx-auto">
     {@render children()}
   </div>
