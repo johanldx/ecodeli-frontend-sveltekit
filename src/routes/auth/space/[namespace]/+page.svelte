@@ -191,6 +191,11 @@
 	const pending_title = t(`auth.space_validation.pending.title`);
 	const pending_subtitle = t(`auth.space_validation.pending.subtitle`);
 	const pending_back_link = t(`auth.space_validation.pending.back_link`);
+
+	const form_input_1 = t(`auth.space_validation.${$page.params.namespace}.form.1`);
+	const form_input_2 = t(`auth.space_validation.${$page.params.namespace}.form.2`);
+	const form_input_3 = t(`auth.space_validation.${$page.params.namespace}.form.3`);
+	const form_input_4 = t(`auth.space_validation.${$page.params.namespace}.form.4`);
 </script>
 
 <GuardWrapper>
@@ -209,7 +214,7 @@
 
 	{:else}
 		<div class="text-center p-4 max-w-lg mx-auto">
-			<img src="/images/logo/ecodeli-icon-light.png" class="m-auto h-5 w-auto mb-4" alt="">
+			<a href="/auth/space"><img src="/images/logo/ecodeli-icon-light.png" class="m-auto h-5 w-auto mb-4" alt=""></a>
 			<h1 class="text-2xl font-bold mb-6 mt-10">{$title}</h1>
 			{#if status === 'rejected'}
 				<div class="border border-error bg-error/10 text-error p-4 rounded-lg mb-4">
@@ -227,12 +232,12 @@
 				{:else if namespace === 'providers'}
 					<label class="form-control w-full my-5 block">
 						<div class="label">
-							<span class="label-text">IBAN</span>
+							<span class="label-text">{$form_input_1}</span>
 						</div>
 						<input
 							type="text"
 							class="input w-full"
-							placeholder="IBAN / RIB"
+							placeholder="{$form_input_1}"
 							bind:value={formData.bank_account}
 							required
 						/>
@@ -240,7 +245,7 @@
 				
 					<label class="form-control w-full my-5 block">
 						<div class="label">
-							<span class="label-text">Carte d'identité du dirigent (PDF, JPG, PNG)</span>
+							<span class="label-text">{$form_input_2}</span>
 						</div>
 						<input
 							type="file"
@@ -258,7 +263,7 @@
 
 					<label class="form-control w-full my-5 block">
 						<div class="label">
-							<span class="label-text">Extrait de KBIS (PDF, JPG, PNG)</span>
+							<span class="label-text">{$form_input_3}</span>
 						</div>
 						<input
 							type="file"
@@ -276,7 +281,7 @@
 
 					<label class="form-control w-full my-5 block">
 						<div class="label">
-							<span class="label-text">Certificats de prestation</span>
+							<span class="label-text">{$form_input_4}</span>
 						</div>
 						<input
 							type="file"
@@ -290,12 +295,12 @@
 				{:else if namespace === 'traders'}
 					<label class="form-control w-full my-5 block">
 						<div class="label">
-							<span class="label-text">IBAN</span>
+							<span class="label-text">{$form_input_1}</span>
 						</div>
 						<input
 							type="text"
 							class="input w-full"
-							placeholder="IBAN / RIB"
+							placeholder="{$form_input_1}"
 							bind:value={formData.bank_account}
 							required
 						/>
@@ -303,7 +308,7 @@
 				
 					<label class="form-control w-full my-5 block">
 						<div class="label">
-							<span class="label-text">Carte d'identité du dirigent (PDF, JPG, PNG)</span>
+							<span class="label-text">{$form_input_2}</span>
 						</div>
 						<input
 							type="file"
@@ -321,7 +326,7 @@
 				
 					<label class="form-control w-full my-5 block">
 						<div class="label">
-							<span class="label-text">Extrait de KBIS (PDF, JPG, PNG)</span>
+							<span class="label-text">{$form_input_3}</span>
 						</div>
 						<input
 							type="file"
@@ -340,12 +345,12 @@
 					{:else if namespace === 'delivery-persons'}
 					<label class="form-control w-full my-5 block">
 						<div class="label">
-							<span class="label-text">IBAN</span>
+							<span class="label-text">{$form_input_1}</span>
 						</div>
 						<input
 							type="text"
 							class="input w-full"
-							placeholder="IBAN / RIB"
+							placeholder="{$form_input_1}"
 							bind:value={formData.bank_account}
 							required
 						/>
@@ -353,7 +358,7 @@
 				
 					<label class="form-control w-full my-5 block">
 						<div class="label">
-							<span class="label-text">Carte d'identité (PDF, JPG, PNG)</span>
+							<span class="label-text">{$form_input_2}</span>
 						</div>
 						<input
 							type="file"
@@ -371,7 +376,7 @@
 				
 					<label class="form-control w-full my-5 block">
 						<div class="label">
-							<span class="label-text">Permis de conduire (PDF, JPG, PNG)</span>
+							<span class="label-text">{$form_input_3}</span>
 						</div>
 						<input
 							type="file"

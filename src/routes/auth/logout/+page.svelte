@@ -5,6 +5,7 @@
   import { user } from '$lib/stores/user';
 
   onMount(() => {
+    localStorage.clear();
     clearTokens();
     user.set(null);
     goto('/auth/login');
