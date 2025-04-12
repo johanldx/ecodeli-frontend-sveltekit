@@ -7,6 +7,7 @@
 
   const pages = [
     { name: "Utilisateurs", url: "/admin/users" },
+    { name: "Adresses", url: "/admin/addresses" },
   ];
 </script>
 

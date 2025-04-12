@@ -5,16 +5,15 @@
   import { t } from '$lib/utils/t';
   import { derived, type Readable } from 'svelte/store';
 
-  import '../../../app.css';
-
   let { children } = $props();
 
   type Page = { name: string; url: string };
 
   const links: { key: string; url: string }[] = [
-    { key: 'discover_link', url: '/app/clients/discover' },
-    { key: 'delivery_link', url: '/app/clients/deliveries' },
-    { key: 'schedule_link', url: '/app/clients/planning' }
+    { key: 'discover_link', url: '/app/delivery-persons/discover' },
+    { key: 'delivery_link', url: '/app/delivery-persons/deliveries' },
+    { key: 'schedule_link', url: '/app/delivery-persons/planning' },
+    { key: 'addresses_link', url: '/app/delivery-persons/addresses' }
   ];
 
   const translationStores = links.map(link => t(`app.global.menu.${link.key}`));

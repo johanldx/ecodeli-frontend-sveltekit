@@ -33,15 +33,15 @@
     Authorization: `Bearer ${get(accessToken)}`
   });
 
-  const title = t('app.clients.addresses.title');
-  const nameLabel = t('app.clients.addresses.name');
-  const addressLabel = t('app.clients.addresses.address');
-  const postal_code = t('app.clients.addresses.postal_code');
-  const cityLabel = t('app.clients.addresses.city');
-  const countryLabel = t('app.clients.addresses.country');
-  const add_address = t('app.clients.addresses.add_address');
-  const modify = t('app.clients.addresses.modify');
-  const delete_address = t('app.clients.addresses.delete_address');
+  const title = t('app.delivery.addresses.title');
+const nameLabel = t('app.delivery.addresses.name');
+const addressLabel = t('app.delivery.addresses.address');
+const postal_code = t('app.delivery.addresses.postal_code');
+const cityLabel = t('app.delivery.addresses.city');
+const countryLabel = t('app.delivery.addresses.country');
+const add_address = t('app.delivery.addresses.add_address');
+const modify = t('app.delivery.addresses.modify');
+const delete_address = t('app.delivery.addresses.delete_address');
 
   async function searchAddressInField() {
     const query = selectedAddress.address;

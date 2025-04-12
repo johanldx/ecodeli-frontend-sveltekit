@@ -14,7 +14,8 @@
   const links: { key: string; url: string }[] = [
     { key: 'discussion_link', url: '/app/providers/conversations' },
     { key: 'service_link', url: '/app/providers/services' },
-    { key: 'schedule_link', url: '/app/providers/calendar' }
+    { key: 'schedule_link', url: '/app/providers/calendar' },
+    { key: 'addresses_link', url: '/app/providers/addresses' }
   ];
 
   const translationStores = links.map(link => t(`app.global.menu.${link.key}`));

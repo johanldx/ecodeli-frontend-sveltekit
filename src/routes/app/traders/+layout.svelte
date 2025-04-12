@@ -13,7 +13,8 @@
 
   const links: { key: string; url: string }[] = [
     { key: 'discussion_link', url: '/app/traders/conversations' },
-    { key: 'request_link', url: '/app/traders/demandes' }
+    { key: 'request_link', url: '/app/traders/demandes' },
+    { key: 'addresses_link', url: '/app/traders/addresses' }
   ];
 
   const translationStores = links.map(link => t(`app.global.menu.${link.key}`));

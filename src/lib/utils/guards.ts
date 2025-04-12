@@ -7,7 +7,7 @@ export async function guardRoute(redirectTo = '/auth/login') {
 	const isValid = await checkAuth();
 
 	if (!isValid) {
-		const message = tStatic('api_responses.errors.auth.invalid_token');
+		const message = tStatic('api_responses.auth.global.session_expired');
 		notifications.error(message);
 		goto(redirectTo);
 		return false;

@@ -114,6 +114,8 @@
     showModalDeliveryDelete = false;
     showModalTraderEdit = false;
     showModalTraderDelete = false;
+    showModalProviderEdit = false;
+    showModalProviderDelete = false;
   }
 
   async function deleteUser() {
@@ -410,7 +412,103 @@
     }
   }
 
+  let providersData: any[] = [];
+  let loadingProviders = true;
+  let selectedProvider: any = null;
+  let editedProvider: any = {};
+  let showModalProviderEdit = false;
+  let showModalProviderDelete = false;
+
+  let providersColumns = [
+    { Header: 'Nom', accessor: 'name', sortable: true },
+    { Header: 'Email', accessor: 'email', sortable: true },
+    { Header: 'Statut', accessor: 'status', sortable: true },
+    { Header: 'Carte d\'identité', accessor: 'identity_card_document', sortable: false },
+    { Header: 'Justificatif d\'activité', accessor: 'proof_of_business_document', sortable: false },
+    { Header: 'Documents de certification', accessor: 'certification_documents', sortable: false },
+    { Header: 'RIB', accessor: 'bank_account', sortable: false },
+    { Header: 'Créé le', accessor: 'created_at', sortable: true },
+    { Header: 'Actions', accessor: 'actions', sortable: false }
+  ];
+
+  onMount(async () => {
+    const providers = await fetchFromAPI('/providers', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` }
+    }) as any[];
+
+    providersData = providers.map(p => ({
+      id: p.id,
+      name: `${p.user?.first_name ?? 'Utilisateur'} ${p.user?.last_name ?? ''}`,
+      email: p.user?.email ?? '',
+      status: formatStatus(p.status),
+      raw_status: p.status,
+      identity_card_document: `<button class="btn btn-sm" onClick="window.open('${p.identity_card_document}', '_blank')">Voir</button>`,
+      proof_of_business_document: `<button class="btn btn-sm" onClick="window.open('${p.proof_of_business_document}', '_blank')">Voir</button>`,
+      certification_documents: p.certification_documents.map((url: string) =>
+        `<button class="btn btn-xs mr-1 mb-1" onClick="window.open('${url}', '_blank')">Voir</button>`
+      ).join(''),
+      bank_account: p.bank_account,
+      created_at: formatDate(p.created_at),
+      actions: [
+        { label: 'Modifier', class: 'btn btn-warning' },
+        { label: 'Supprimer', class: 'btn btn-error' }
+      ]
+    }));
+
+    loadingProviders = false;
+  });
+
+  function handleProviderAction(action: string, row: any) {
+    if (action === 'Modifier') {
+      selectedProvider = row;
+      editedProvider = { ...row, status: row.raw_status || 'pending' };
+      showModalProviderEdit = true;
+    } else if (action === 'Supprimer') {
+      selectedProvider = row;
+      showModalProviderDelete = true;
+    }
+  }
+
+  async function modifyProvider() {
+    try {
+      await fetchFromAPI(`/providers/${editedProvider.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` },
+        body: JSON.stringify({ status: editedProvider.status })
+      });
+
+      notifications.success("Le statut du fournisseur a bien été mis à jour.");
+      closeModals();
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      location.reload();
+    } catch (error) {
+      closeModals();
+      notifications.error("Erreur");
+    }
+  }
+
+  async function deleteProvider() {
+    try {
+      await fetchFromAPI(`/providers/${selectedProvider.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` }
+      });
+
+      notifications.success("Le fournisseur a bien été supprimé.");
+      closeModals();
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      location.reload();
+    } catch (error) {
+      closeModals();
+      notifications.error("Erreur");
+    }
+  }
+
+
 </script>
+
+<div class="p-6 min-h-screen">
 
 <!-- Utilisateurs -->
 <h1 class="text-2xl mt-10 mb-5 font-medium">Utilisateurs</h1>
@@ -588,3 +686,53 @@
     </div>
   </div>
 {/if}
+
+<h2 class="text-xl mt-5 mb-2 font-medium">Prestataire</h2>
+
+{#if loadingProviders}
+  <div class="fixed inset-0 flex items-center justify-center bg-white z-50">
+    <span class="loading loading-spinner loading-lg text-primary"></span>
+  </div>
+{:else}
+  <Table columns={providersColumns} data={providersData} pageSize={5} onAction={handleProviderAction} />
+{/if}
+
+{#if showModalProviderEdit}
+  <div class="modal modal-open">
+    <div class="modal-box">
+      <h2 class="text-center text-xl font-semibold mb-5">Modifier le statut du prestataire</h2>
+      <label class="label" for="provider-status">Statut</label>
+      <select
+        id="provider-status"
+        class="select select-bordered w-full"
+        bind:value={editedProvider.status}
+      >
+        {#each statusOptions as statusOption}
+          <option value={statusOption.value}>{statusOption.label}</option>
+        {/each}
+      </select>
+      <div class="modal-action">
+        <button class="btn btn-primary" on:click={modifyProvider}>Enregistrer</button>
+        <button class="btn" on:click={closeModals}>Fermer</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+{#if showModalProviderDelete}
+  <div class="modal modal-open">
+    <div class="modal-box">
+      <h2 class="text-center text-xl font-semibold mb-5">Supprimer le fournisseur</h2>
+      {#if selectedProvider}
+        <p class="text-center">Êtes-vous sûr de vouloir supprimer <strong>{selectedProvider.name}</strong> ?</p>
+      {/if}
+      <div class="modal-action">
+        <button class="btn btn-error" on:click={deleteProvider}>Supprimer</button>
+        <button class="btn" on:click={closeModals}>Annuler</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+</div>

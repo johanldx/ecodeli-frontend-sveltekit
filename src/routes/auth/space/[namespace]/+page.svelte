@@ -128,7 +128,6 @@
 				? `/${namespace}/${profileId}`
 				: `/${namespace}`;
 
-			// Création du FormData
 			const form = new FormData();
 			form.append('user_id', String(currentUser.id));
 
@@ -141,7 +140,20 @@
 					form.append('driver_license_document', formData.driver_license_document);
 				}
 			} else if (namespace === 'providers') {
-				// a faire
+				form.append('name', String(formData.name || ''));
+				form.append('bank_account', String(formData.bank_account || ''));
+
+				if (formData.identity_card_document instanceof File) {
+					form.append('identity_card_document', formData.identity_card_document);
+				}
+
+				if (formData.proof_of_business_document instanceof File) {
+					form.append('proof_of_business_document', formData.proof_of_business_document);
+				}
+				const certs = get(files);
+				for (const cert of certs) {
+					form.append('certification_documents', cert);
+				}
 			} else if (namespace === 'traders') {
 				form.append('bank_account', String(formData.bank_account || ''));
 				if (formData.identity_card_document instanceof File) {
@@ -230,6 +242,19 @@
 						title="Vidéo d'onboarding" frameborder="0" allowfullscreen></iframe>
 
 				{:else if namespace === 'providers'}
+					<label class="form-control w-full my-5 block">
+						<div class="label">
+						<span class="label-text">Nom du fournisseur</span>
+						</div>
+						<input
+						type="text"
+						class="input w-full"
+						placeholder="Nom du fournisseur"
+						bind:value={formData.name}
+						required
+						/>
+					</label>				  
+
 					<label class="form-control w-full my-5 block">
 						<div class="label">
 							<span class="label-text">{$form_input_1}</span>
