@@ -23,11 +23,11 @@
   }
 
   function handleManageAccount() {
-    alert('Redirection vers la gestion du compte global...');
+    window.location.href = '/auth/account';
   }
 
   function handleManageAddresses() {
-    alert('Redirection vers la gestion des adresses...');
+    window.location.href = '/app/clients/addresses';
   }
 
   function handleValidateIBAN() {
@@ -65,14 +65,14 @@
     
     <button 
       on:click={handleManageAccount} 
-      class="bg-primary text-primary-content py-3 w-full rounded-md text-sm mb-3 hover:bg-primary-focus transition-colors"
+      class="bg-primary text-primary-content py-3 w-full rounded-md text-sm mb-3 hover:bg-primary-focus transition-colors cursor-pointer"
     >
       {$manage_global_account}
     </button>
     
     <button 
       on:click={handleManageAddresses} 
-      class="bg-secondary text-secondary-content py-3 w-full rounded-md text-sm hover:bg-secondary-focus transition-colors"
+      class="bg-secondary text-secondary-content py-3 w-full rounded-md text-sm hover:bg-secondary-focus transition-colors cursor-pointer"
     >
       {$manage_addresses}
     </button>

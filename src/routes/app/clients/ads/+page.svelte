@@ -190,9 +190,12 @@
         </figure>
       {/if}
 				<div class="card-body p-4 md:p-6">
+					<div>
+						<p class="badge badge-neutral badge-outline py-2 px-3 mt-2 mr-2">Liste de courses</p>
+						<p class="badge badge-neutral py-2 px-3 mt-2">{ad.price} €</p>
+					</div>
 					<h2 class="card-title text-sm sm:text-base">{ad.title}</h2>
 					<p class="text-xs sm:text-sm text-gray-600">{ad.description}</p>
-					<p class="badge badge-primary badge-outline py-2 px-3 mt-2">{ad.price} €</p>
 				</div>
 			</div>
 		{/each}
