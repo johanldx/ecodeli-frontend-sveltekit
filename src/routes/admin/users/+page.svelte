@@ -7,6 +7,61 @@
   import { accessToken } from '$lib/stores/token';
   import { notifications } from '$lib/stores/notifications';
 	import { tabTitle } from '$lib/utils/tabTitle';
+  import { t, tStatic } from '$lib/utils/t';
+  
+
+
+  // des petites constantes pour la traduction du back office :D 
+
+  const tab_title = t('admin.users.tab_title');
+  const users_title = t('admin.users.users_title');
+  const providers_title = t('admin.users.providers_title');
+  const delivery_persons_title = t('admin.users.delivery_persons_title');
+  const traders_title = t('admin.users.traders_title');
+  const clients_title = t('admin.users.clients_title');
+  const profiles_title = t('admin.users.profiles_title');
+  const search_bar = t('admin.users.search_bar');
+  const user_name = tStatic('admin.users.user_name');
+  const user_first_name = t('admin.users.user_first_name');
+  const user_email = tStatic('admin.users.user_email');
+  const status = tStatic('admin.users.status');
+  const creation_date = tStatic('admin.users.creation_date');
+  const actions = tStatic('admin.users.actions');
+  const modify = tStatic('admin.users.modify');
+  const cancel = tStatic('admin.users.cancel');
+  const next = t('admin.users.next');
+  const previous = t('admin.users.previous');
+  const page = t('admin.users.page');
+  const card_id = tStatic('admin.users.card_id');
+  const driving_license = tStatic('admin.users.driving_license');
+  const RIB = tStatic('admin.users.RIB');
+  const create_it = tStatic('admin.users.create_it');
+  const proof_of_activity = tStatic('admin.users.proof_of_activity');
+  const certification_document = tStatic('admin.users.certification_document');
+  const user_modify = t('admin.users.user_modify');
+  const active = tStatic('admin.users.active');
+  const verify = t('admin.users.verify');
+  const administrator = t('admin.users.administrator');
+  const close_button = t('admin.users.close_button');
+  const record_button = t('admin.users.record_button');
+  const user_delete = t('admin.users.user_delete');
+  const cancel_delete = t('admin.users.cancel_delete');
+  const delete_confirmation = t('admin.users.delete_confirmation');
+  const client_delete = t('admin.users.client_delete');
+  const provider_delete = t('admin.users.provider_delete');
+  const trader_delete = t('admin.users.trader_delete');
+  const delivery_delete = t('admin.users.delivery_delete');
+  const delivery_status_modify = t('admin.users.delivery_status_modify');
+  const provider_status_modify = t('admin.users.provider_status_modify');
+  const trader_status_modify = t('admin.users.trader_status_modify');
+  const client_status_modify = t('admin.users.client_status_modify');
+  const supplier_delete = t('admin.users.supplier_delete');
+  const to_validate = tStatic('admin.users.to_validate');
+  const pending = tStatic('admin.users.pending');
+  const rejected = tStatic('admin.users.rejected');
+  const none_validated = tStatic('admin.users.none_validated');
+  
+
 
   onMount(() => onDestroy(tabTitle('admin.users')));
   
@@ -20,11 +75,11 @@
   }[] = [];
 
   let columns = [
-    { Header: 'Nom', accessor: 'name', sortable: true },
-    { Header: 'Email', accessor: 'email', sortable: true },
-    { Header: 'Statut', accessor: 'active', sortable: true },
-    { Header: 'Date de création', accessor: 'created_at', sortable: true },
-    { Header: 'Actions', accessor: 'actions', sortable: false }
+    { Header: user_name , accessor: 'name', sortable: true },
+    { Header: user_email, accessor: 'email', sortable: true },
+    { Header: status, accessor: 'active', sortable: true },
+    { Header: creation_date, accessor: 'created_at', sortable: true },
+    { Header: actions, accessor: 'actions', sortable: false }
   ];
 
   let loadingUsers = true;
@@ -39,12 +94,12 @@
   let editedUser = { ...selectedUser };
 
   const formatActiveStatus = (status: boolean) =>
-    status ? `<span class="badge badge-success">Actif</span>` : `<span class="badge badge-error">Inactif</span>`;
+    status ? `<span class="badge badge-success">${active}</span>` : `<span class="badge badge-error">Inactif</span>`;
 
   function formatStatus(status: string) {
     switch (status) {
       case 'approved':
-        return `<span class="badge badge-success">Validé</span>`;
+        return `<span class="badge badge-success">${to_validate}</span>`;
       case 'rejected':
         return `<span class="badge badge-error">Rejeté</span>`;
       case 'pending':
@@ -69,8 +124,8 @@
       active: formatActiveStatus(user.active),
       created_at: formatDate(user.created_at),
       actions: [
-        { label: 'Modifier', class: 'btn btn-warning' },
-        { label: 'Supprimer', class: 'btn btn-error' }
+        { label: modify, class: 'btn btn-warning' },
+        { label: cancel, class: 'btn btn-error' }
       ]
     }));
 
@@ -78,9 +133,9 @@
   });
 
   function handleAction(action: string, row: any) {
-    if (action === 'Modifier') {
+    if (action === modify) {
       openModal(row);
-    } else if (action === 'Supprimer') {
+    } else if (action === cancel) {
       selectedUser = row;
       showModalUserDelete = true;
     }
@@ -159,11 +214,11 @@
   // Clients
   let clientsData: any[] = [];
   let clientsColumns = [
-    { Header: 'Nom', accessor: 'name', sortable: true },
-    { Header: 'Email', accessor: 'email', sortable: true },
-    { Header: 'Statut', accessor: 'onboarding', sortable: true },
-    { Header: 'Date de création', accessor: 'created_at', sortable: true },
-    { Header: 'Actions', accessor: 'actions', sortable: false }
+    { Header: user_name, accessor: 'name', sortable: true },
+    { Header: user_email, accessor: 'email', sortable: true },
+    { Header: status, accessor: 'onboarding', sortable: true },
+    { Header: creation_date, accessor: 'created_at', sortable: true },
+    { Header: actions, accessor: 'actions', sortable: false }
   ];
 
   let selectedClient: any = null;
@@ -180,11 +235,11 @@
       name: `${client.user.first_name} ${client.user.last_name}`,
       email: client.user.email,
       onboarding: client.onboarding
-        ? `<span class="badge badge-success">Validé</span>`
-        : `<span class="badge badge-error">Non validé</span>`,
+        ? `<span class="badge badge-success">${to_validate}</span>`
+        : `<span class="badge badge-error">${none_validated}</span>`,
       created_at: formatDate(client.created_at),
       actions: [
-        { label: 'Supprimer', class: 'btn btn-error' }
+        { label: cancel, class: 'btn btn-error' }
       ]
     }));
 
@@ -192,7 +247,7 @@
   });
 
   function handleClientAction(action: string, row: any) {
-    if (action === 'Supprimer') {
+    if (action === cancel) {
       selectedClient = row;
       showModalClientDelete = true;
     }
@@ -221,21 +276,21 @@
   // Delivery Persons
 
   const statusOptions = [
-    { value: 'pending', label: 'En attente' },
-    { value: 'approved', label: 'Validé' },
-    { value: 'rejected', label: 'Rejeté' }
+    { value: 'pending', label: pending },
+    { value: 'approved', label: to_validate },
+    { value: 'rejected', label: rejected }
   ];
 
   let deliveryPersonsData: any[] = [];
   let deliveryPersonsColumns = [
-    { Header: 'Nom', accessor: 'name', sortable: true },
-    { Header: 'Email', accessor: 'email', sortable: true },
-    { Header: 'Statut', accessor: 'status', sortable: true },
-    { Header: 'Carte d\'identité', accessor: 'identity_card_document', sortable: false },
-    { Header: 'Permis de conduire', accessor: 'driver_license_document', sortable: false },
-    { Header: 'RIB', accessor: 'bank_account', sortable: false },
-    { Header: 'Créé le', accessor: 'created_at', sortable: true },
-    { Header: 'Actions', accessor: 'actions', sortable: false }
+    { Header: user_name, accessor: 'name', sortable: true },
+    { Header: user_email, accessor: 'email', sortable: true },
+    { Header: status, accessor: 'status', sortable: true },
+    { Header: card_id, accessor: 'identity_card_document', sortable: false },
+    { Header: driving_license, accessor: 'driver_license_document', sortable: false },
+    { Header: RIB, accessor: 'bank_account', sortable: false },
+    { Header: create_it, accessor: 'created_at', sortable: true },
+    { Header: actions, accessor: 'actions', sortable: false }
   ];
 
   let loadingDeliveryPersons = true;
@@ -261,8 +316,8 @@
       bank_account: dp.bank_account,
       created_at: formatDate(dp.created_at),
       actions: [
-        { label: 'Modifier', class: 'btn btn-warning' },
-        { label: 'Supprimer', class: 'btn btn-error' }
+        { label: modify, class: 'btn btn-warning' },
+        { label: cancel, class: 'btn btn-error' }
       ]
     }));
 
@@ -270,11 +325,11 @@
   });
 
   function handleDeliveryAction(action: string, row: any) {
-    if (action === 'Modifier') {
+    if (action === modify) {
       selectedDelivery = row;
       editedDelivery = { ...row, status: row.raw_status || 'pending' };
       showModalDeliveryEdit = true;
-    } else if (action === 'Supprimer') {
+    } else if (action === cancel) {
       selectedDelivery = row;
       showModalDeliveryDelete = true;
     }
@@ -286,14 +341,14 @@
 
   let tradersData: any[] = [];
   let tradersColumns = [
-    { Header: 'Nom', accessor: 'name', sortable: true },
-    { Header: 'Email', accessor: 'email', sortable: true },
-    { Header: 'Statut', accessor: 'status', sortable: true },
-    { Header: 'Carte d\'identité', accessor: 'identity_card_document', sortable: false },
-    { Header: 'Justificatif d\'activité', accessor: 'proof_of_business_document', sortable: false },
-    { Header: 'RIB', accessor: 'bank_account', sortable: false },
-    { Header: 'Créé le', accessor: 'created_at', sortable: true },
-    { Header: 'Actions', accessor: 'actions', sortable: false }
+    { Header: user_name, accessor: 'name', sortable: true },
+    { Header: user_name, accessor: 'email', sortable: true },
+    { Header: status, accessor: 'status', sortable: true },
+    { Header: card_id, accessor: 'identity_card_document', sortable: false },
+    { Header: proof_of_activity, accessor: 'proof_of_business_document', sortable: false },
+    { Header: RIB, accessor: 'bank_account', sortable: false },
+    { Header: create_it, accessor: 'created_at', sortable: true },
+    { Header: actions, accessor: 'actions', sortable: false }
   ];
 
   let loadingTraders = true;
@@ -319,8 +374,8 @@
       bank_account: trader.bank_account,
       created_at: formatDate(trader.created_at),
       actions: [
-        { label: 'Modifier', class: 'btn btn-warning' },
-        { label: 'Supprimer', class: 'btn btn-error' }
+        { label: modify, class: 'btn btn-warning' },
+        { label: cancel, class: 'btn btn-error' }
       ]
     }));
 
@@ -328,11 +383,11 @@
   });
 
   function handleTraderAction(action: string, row: any) {
-    if (action === 'Modifier') {
+    if (action === modify) {
       selectedTrader = row;
       editedTrader = { ...row, status: row.raw_status || 'pending' };
       showModalTraderEdit = true;
-    } else if (action === 'Supprimer') {
+    } else if (action === cancel) {
       selectedTrader = row;
       showModalTraderDelete = true;
     }
@@ -420,15 +475,15 @@
   let showModalProviderDelete = false;
 
   let providersColumns = [
-    { Header: 'Nom', accessor: 'name', sortable: true },
-    { Header: 'Email', accessor: 'email', sortable: true },
-    { Header: 'Statut', accessor: 'status', sortable: true },
-    { Header: 'Carte d\'identité', accessor: 'identity_card_document', sortable: false },
-    { Header: 'Justificatif d\'activité', accessor: 'proof_of_business_document', sortable: false },
-    { Header: 'Documents de certification', accessor: 'certification_documents', sortable: false },
-    { Header: 'RIB', accessor: 'bank_account', sortable: false },
-    { Header: 'Créé le', accessor: 'created_at', sortable: true },
-    { Header: 'Actions', accessor: 'actions', sortable: false }
+    { Header: user_name, accessor: 'name', sortable: true },
+    { Header: user_name, accessor: 'email', sortable: true },
+    { Header: status, accessor: 'status', sortable: true },
+    { Header: card_id, accessor: 'identity_card_document', sortable: false },
+    { Header: proof_of_activity, accessor: 'proof_of_business_document', sortable: false },
+    { Header: certification_document, accessor: 'certification_documents', sortable: false },
+    { Header: RIB, accessor: 'bank_account', sortable: false },
+    { Header: create_it, accessor: 'created_at', sortable: true },
+    { Header: actions, accessor: 'actions', sortable: false }
   ];
 
   onMount(async () => {
@@ -451,8 +506,8 @@
       bank_account: p.bank_account,
       created_at: formatDate(p.created_at),
       actions: [
-        { label: 'Modifier', class: 'btn btn-warning' },
-        { label: 'Supprimer', class: 'btn btn-error' }
+        { label: modify, class: 'btn btn-warning' },
+        { label: cancel, class: 'btn btn-error' }
       ]
     }));
 
@@ -460,11 +515,11 @@
   });
 
   function handleProviderAction(action: string, row: any) {
-    if (action === 'Modifier') {
+    if (action === modify) {
       selectedProvider = row;
       editedProvider = { ...row, status: row.raw_status || 'pending' };
       showModalProviderEdit = true;
-    } else if (action === 'Supprimer') {
+    } else if (action === cancel) {
       selectedProvider = row;
       showModalProviderDelete = true;
     }
@@ -511,7 +566,7 @@
 <div class="p-6 min-h-screen">
 
 <!-- Utilisateurs -->
-<h1 class="text-2xl mt-10 mb-5 font-medium">Utilisateurs</h1>
+<h1 class="text-2xl mt-10 mb-5 font-medium">{$users_title}</h1>
 
 {#if loadingUsers}
   <div class="fixed inset-0 flex items-center justify-center bg-white z-50">
@@ -521,10 +576,10 @@
   <Table {columns} {data} pageSize={5} onAction={handleAction} />
 {/if}
 
-<h1 class="text-2xl mt-10 mb-5 font-medium">Profiles</h1>
+<h1 class="text-2xl mt-10 mb-5 font-medium">{$profiles_title}</h1>
 
 <!-- Clients -->
-<h2 class="text-xl mt-5 mb-2 font-medium">Clients</h2>
+<h2 class="text-xl mt-5 mb-2 font-medium">{$clients_title}</h2>
 
 {#if loadingClients}
   <div class="fixed inset-0 flex items-center justify-center bg-white z-50">
@@ -534,7 +589,7 @@
   <Table columns={clientsColumns} data={clientsData} pageSize={5} onAction={handleClientAction} />
 {/if}
 
-<h2 class="text-xl mt-5 mb-2 font-medium">Livreurs</h2>
+<h2 class="text-xl mt-5 mb-2 font-medium">{$delivery_persons_title}</h2>
 
 <!-- Delivery Persons -->
 {#if loadingDeliveryPersons}
@@ -545,7 +600,7 @@
   <Table columns={deliveryPersonsColumns} data={deliveryPersonsData} pageSize={5} onAction={handleDeliveryAction} />
 {/if}
 
-<h2 class="text-xl mt-5 mb-2 font-medium">Commerçants</h2>
+<h2 class="text-xl mt-5 mb-2 font-medium">{$traders_title}</h2>
 
 {#if loadingTraders}
   <div class="fixed inset-0 flex items-center justify-center bg-white z-50">
@@ -562,18 +617,18 @@
 {#if showModalEdit}
   <div class="modal modal-open">
     <div class="modal-box">
-      <h2 class="text-center text-xl font-semibold mb-5">Modifier l'utilisateur</h2>
+      <h2 class="text-center text-xl font-semibold mb-5">{$user_modify}</h2>
       {#if editedUser}
-        <fieldset class="fieldset"><legend>Prénom</legend><input class="input input-bordered" bind:value={editedUser.first_name} /></fieldset>
-        <fieldset class="fieldset"><legend>Nom</legend><input class="input input-bordered" bind:value={editedUser.last_name} /></fieldset>
-        <fieldset class="fieldset"><legend>Email</legend><input class="input input-bordered" bind:value={editedUser.email} /></fieldset>
-        <fieldset class="fieldset"><legend>Actif</legend><input type="checkbox" class="checkbox" checked={editedUser.active} on:change={() => editedUser.active = !editedUser.active} /></fieldset>
-        <fieldset class="fieldset"><legend>Vérifié</legend><input type="checkbox" class="checkbox" checked={editedUser.verified} on:change={() => editedUser.verified = !editedUser.verified} /></fieldset>
-        <fieldset class="fieldset"><legend>Administrateur</legend><input type="checkbox" class="checkbox" checked={editedUser.administrator} on:change={() => editedUser.administrator = !editedUser.administrator} /></fieldset>
+        <fieldset class="fieldset"><legend>{$user_first_name}</legend><input class="input input-bordered" bind:value={editedUser.first_name} /></fieldset>
+        <fieldset class="fieldset"><legend>{user_name}</legend><input class="input input-bordered" bind:value={editedUser.last_name} /></fieldset>
+        <fieldset class="fieldset"><legend>{user_email}</legend><input class="input input-bordered" bind:value={editedUser.email} /></fieldset>
+        <fieldset class="fieldset"><legend>{active}</legend><input type="checkbox" class="checkbox" checked={editedUser.active} on:change={() => editedUser.active = !editedUser.active} /></fieldset>
+        <fieldset class="fieldset"><legend>{$verify}</legend><input type="checkbox" class="checkbox" checked={editedUser.verified} on:change={() => editedUser.verified = !editedUser.verified} /></fieldset>
+        <fieldset class="fieldset"><legend>{$administrator}</legend><input type="checkbox" class="checkbox" checked={editedUser.administrator} on:change={() => editedUser.administrator = !editedUser.administrator} /></fieldset>
       {/if}
       <div class="modal-action">
-        <button class="btn btn-primary" on:click={modifyUser}>Enregistrer</button>
-        <button class="btn" on:click={closeModals}>Fermer</button>
+        <button class="btn btn-primary" on:click={modifyUser}>{$record_button}</button>
+        <button class="btn" on:click={closeModals}>{$close_button}</button>
       </div>
     </div>
   </div>
@@ -583,13 +638,13 @@
 {#if showModalUserDelete}
   <div class="modal modal-open">
     <div class="modal-box">
-      <h2 class="text-center text-xl font-semibold mb-5">Supprimer l'utilisateur</h2>
+      <h2 class="text-center text-xl font-semibold mb-5">{$user_delete}</h2>
       {#if selectedUser}
-        <p class="text-center">Êtes-vous sûr de vouloir supprimer <strong>{selectedUser.name}</strong> ?</p>
+        <p class="text-center">{$delete_confirmation}</p>
       {/if}
       <div class="modal-action">
-        <button class="btn btn-error" on:click={deleteUser}>Supprimer</button>
-        <button class="btn" on:click={closeModals}>Annuler</button>
+        <button class="btn btn-error" on:click={deleteUser}>{cancel}</button>
+        <button class="btn" on:click={closeModals}>{$cancel_delete}</button>
       </div>
     </div>
   </div>
@@ -599,13 +654,13 @@
 {#if showModalClientDelete}
   <div class="modal modal-open">
     <div class="modal-box">
-      <h2 class="text-center text-xl font-semibold mb-5">Supprimer le client</h2>
+      <h2 class="text-center text-xl font-semibold mb-5">{$client_delete}</h2>
       {#if selectedClient}
-        <p class="text-center">Êtes-vous sûr de vouloir supprimer <strong>{selectedClient.name}</strong> ?</p>
+        <p class="text-center">{$delete_confirmation}<strong>{selectedClient.name}</strong> ?</p>
       {/if}
       <div class="modal-action">
-        <button class="btn btn-error" on:click={deleteClient}>Supprimer</button>
-        <button class="btn" on:click={closeModals}>Annuler</button>
+        <button class="btn btn-error" on:click={deleteClient}>{cancel}</button>
+        <button class="btn" on:click={closeModals}>{$cancel_delete}</button>
       </div>
     </div>
   </div>
@@ -614,8 +669,8 @@
 {#if showModalDeliveryEdit}
   <div class="modal modal-open">
     <div class="modal-box">
-      <h2 class="text-center text-xl font-semibold mb-5">Modifier le statut du livreur</h2>
-      <label class="label" for="delivery-status">Statut</label>
+      <h2 class="text-center text-xl font-semibold mb-5">{delivery_status_modify}</h2>
+      <label class="label" for="delivery-status">{status}</label>
       <select
       id="delivery-status"
       class="select select-bordered w-full"
@@ -626,8 +681,8 @@
       {/each}
     </select>
       <div class="modal-action">
-        <button class="btn btn-primary" on:click={modifyDelivery}>Enregistrer</button>
-        <button class="btn" on:click={closeModals}>Fermer</button>
+        <button class="btn btn-primary" on:click={modifyDelivery}>{$record_button}</button>
+        <button class="btn" on:click={closeModals}>{$close_button}</button>
       </div>
     </div>
   </div>
@@ -637,13 +692,13 @@
 {#if showModalDeliveryDelete}
   <div class="modal modal-open">
     <div class="modal-box">
-      <h2 class="text-center text-xl font-semibold mb-5">Supprimer le livreur</h2>
+      <h2 class="text-center text-xl font-semibold mb-5">{$delivery_delete}</h2>
       {#if selectedDelivery}
-        <p class="text-center">Êtes-vous sûr de vouloir supprimer <strong>{selectedDelivery.name}</strong> ?</p>
+        <p class="text-center">{$delete_confirmation}<strong>{selectedDelivery.name}</strong> ?</p>
       {/if}
       <div class="modal-action">
-        <button class="btn btn-error" on:click={deleteDelivery}>Supprimer</button>
-        <button class="btn" on:click={closeModals}>Annuler</button>
+        <button class="btn btn-error" on:click={deleteDelivery}>{cancel}</button>
+        <button class="btn" on:click={closeModals}>{$cancel_delete}</button>
       </div>
     </div>
   </div>
@@ -652,8 +707,8 @@
 {#if showModalTraderEdit}
   <div class="modal modal-open">
     <div class="modal-box">
-      <h2 class="text-center text-xl font-semibold mb-5">Modifier le statut du commerçant</h2>
-      <label class="label" for="trader-status">Statut</label>
+      <h2 class="text-center text-xl font-semibold mb-5">{$trader_status_modify}</h2>
+      <label class="label" for="trader-status">{status}</label>
       <select
       id="trader-status"
       class="select select-bordered w-full"
@@ -665,8 +720,8 @@
     </select>
     
       <div class="modal-action">
-        <button class="btn btn-primary" on:click={modifyTrader}>Enregistrer</button>
-        <button class="btn" on:click={closeModals}>Fermer</button>
+        <button class="btn btn-primary" on:click={modifyTrader}>{$record_button}</button>
+        <button class="btn" on:click={closeModals}>{$close_button}</button>
       </div>
     </div>
   </div>
@@ -675,19 +730,19 @@
 {#if showModalTraderDelete}
   <div class="modal modal-open">
     <div class="modal-box">
-      <h2 class="text-center text-xl font-semibold mb-5">Supprimer le commerçant</h2>
+      <h2 class="text-center text-xl font-semibold mb-5">{$trader_delete}</h2>
       {#if selectedTrader}
-        <p class="text-center">Êtes-vous sûr de vouloir supprimer <strong>{selectedTrader.name}</strong> ?</p>
+        <p class="text-center">{$delete_confirmation}<strong>{selectedTrader.name}</strong> ?</p>
       {/if}
       <div class="modal-action">
-        <button class="btn btn-error" on:click={deleteTrader}>Supprimer</button>
-        <button class="btn" on:click={closeModals}>Annuler</button>
+        <button class="btn btn-error" on:click={deleteTrader}>{cancel}</button>
+        <button class="btn" on:click={closeModals}>{$cancel_delete}</button>
       </div>
     </div>
   </div>
 {/if}
 
-<h2 class="text-xl mt-5 mb-2 font-medium">Prestataire</h2>
+<h2 class="text-xl mt-5 mb-2 font-medium">{$providers_title}</h2>
 
 {#if loadingProviders}
   <div class="fixed inset-0 flex items-center justify-center bg-white z-50">
@@ -700,8 +755,8 @@
 {#if showModalProviderEdit}
   <div class="modal modal-open">
     <div class="modal-box">
-      <h2 class="text-center text-xl font-semibold mb-5">Modifier le statut du prestataire</h2>
-      <label class="label" for="provider-status">Statut</label>
+      <h2 class="text-center text-xl font-semibold mb-5">{$provider_status_modify}</h2>
+      <label class="label" for="provider-status">{status}</label>
       <select
         id="provider-status"
         class="select select-bordered w-full"
@@ -712,8 +767,8 @@
         {/each}
       </select>
       <div class="modal-action">
-        <button class="btn btn-primary" on:click={modifyProvider}>Enregistrer</button>
-        <button class="btn" on:click={closeModals}>Fermer</button>
+        <button class="btn btn-primary" on:click={modifyProvider}>{$record_button}</button>
+        <button class="btn" on:click={closeModals}>{$close_button}</button>
       </div>
     </div>
   </div>
@@ -722,13 +777,13 @@
 {#if showModalProviderDelete}
   <div class="modal modal-open">
     <div class="modal-box">
-      <h2 class="text-center text-xl font-semibold mb-5">Supprimer le fournisseur</h2>
+      <h2 class="text-center text-xl font-semibold mb-5">{$supplier_delete}</h2>
       {#if selectedProvider}
-        <p class="text-center">Êtes-vous sûr de vouloir supprimer <strong>{selectedProvider.name}</strong> ?</p>
+        <p class="text-center">{$delete_confirmation}<strong>{selectedProvider.name}</strong> ?</p>
       {/if}
       <div class="modal-action">
-        <button class="btn btn-error" on:click={deleteProvider}>Supprimer</button>
-        <button class="btn" on:click={closeModals}>Annuler</button>
+        <button class="btn btn-error" on:click={deleteProvider}>{cancel}</button>
+        <button class="btn" on:click={closeModals}>{$cancel_delete}</button>
       </div>
     </div>
   </div>

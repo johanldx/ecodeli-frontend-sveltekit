@@ -3,11 +3,16 @@
 	import GuardWrapper from '$lib/components/GuardWrapper.svelte';
 	import Notifications from '$lib/components/Notifications.svelte';
   import '../../app.css';
+  import { t, tStatic } from '$lib/utils/t';
+
+const users_title = tStatic('admin.global.users_title');
+const addresses_title = tStatic('admin.global.addresses_title');
+
   let { children } = $props();
 
   const pages = [
-    { name: "Utilisateurs", url: "/admin/users" },
-    { name: "Adresses", url: "/admin/addresses" },
+    { name: users_title, url: "/admin/users" },
+    { name: addresses_title, url: "/admin/addresses" },
   ];
 </script>
 

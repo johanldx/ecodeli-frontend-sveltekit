@@ -1,10 +1,17 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
+  import { t, tStatic } from '$lib/utils/t';
 
   export let columns: { Header: string, accessor: string, sortable?: boolean, hidden?: boolean }[] = [];
   export let data: any[] = []; // Assurez-vous que `data` est correctement initialisé avant d'être utilisé
   export let pageSize: number = 5;
   export let onAction: (action: string, row: any) => void; // Event for button actions
+
+  // constantes des traductions
+  const next = t('admin.users.next');
+  const previous = t('admin.users.previous');
+  const page = t('admin.users.page');
+  const on = tStatic('admin.users.on');
 
   // Pagination
   let currentPage = 0;
@@ -155,11 +162,11 @@
       on:click={() => updatePage(currentPage - 1)}
       disabled={currentPage === 0}
     >
-      Précédent
+      {$previous}
     </button>
 
     <span>
-      Page {currentPage + 1} sur {totalPages}
+      {$page} {currentPage + 1} ${on} {totalPages}
     </span>
 
     <button
@@ -167,7 +174,7 @@
       on:click={() => updatePage(currentPage + 1)}
       disabled={currentPage === totalPages - 1}
     >
-      Suivant
+      {$next}
     </button>
   </div>
 </div>
