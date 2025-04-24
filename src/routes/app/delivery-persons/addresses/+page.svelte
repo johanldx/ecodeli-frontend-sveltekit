@@ -1,10 +1,14 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { get } from 'svelte/store';
   import { fetchFromAPI } from '$lib/utils/api';
   import { accessToken } from '$lib/stores/token';
   import { notifications } from '$lib/stores/notifications';
   import { t } from '$lib/utils/t';
+
+  import { onDestroy, onMount } from 'svelte';
+	import { tabTitle } from '$lib/utils/tabTitle';
+
+onMount(() => onDestroy(tabTitle('app.clients.addresses')));
 
   type Address = {
     id: number;

@@ -1,12 +1,17 @@
 <script lang="ts">
 
 import { t } from '$lib/utils/t';
+	import { tabTitle } from '$lib/utils/tabTitle';
 const title = t('app.delivery.my_planned_trips.title');
 const departure = t('app.delivery.my_planned_trips.departure');
 const arrival = t('app.delivery.my_planned_trips.arrival');
 const date = t('app.delivery.my_planned_trips.date');
 const modify = t('app.delivery.my_planned_trips.modify');
 const cancel = t('app.delivery.my_planned_trips.cancel');
+
+import { onDestroy, onMount } from 'svelte';
+
+onMount(() => onDestroy(tabTitle('app.delivery.my_planned_trips')));
 
 
   // Définition de l'interface pour un trajet

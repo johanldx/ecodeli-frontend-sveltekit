@@ -1,12 +1,17 @@
 <script lang="ts">
 
 import { t } from '$lib/utils/t';
+	import { tabTitle } from '$lib/utils/tabTitle';
 const all_services = t('app.delivery.announce.all_services');
 const delivery = t('app.delivery.announce.delivery');
 const transport = t('app.delivery.announce.transport');
 const city = t('app.delivery.announce.city');
 const contact = t('app.delivery.announce.contact');
 const details = t('app.delivery.announce.details');
+
+import { onDestroy, onMount } from 'svelte';
+
+onMount(() => onDestroy(tabTitle('app.clients.discover')));
 
     interface Service {
       id: number;
