@@ -6,6 +6,8 @@
 	import { fetchFromAPI } from "$lib/utils/api";
 	import { notifications } from "$lib/stores/notifications";
 
+onMount(() => onDestroy(tabTitle('admin.global')));
+
     let editorRef: any;
 	const langs = writable<string[]>([]);
 	const selectedLang = writable<string>('fr');

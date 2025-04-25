@@ -2,6 +2,10 @@
   
 
   import { t } from '$lib/utils/t';
+	import { tabTitle } from '$lib/utils/tabTitle';
+  import { onDestroy, onMount } from 'svelte';
+
+onMount(() => onDestroy(tabTitle('app.traders.account')));
 
 const title = t('app.traders.account.title');
 const manage_my_documents = t('app.traders.account.manage_my_documents');
@@ -14,6 +18,8 @@ const pricing_title = t('app.traders.pricing.title');
 const customer_service = t('app.traders.pricing.title');
 const customer_contact = t('app.traders.pricing.customer_contact');
 const invoice_title = t('app.traders.invoice.title');
+
+
 
 
   function handleManageDocuments() {

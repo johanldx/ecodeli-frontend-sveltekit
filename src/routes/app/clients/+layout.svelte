@@ -4,6 +4,10 @@
   import Notifications from '$lib/components/Notifications.svelte';
   import { t } from '$lib/utils/t';
   import { derived, type Readable } from 'svelte/store';
+  import { onDestroy, onMount } from 'svelte';
+	import { tabTitle } from '$lib/utils/tabTitle';
+
+onMount(() => onDestroy(tabTitle('app.clients.new-ads')));
 
   let { children } = $props();
 

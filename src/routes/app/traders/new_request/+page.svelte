@@ -1,6 +1,10 @@
 <script lang="ts">
 
 import { t } from '$lib/utils/t';
+	import { tabTitle } from '$lib/utils/tabTitle';
+import { onDestroy, onMount } from 'svelte';
+
+onMount(() => onDestroy(tabTitle('app.traders.new_request')));
 
 const titles = t('app.traders.new_request.title');
 const add = t('app.traders.new_request.add');

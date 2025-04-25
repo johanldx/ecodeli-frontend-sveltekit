@@ -4,8 +4,11 @@
 	import { user } from '$lib/stores/user';
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { t } from '$lib/utils/t';
-	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
+	import { onDestroy, onMount } from 'svelte';
+	import { tabTitle } from '$lib/utils/tabTitle';
+
+onMount(() => onDestroy(tabTitle('app.clients.ads')));
 
   function waitUntil(conditionFn: () => boolean, interval = 50): Promise<void> {
 		return new Promise((resolve) => {

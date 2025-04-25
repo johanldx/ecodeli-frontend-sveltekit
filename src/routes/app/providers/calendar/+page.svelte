@@ -2,6 +2,10 @@
   import { onMount } from 'svelte';
   import { t } from '$lib/utils/t';
   import { get } from 'svelte/store';
+  import { onDestroy} from 'svelte';
+	import { tabTitle } from '$lib/utils/tabTitle';
+
+onMount(() => onDestroy(tabTitle('app.providers.calendar')));
 
   // Traductions
   const add = t('app.providers.calendar.add');

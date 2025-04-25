@@ -1,6 +1,11 @@
 <script lang="ts">
     import '../../../../app.css';
     import { t } from '$lib/utils/t';
+    import { onDestroy, onMount } from 'svelte';
+	import { tabTitle } from '$lib/utils/tabTitle';
+
+onMount(() => onDestroy(tabTitle('app.delivery.account')));
+
 
     const title = t('app.delivery.account.title');
     const manage_supporting_documents = t('app.delivery.account.manage_supporting_documents');

@@ -1,6 +1,7 @@
 <script>
 
 import { t } from '$lib/utils/t';
+import { tabTitle } from '$lib/utils/tabTitle';
 
 const all_services = t('app.clients.discover.all_services');
 const taxi = t('app.clients.discover.taxi');
@@ -9,6 +10,9 @@ const childcare = t('app.clients.discover.childcare');
 const professional_service_provider = t('app.clients.discover.professional_service_provider');
 const contact = t('app.clients.discover.contact');
 const details = t('app.clients.discover.details');
+import { onDestroy, onMount } from 'svelte';
+
+onMount(() => onDestroy(tabTitle('app.clients.discover')));
 
   let services = [
     { id: 1, category: "Taxi", title: "Transport à l’aéroport", price: 62, description: "Nous transportons de 1 à 4 personnes depuis toute l'IDF vers CDG et Orly.", image: "/taxi.jpg" },

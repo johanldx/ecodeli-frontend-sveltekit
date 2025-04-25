@@ -5,6 +5,10 @@
   import { accessToken } from '$lib/stores/token';
   import { notifications } from '$lib/stores/notifications';
   import { t } from '$lib/utils/t';
+  import { onDestroy} from 'svelte';
+	import { tabTitle } from '$lib/utils/tabTitle';
+
+onMount(() => onDestroy(tabTitle('app.traders.addresses')));
 
   type Address = {
     id: number;

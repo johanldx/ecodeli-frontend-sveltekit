@@ -1,5 +1,10 @@
 <script lang="ts">
   import { t } from '$lib/utils/t';
+	import { tabTitle } from '$lib/utils/tabTitle';
+	import { onDestroy, onMount } from 'svelte';
+
+
+  onMount(() => onDestroy(tabTitle('app.clients.account')));
 
   let ibanInput: HTMLInputElement; // Référence directe à l'input
 
