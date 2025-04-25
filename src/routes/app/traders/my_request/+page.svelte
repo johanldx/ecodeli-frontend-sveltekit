@@ -1,12 +1,16 @@
 <script lang="ts">
 
 import { t } from '$lib/utils/t';
+	import { tabTitle } from '$lib/utils/tabTitle';
 
 const title = t('app.traders.my_requests.title');
 const modify = t('app.traders.my_requests.modify');
 const details = t('app.traders.my_requests.details');
 const cancel = t('app.traders.my_requests.cancel');
 const add_new_announce = t('app.traders.my_requests.add_new_announce');
+import { onDestroy, onMount } from 'svelte';
+
+onMount(() => onDestroy(tabTitle('app.traders.my_requests')));
   
     const announcements = [
       {
