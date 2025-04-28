@@ -10,7 +10,7 @@
 	import { accessToken } from '$lib/stores/token';
 	import { user, type User } from '$lib/stores/user';
 	import { profileIds } from '$lib/stores/profiles';
-	
+
 	function waitUntil(conditionFn: () => boolean, interval = 50): Promise<void> {
 		return new Promise((resolve) => {
 			const check = () => {
@@ -32,10 +32,9 @@
 		namespace = $page.params.namespace;
 
 		await waitUntil(() => !!get(user) && !!get(accessToken));
-		
+
 		const currentUser = get(user)!;
 		const token = get(accessToken)!;
-
 
 		if (!VALID_NAMESPACES.includes(namespace)) {
 			goto('/auth/space');
@@ -46,7 +45,7 @@
 			if (namespace === 'clients') {
 				const res = await fetchFromAPI<any>('/auth/me/clients', {
 					method: 'GET',
-					headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+					headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
 				});
 
 				profileIds.update((ids) => ({ ...ids, clientId: res.id }));
@@ -58,7 +57,7 @@
 			} else {
 				const data = await fetchFromAPI<any>(`/auth/me/${namespace}`, {
 					method: 'GET',
-					headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+					headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
 				});
 
 				status = data.status;
@@ -124,9 +123,7 @@
 				traders: profiles.traderId
 			}[namespace];
 
-			const endpoint = isRejected
-				? `/${namespace}/${profileId}`
-				: `/${namespace}`;
+			const endpoint = isRejected ? `/${namespace}/${profileId}` : `/${namespace}`;
 
 			const form = new FormData();
 			form.append('user_id', String(currentUser.id));
@@ -169,7 +166,6 @@
 				console.log(pair[0], pair[1]);
 			}
 
-
 			await fetchFromAPI(endpoint, {
 				method,
 				headers: {
@@ -189,11 +185,11 @@
 	let files = writable<File[]>([]);
 
 	const handleFileChange = (event: Event) => {
-    const input = event.target as HTMLInputElement;
+		const input = event.target as HTMLInputElement;
 		if (input?.files) {
-		files.set(Array.from(input.files));
+			files.set(Array.from(input.files));
 		}
-  	};
+	};
 
 	const title = t(`auth.space_validation.${$page.params.namespace}.title`);
 	const subtitle = t(`auth.space_validation.${$page.params.namespace}.subtitle`);
@@ -212,24 +208,24 @@
 
 <GuardWrapper>
 	{#if loading}
-		<div class="fixed inset-0 flex items-center justify-center bg-neutral z-50">
+		<div class="bg-neutral fixed inset-0 z-50 flex items-center justify-center">
 			<span class="loading loading-spinner loading-lg text-primary"></span>
 		</div>
-
 	{:else if status === 'pending'}
-		<div class="text-center p-4 max-w-lg mx-auto">
-			<img src="/images/logo/ecodeli-icon-light.png" class="m-auto h-5 w-auto mb-4" alt="">
-			<h1 class="mb-6 mt-10 text-2xl font-bold">{$pending_title}</h1>
+		<div class="mx-auto max-w-lg p-4 text-center">
+			<img src="/images/logo/ecodeli-icon-light.png" class="m-auto mb-4 h-5 w-auto" alt="" />
+			<h1 class="mt-10 mb-6 text-2xl font-bold">{$pending_title}</h1>
 			<p>{$pending_subtitle}</p>
 			<a class="btn btn-primary mt-10" href="/auth/space">{$pending_back_link}</a>
 		</div>
-
 	{:else}
-		<div class="text-center p-4 max-w-lg mx-auto">
-			<a href="/auth/space"><img src="/images/logo/ecodeli-icon-light.png" class="m-auto h-5 w-auto mb-4" alt=""></a>
-			<h1 class="text-2xl font-bold mb-6 mt-10">{$title}</h1>
+		<div class="mx-auto max-w-lg p-4 text-center">
+			<a href="/auth/space"
+				><img src="/images/logo/ecodeli-icon-light.png" class="m-auto mb-4 h-5 w-auto" alt="" /></a
+			>
+			<h1 class="mt-10 mb-6 text-2xl font-bold">{$title}</h1>
 			{#if status === 'rejected'}
-				<div class="border border-error bg-error/10 text-error p-4 rounded-lg mb-4">
+				<div class="border-error bg-error/10 text-error mb-4 rounded-lg border p-4">
 					<p class="font-medium">{$rejected}</p>
 				</div>
 			{/if}
@@ -237,38 +233,41 @@
 
 			<form class="space-y-4" on:submit|preventDefault={handleSubmit}>
 				{#if namespace === 'clients'}
-					<iframe class="w-full aspect-video mx-auto rounded-xl shadow-md"
+					<iframe
+						class="mx-auto aspect-video w-full rounded-xl shadow-md"
 						src="https://www.youtube.com/embed/MV_3Dpw-BRY?si=5TAQ3lDVCYVfbG7G&amp;controls=0"
-						title="Vidéo d'onboarding" frameborder="0" allowfullscreen></iframe>
-
+						title="Vidéo d'onboarding"
+						frameborder="0"
+						allowfullscreen
+					></iframe>
 				{:else if namespace === 'providers'}
-					<label class="form-control w-full my-5 block">
+					<label class="form-control my-5 block w-full">
 						<div class="label">
-						<span class="label-text">Nom du fournisseur</span>
+							<span class="label-text">Nom du fournisseur</span>
 						</div>
 						<input
-						type="text"
-						class="input w-full"
-						placeholder="Nom du fournisseur"
-						bind:value={formData.name}
-						required
+							type="text"
+							class="input w-full"
+							placeholder="Nom du fournisseur"
+							bind:value={formData.name}
+							required
 						/>
-					</label>				  
+					</label>
 
-					<label class="form-control w-full my-5 block">
+					<label class="form-control my-5 block w-full">
 						<div class="label">
 							<span class="label-text">{$form_input_1}</span>
 						</div>
 						<input
 							type="text"
 							class="input w-full"
-							placeholder="{$form_input_1}"
+							placeholder={$form_input_1}
 							bind:value={formData.bank_account}
 							required
 						/>
 					</label>
-				
-					<label class="form-control w-full my-5 block">
+
+					<label class="form-control my-5 block w-full">
 						<div class="label">
 							<span class="label-text">{$form_input_2}</span>
 						</div>
@@ -281,12 +280,12 @@
 								if (input?.files?.[0]) {
 									formData.identity_card_document = input.files[0];
 								}
-							}}	
+							}}
 							required
 						/>
 					</label>
 
-					<label class="form-control w-full my-5 block">
+					<label class="form-control my-5 block w-full">
 						<div class="label">
 							<span class="label-text">{$form_input_3}</span>
 						</div>
@@ -299,12 +298,12 @@
 								if (input?.files?.[0]) {
 									formData.proof_of_business_document = input.files[0];
 								}
-							}}							
+							}}
 							required
 						/>
 					</label>
 
-					<label class="form-control w-full my-5 block">
+					<label class="form-control my-5 block w-full">
 						<div class="label">
 							<span class="label-text">{$form_input_4}</span>
 						</div>
@@ -316,22 +315,21 @@
 							required
 						/>
 					</label>
-
 				{:else if namespace === 'traders'}
-					<label class="form-control w-full my-5 block">
+					<label class="form-control my-5 block w-full">
 						<div class="label">
 							<span class="label-text">{$form_input_1}</span>
 						</div>
 						<input
 							type="text"
 							class="input w-full"
-							placeholder="{$form_input_1}"
+							placeholder={$form_input_1}
 							bind:value={formData.bank_account}
 							required
 						/>
 					</label>
-				
-					<label class="form-control w-full my-5 block">
+
+					<label class="form-control my-5 block w-full">
 						<div class="label">
 							<span class="label-text">{$form_input_2}</span>
 						</div>
@@ -344,12 +342,12 @@
 								if (input?.files?.[0]) {
 									formData.identity_card_document = input.files[0];
 								}
-							}}	
+							}}
 							required
 						/>
 					</label>
-				
-					<label class="form-control w-full my-5 block">
+
+					<label class="form-control my-5 block w-full">
 						<div class="label">
 							<span class="label-text">{$form_input_3}</span>
 						</div>
@@ -362,26 +360,25 @@
 								if (input?.files?.[0]) {
 									formData.proof_of_business_document = input.files[0];
 								}
-							}}							
+							}}
 							required
 						/>
 					</label>
-
-					{:else if namespace === 'delivery-persons'}
-					<label class="form-control w-full my-5 block">
+				{:else if namespace === 'delivery-persons'}
+					<label class="form-control my-5 block w-full">
 						<div class="label">
 							<span class="label-text">{$form_input_1}</span>
 						</div>
 						<input
 							type="text"
 							class="input w-full"
-							placeholder="{$form_input_1}"
+							placeholder={$form_input_1}
 							bind:value={formData.bank_account}
 							required
 						/>
 					</label>
-				
-					<label class="form-control w-full my-5 block">
+
+					<label class="form-control my-5 block w-full">
 						<div class="label">
 							<span class="label-text">{$form_input_2}</span>
 						</div>
@@ -394,12 +391,12 @@
 								if (input?.files?.[0]) {
 									formData.identity_card_document = input.files[0];
 								}
-							}}	
+							}}
 							required
 						/>
 					</label>
-				
-					<label class="form-control w-full my-5 block">
+
+					<label class="form-control my-5 block w-full">
 						<div class="label">
 							<span class="label-text">{$form_input_3}</span>
 						</div>
@@ -412,13 +409,13 @@
 								if (input?.files?.[0]) {
 									formData.driver_license_document = input.files[0];
 								}
-							}}							
+							}}
 							required
 						/>
 					</label>
 				{/if}
 
-				<input type="submit" class="btn btn-primary w-full mt-5" value={$button} />
+				<input type="submit" class="btn btn-primary mt-5 w-full" value={$button} />
 			</form>
 		</div>
 	{/if}

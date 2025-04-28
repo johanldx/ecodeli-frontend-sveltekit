@@ -9,8 +9,8 @@
 		const isLoggedIn = await checkAuth();
 
 		if (isLoggedIn) {
-            const message = tStatic('api_responses.auth.global.already_logged_in');
-            notifications.success(message);
+			const message = tStatic('api_responses.auth.global.already_logged_in');
+			notifications.success(message);
 			goto('/auth/space');
 		}
 	});
@@ -30,7 +30,12 @@
 
 	const handleRegister = async () => {
 		try {
-			const { access_token, refresh_token } = await register(email, password, first_name, last_name);
+			const { access_token, refresh_token } = await register(
+				email,
+				password,
+				first_name,
+				last_name
+			);
 
 			const message = tStatic('api_responses.auth.register.register_successful');
 			notifications.success(message);
@@ -43,30 +48,56 @@
 				const message = tStatic('api_responses.auth.register.user_already_exists');
 				notifications.error(message);
 			} else {
-				
 				const message = tStatic('api_responses.auth.global.unknown_error');
 				notifications.error(message);
 			}
 		}
 	};
-
 </script>
 
 <div class="text-center">
-	<a href="/"><img src="/images/logo/ecodeli-icon-light.png" class="m-auto h-5 w-auto" alt=""></a>
+	<a href="/"><img src="/images/logo/ecodeli-icon-light.png" class="m-auto h-5 w-auto" alt="" /></a>
 	<h1 class="mt-10 text-xl font-semibold">{$register_title}</h1>
 
 	<form on:submit|preventDefault={handleRegister} class="my-5 space-y-5">
 		<div class="flex flex-row gap-2">
-			<input type="text" id="first_name" bind:value={first_name} class="input flex-1" placeholder="{$register_first_name_placeholder}" required/>
-			<input type="text" id="last_name" bind:value={last_name} class="input flex-1" placeholder="{$register_last_name_placeholder}" required/>
+			<input
+				type="text"
+				id="first_name"
+				bind:value={first_name}
+				class="input flex-1"
+				placeholder={$register_first_name_placeholder}
+				required
+			/>
+			<input
+				type="text"
+				id="last_name"
+				bind:value={last_name}
+				class="input flex-1"
+				placeholder={$register_last_name_placeholder}
+				required
+			/>
 		</div>
 
-		<input type="email" id="email" bind:value={email} class="input w-full" placeholder="{$register_email_placeholder}" required/>
+		<input
+			type="email"
+			id="email"
+			bind:value={email}
+			class="input w-full"
+			placeholder={$register_email_placeholder}
+			required
+		/>
 
-		<input type="password" id="password" bind:value={password} class="input w-full" placeholder="{$register_password_placeholder}" required/>
+		<input
+			type="password"
+			id="password"
+			bind:value={password}
+			class="input w-full"
+			placeholder={$register_password_placeholder}
+			required
+		/>
 
-		<input type="submit" value="{$register_button}" class="btn btn-primary w-full" />
+		<input type="submit" value={$register_button} class="btn btn-primary w-full" />
 	</form>
 
 	<a href="/auth/login" class="">{$register_login_link}</a>

@@ -11,7 +11,7 @@
 </script>
 
 {#if loading}
-	<div class="fixed inset-0 flex items-center justify-center bg-white z-50">
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-white">
 		<span class="loading loading-spinner loading-lg text-primary"></span>
 	</div>
 {:else}

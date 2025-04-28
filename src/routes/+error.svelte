@@ -11,17 +11,17 @@
 	const reload = () => location.reload();
 </script>
 
-<div class="container mx-auto py-20 text-center min-h-[50vh]">
-    <h1 class="m-auto font-semibold text-3xl md:text-6xl md:w-2/3">{status}</h1>
-    <h2 class="text-sm md:text-xl mt-5">{$errorMessage}</h2>
+<div class="container mx-auto min-h-[50vh] py-20 text-center">
+	<h1 class="m-auto text-3xl font-semibold md:w-2/3 md:text-6xl">{status}</h1>
+	<h2 class="mt-5 text-sm md:text-xl">{$errorMessage}</h2>
 
-    {#if $errorActionHref === 'reload'}
-        <button on:click={reload} class="btn btn-primary font-normal mt-10">
-            {$errorActionLabel}
-        </button>
-    {:else}
-        <a href={$errorActionHref} class="btn btn-primary font-normal mt-10">
-            {$errorActionLabel}
-        </a>
-    {/if}
+	{#if $errorActionHref === 'reload'}
+		<button on:click={reload} class="btn btn-primary mt-10 font-normal">
+			{$errorActionLabel}
+		</button>
+	{:else}
+		<a href={$errorActionHref} class="btn btn-primary mt-10 font-normal">
+			{$errorActionLabel}
+		</a>
+	{/if}
 </div>

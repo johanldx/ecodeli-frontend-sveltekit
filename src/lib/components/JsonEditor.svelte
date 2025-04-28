@@ -36,6 +36,6 @@
 	});
 </script>
 
-<div class="border border-base-300 rounded overflow-hidden">
+<div class="border-base-300 overflow-hidden rounded border">
 	<div bind:this={editorContainer} class="h-128 w-full"></div>
 </div>

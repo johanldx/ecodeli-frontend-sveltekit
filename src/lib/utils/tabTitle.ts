@@ -5,9 +5,7 @@ export function tabTitle(path: string) {
 	document.title = originalTitle;
 
 	const handleVisibilityChange = () => {
-		document.title = document.hidden
-			? tStatic('landing.global.tab_message')
-			: originalTitle;
+		document.title = document.hidden ? tStatic('landing.global.tab_message') : originalTitle;
 	};
 
 	document.addEventListener('visibilitychange', handleVisibilityChange);

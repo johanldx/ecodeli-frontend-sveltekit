@@ -8,12 +8,12 @@
 </script>
 
 <TranslationProvider lang="fr">
-	<Notifications/>
+	<Notifications />
 	<div class="fixed top-4 right-4 z-50">
 		<LanguageSwitcher />
 	</div>
-	<div class="min-h-screen w-full flex items-center justify-center bg-base-content px-4">
-		<div class="card min-w-md bg-base-200 shadow-xl p-10">
+	<div class="bg-base-content flex min-h-screen w-full items-center justify-center px-4">
+		<div class="card bg-base-200 min-w-md p-10 shadow-xl">
 			{@render children()}
 		</div>
 	</div>
