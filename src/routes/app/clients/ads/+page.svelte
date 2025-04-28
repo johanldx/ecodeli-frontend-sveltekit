@@ -323,6 +323,44 @@
 	function removeDeliveryStep(index: number) {
 		form_delivery.steps.splice(index, 1);
 	}
+
+	// État pour la modale de suppression
+	let showDeleteModal = false;
+	let deleteType: 'shopping' | 'delivery' = 'shopping';
+	let deleteId: number | null = null;
+
+	// Ouvre la modale (à appeler depuis le bouton)
+	function openDeleteModal(type: 'shopping' | 'delivery', id: number) {
+		deleteType = type;
+		deleteId = id;
+		showDeleteModal = true;
+	}
+
+	// Annule la suppression
+	function cancelDelete() {
+		showDeleteModal = false;
+		deleteId = null;
+	}
+
+	// Confirme et lance la suppression
+	async function confirmDelete() {
+		if (deleteId === null) return;
+		try {
+			const res = await fetchFromAPI(
+				deleteType === 'shopping' ? `/shopping-ads/${deleteId}` : `/delivery-ads/${deleteId}`,
+				{ method: 'DELETE', headers: getAuthHeaders() }
+			);
+			if (res == null) {
+				notifications.success('Annonce supprimée');
+				await loadAds();
+			}
+		} catch {
+			notifications.error('Erreur lors de la suppression');
+		} finally {
+			showDeleteModal = false;
+			deleteId = null;
+		}
+	}
 </script>
 
 <div class="bg-base-200 min-h-screen p-4 md:p-6">
@@ -379,6 +417,12 @@
 					</div>
 					<h2 class="card-title text-sm sm:text-base">{ad.title}</h2>
 					<p class="text-xs text-gray-600 sm:text-sm">{ad.description}</p>
+					<button
+						on:click={() => openDeleteModal('shopping', ad.id)}
+						class="btn btn-xs btn-error top-2 right-2"
+					>
+						Supprimer
+					</button>
 				</div>
 			</div>
 		{/each}
@@ -435,38 +479,23 @@
 					<h2 class="card-title text-sm sm:text-base">{ad.title}</h2>
 					<p class="text-xs text-gray-600 sm:text-sm">{ad.description}</p>
 					<p class="mt-1 text-xs text-gray-500">{new Date(ad.deliveryDate).toLocaleString()}</p>
+					<button
+						on:click={() => openDeleteModal('delivery', ad.id)}
+						class="btn btn-xs btn-error top-2 right-2"
+					>
+						Supprimer
+					</button>
 
 					<!-- 3) Étapes -->
 					{#if ad.deliverySteps?.length}
-						<div class="mt-4 space-y-2">
-							{#each ad.deliverySteps as step, i}
-								<div class="flex items-center space-x-2">
-									<div class="bg-base-100 flex-1 rounded p-2 shadow">
-										<strong>Étape {step.stepNumber}:</strong>
-										{step.price}€
-										<span class="block text-sm text-gray-500">
-											{step.departureLocation.name} → {step.arrivalLocation.name}
-										</span>
-									</div>
-									{#if i < ad.deliverySteps.length - 1}
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											class="h-6 w-6 text-gray-400"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M19 9l-7 7-7-7"
-											/>
-										</svg>
-									{/if}
-								</div>
+						<ul class="steps steps-vertical mt-4 space-y-2">
+							{#each ad.deliverySteps as step}
+								<li class="step step-primary">
+									<strong>Étape {step.stepNumber}:</strong>
+									{step.departureLocation.name} → {step.arrivalLocation.name} ({step.price}€)
+								</li>
 							{/each}
-						</div>
+						</ul>
 					{/if}
 				</div>
 			</div>
@@ -484,7 +513,6 @@
 						<option value="" disabled selected>Sélectionner un type</option>
 						<option value="shopping-ads">Liste de courses</option>
 						<option value="delivery-request">Demande de livraison</option>
-						<option value="custom-service">Service personnalisé</option>
 					</select>
 				</div>
 
@@ -729,6 +757,19 @@
 					{#if selectedType === 'shopping-ads' || selectedType === 'delivery-request'}
 						<button class="btn btn-primary" on:click={handleCreate}>Créer</button>
 					{/if}
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	{#if showDeleteModal}
+		<div class="modal modal-open">
+			<div class="modal-box">
+				<h3 class="text-lg font-bold">Confirmer la suppression</h3>
+				<p>Voulez-vous vraiment supprimer cette annonce ?</p>
+				<div class="modal-action">
+					<button class="btn" on:click={cancelDelete}>Annuler</button>
+					<button class="btn btn-error" on:click={confirmDelete}>Supprimer</button>
 				</div>
 			</div>
 		</div>
