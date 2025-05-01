@@ -478,7 +478,6 @@
 					</div>
 					<h2 class="card-title text-sm sm:text-base">{ad.title}</h2>
 					<p class="text-xs text-gray-600 sm:text-sm">{ad.description}</p>
-					<p class="mt-1 text-xs text-gray-500">{new Date(ad.deliveryDate).toLocaleString()}</p>
 					<button
 						on:click={() => openDeleteModal('delivery', ad.id)}
 						class="btn btn-xs btn-error top-2 right-2"

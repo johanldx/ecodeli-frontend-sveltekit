@@ -15,7 +15,7 @@
 
 	const links: { key: string; url: string }[] = [
 		{ key: 'discover_link', url: '/app/clients/discover' },
-		{ key: 'discussion_link', url: '/app/clients/conversations' },
+		{ key: 'discussion_link', url: '/app/clients/chat' },
 		{ key: 'announces_link', url: '/app/clients/ads' },
 		{ key: 'addresses_link', url: '/app/clients/addresses' }
 	];
