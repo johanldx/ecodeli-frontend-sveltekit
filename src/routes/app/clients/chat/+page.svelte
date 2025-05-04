@@ -1,207 +1,254 @@
 <script lang="ts">
-    interface Conversation {
-      id: number;
-      participantName: string;
-      subtitle?: string;
-    }
-    interface Ad {
-        title: string;
-        description: string;
-        price: number;
-        type: 'delivery' | 'shopping' | 'service';
-        offerPrice?: number;
-    }
+  import { onMount, onDestroy } from 'svelte';
+  import { io, Socket } from 'socket.io-client';
+  import { fetchFromAPI } from '$lib/utils/api';
+  import { accessToken } from '$lib/stores/token';
+  import { get } from 'svelte/store';
 
-    interface Message {
-      id: number;
-      role: 'user' | 'other' | 'system';
-      text: string;
-      senderName?: string;
+  interface Conversation {
+    id: number;
+    adType: 'ShoppingAds' | 'DeliverySteps' | 'ServiceProvisions';
+    adId: number;
+  }
+
+  interface Ad {
+    title: string;
+    description: string;
+    price: number;
+    type: 'delivery' | 'shopping' | 'service';
+    offerPrice?: number;
+  }
+
+  interface Message {
+    id: number;
+    role: 'user' | 'other' | 'system';
+    content: string;
+    sender: { name: string };
+    conversation: { id: number };
+  }
+
+  let convList: Conversation[] = [];
+  let selectedConv!: Conversation;
+  let selectedConvId: number;
+  let ad: Ad | null = null;
+  let messages: Message[] = [];
+  let newMessage = '';
+  let showSlotModal = false;
+  let socket: Socket;
+
+  function openSlotModal() { showSlotModal = true; }
+  function closeSlotModal() { showSlotModal = false; }
+
+  function updateUrl(id: number) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('id', id.toString());
+    history.replaceState(null, '', `chat?${params.toString()}`);
+  }
+
+  async function loadConversations() {
+    const token = get(accessToken);
+    convList = await fetchFromAPI<Conversation[]>('/conversations', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+
+  async function fetchAd(conv: Conversation): Promise<Ad> {
+    const token = get(accessToken);
+    if (conv.adType === 'ShoppingAds') {
+      const raw = await fetchFromAPI<any>(`/shopping-ads/${conv.adId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return {
+        title: raw.title,
+        description: raw.description,
+        price: raw.price,
+        type: 'shopping',
+        offerPrice: raw.price
+      };
+    } else if (conv.adType === 'DeliverySteps') {
+      const raw = await fetchFromAPI<any>(`/delivery-ads/${conv.adId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return {
+        title: raw.title,
+        description: raw.description,
+        price: raw.price,
+        type: 'delivery',
+        offerPrice: raw.price
+      };
+    } else {
+      const raw = await fetchFromAPI<any>(`/service-ads/${conv.adId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return {
+        title: raw.title,
+        description: raw.description,
+        price: 0,
+        type: 'service'
+      };
     }
-  
-    let convList: Conversation[] = [
-      { id: 1, participantName: 'Vincent Juillet' },
-      { id: 2, participantName: 'Charles Leclerc', subtitle: 'Transport à l’aéroport' },
-      { id: 3, participantName: 'Bob Alice', subtitle: 'Jardinage' },
-      // …
-    ];
-    let selectedConv: Conversation = convList[0];
-  
-    let ad: Ad = {
-    title: 'Titre de l’annonce',
-    description: 'Description de l’annonce…',
-    price: 140,
-    type: 'delivery',      // ou 'shopping', ou 'service'
-    offerPrice: 120        // seulement pour delivery & shopping
-    };
-  
-    let messages: Message[] = [
-      { id: 1, role: 'other', text: 'Bonjour, j’aimerais m’occuper de votre canapé', senderName: selectedConv.participantName },
-      { id: 2, role: 'user',  text: 'Bonjour ! Faites-moi une proposition', senderName: 'Vous' },
-      { id: 3, role: 'system', text: 'Voir la proposition à 163 €', senderName: 'Notification automatique' }
-    ];
-  
-    let newMessage = '';
-  
-    function selectConv(conv: Conversation) {
-      selectedConv = conv;
-      // TODO: charger ad & messages depuis API
-      newMessage = '';
-    }
-  
-    function send() {
-      if (!newMessage.trim()) return;
-      messages = [
-        ...messages,
-        { id: messages.length + 1, role: 'user', text: newMessage, senderName: 'Vous' }
-      ];
-      newMessage = '';
-      // TODO: POST vers l’API
-    }
+  }
 
-    let showSlotModal = false;
+  async function loadMessages(convId: number) {
+    const token = get(accessToken);
+    messages = await fetchFromAPI<Message[]>(
+      `/messages?conversationId=${convId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  }
 
-function openSlotModal() {
-  showSlotModal = true;
-}
+  function connectWS(convId: number) {
+    const token = get(accessToken);
+    socket = io('/ws', { auth: { token } });
+    socket.emit('joinConversation', { conversationId: convId });
+    socket.on('newMessage', (msg: Message) => {
+      if (msg.conversation.id === convId) {
+        messages = [...messages, msg];
+      }
+    });
+  }
 
-function closeSlotModal() {
-  showSlotModal = false;
-}
-  </script>
+  async function selectConv(conv: Conversation) {
+    selectedConv = conv;
+    selectedConvId = conv.id;
+    updateUrl(conv.id);
+    if (socket) socket.disconnect();
 
-  <div class="h-screen">
-    <div class="mt-20 flex h-[70vh] border-2 border-gray-300 rounded-2xl overflow-hidden">
-        <!-- Sidebar desktop -->
-        <aside class="hidden md:flex flex-col w-64 bg-white border-r border-gray-300 rounded-l-lg overflow-hidden">
-          <ul class="flex-1 overflow-y-auto">
-            {#each convList as conv}
-              <button
-                type="button"
-                on:click={() => selectConv(conv)}
-                class="flex items-center p-3 text-left w-full hover:bg-gray-200 border-b border-gray-200 {selectedConv.id === conv.id ? 'bg-base-100' : ''}"
-              >
-                <div class="h-8 w-1 bg-green-500 rounded mr-3"></div>
-                <div class="flex flex-col">
-                  <span class="font-semibold">{conv.participantName}</span>
-                  {#if conv.subtitle}
-                    <small class="text-xs text-gray-500">{conv.subtitle}</small>
-                  {/if}
-                </div>
-              </button>
-            {/each}
-          </ul>
-        </aside>
-      
-        <div class="flex flex-col flex-1 border-gray-300 rounded-r-lg">
-          <!-- Mobile selector -->
-          <div class="md:hidden bg-white border-b border-gray-300 p-2">
-            <select
-              bind:value={selectedConv.id}
-              class="select select-bordered w-full"
-              on:change={() => selectConv(convList.find(c => c.id === +selectedConv.id) ?? convList[0])}
-            >
-              {#each convList as conv}
-                <option value={conv.id}>{conv.participantName}</option>
-              {/each}
-            </select>
+    ad = null;
+    await Promise.all([
+      (async () => { ad = await fetchAd(conv); })(),
+      loadMessages(conv.id)
+    ]);
+    connectWS(conv.id);
+  }
+
+  function send() {
+    if (!newMessage.trim()) return;
+    socket.emit('sendMessage', {
+      conversationId: selectedConv.id,
+      content: newMessage
+    });
+    newMessage = '';
+  }
+
+  // When the select changes:
+  $: if (convList.length && selectedConvId !== selectedConv?.id) {
+    const c = convList.find((c) => c.id === selectedConvId);
+    if (c) selectConv(c);
+  }
+
+  onMount(async () => {
+    await loadConversations();
+
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get('id');
+    const id = raw ? Number(raw) : NaN;
+    const first = convList.find((c) => c.id === id) ?? convList[0];
+
+    await selectConv(first);
+  });
+
+  onDestroy(() => {
+    if (socket) socket.disconnect();
+  });
+</script>
+
+<div class="h-screen">
+  <div class="mt-20 flex h-[70vh] overflow-hidden rounded-2xl border-2 border-gray-300">
+    <!-- Sidebar desktop -->
+    <aside class="hidden md:flex w-64 flex-col overflow-hidden rounded-l-lg border-r border-gray-300 bg-white">
+      <ul class="flex-1 overflow-y-auto">
+        {#each convList as conv}
+          <button
+            class="flex w-full items-center border-b border-gray-200 p-3 hover:bg-gray-200 {selectedConv.id === conv.id ? 'bg-base-100' : ''}"
+            on:click={() => selectConv(conv)}
+          >
+            <div class="mr-3 h-8 w-1 rounded bg-green-500"></div>
+            <div class="flex flex-col">
+              <span class="font-semibold">Conversation #{conv.id}</span>
+            </div>
+          </button>
+        {/each}
+      </ul>
+    </aside>
+
+    <!-- Mobile selector -->
+    <div class="md:hidden border-b border-gray-300 bg-white p-2">
+      <select bind:value={selectedConvId} class="select select-bordered w-full">
+        {#each convList as conv}
+          <option value={conv.id}>Conversation #{conv.id}</option>
+        {/each}
+      </select>
+    </div>
+
+    <!-- Main panel -->
+    <div class="flex flex-1 flex-col rounded-r-lg border-gray-300">
+      {#if ad}
+        <header class="flex items-start justify-between border-b border-gray-300 bg-white p-4">
+          <div>
+            <div class="mb-2 flex items-center space-x-2">
+              <button class="badge badge-neutral">Mon annonce</button>
+              <span class="badge badge-secondary">{ad.price} €</span>
+            </div>
+            <h2 class="text-lg font-bold">{ad.title}</h2>
+            <p class="text-sm text-gray-600">{ad.description}</p>
           </div>
-      
-          <!-- Récap annonce -->
-          <header class="flex justify-between items-start p-4 bg-white border-b border-gray-300">
-            <div>
-                <div class="flex items-center space-x-2 mb-2">
-                    <button class="badge badge-neutral">Mon annonce</button>
-                    <span class="badge badge-secondary">{ad.price} €</span>
-                  </div>
-              <h2 class="font-bold text-lg">{ad.title}</h2>
-              <p class="text-sm text-gray-600">{ad.description}</p>
+          {#if ad.type === 'delivery' || ad.type === 'shopping'}
+            <button class="btn btn-primary">Accepter {ad.offerPrice} €</button>
+          {:else}
+            <button class="btn btn-primary" on:click={openSlotModal}>Choisir un créneau</button>
+          {/if}
+        </header>
+      {:else}
+        <div class="p-4">Chargement de l’annonce…</div>
+      {/if}
+
+      <main class="flex-1 overflow-y-auto bg-white p-4 space-y-4">
+        {#each messages as m}
+          {#if m.role === 'system'}
+            <div class="chat chat-center">
+              <div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+              <div class="chat-bubble bg-base-content text-white">{m.content}</div>
             </div>
-          
-            {#if ad.type === 'delivery' || ad.type === 'shopping'}
-              <!-- badge Mon annonce + prix -->
-              <!-- bouton d’action Accepter l’offre -->
-              <button class="btn btn-primary ml-4">
-                Accepter l’offre de {ad.offerPrice} €
-              </button>
-          
-            {:else if ad.type === 'service'}
-              <!-- pas de badge prix, juste le bouton de créneau -->
-              <button class="btn btn-primary" on:click={openSlotModal}>
-                Choisir un créneau
-              </button>
-            {/if}
-          </header>
-          
-      
-          <!-- Messages -->
-          <main class="flex-1 overflow-y-auto p-4 bg-white space-y-4">
-            {#each messages as m}
-              {#if m.role === 'system'}
-                <div class="chat chat-center">
-                  <div class="chat-header text-xs text-gray-500">{m.senderName}</div>
-                  <div class="chat-bubble bg-base-content text-white">
-                    {m.text}
-                  </div>
-                </div>
-              {:else if m.role === 'user'}
-                <div class="chat chat-end">
-                  <div class="chat-header text-xs text-gray-500">{m.senderName}</div>
-                  <div class="chat-bubble bg-primary">
-                    {m.text}
-                  </div>
-                </div>
-              {:else}
-                <div class="chat chat-start">
-                  <div class="chat-header text-xs text-gray-500">{m.senderName}</div>
-                  <div class="chat-bubble bg-gray-300">
-                    {m.text}
-                  </div>
-                </div>
-              {/if}
-            {/each}
-          </main>
-      
-          <!-- Input -->
-          <footer class="p-4 bg-white border-t border-gray-300">
-            <div class="flex">
-              <input
-                type="text"
-                bind:value={newMessage}
-                placeholder="Tapez un message…"
-                class="input input-bordered flex-1"
-                on:keydown={(e) => e.key === 'Enter' && send()}
-              />
-              <button class="btn btn-primary ml-2" on:click={send}>→</button>
+          {:else if m.role === 'user'}
+            <div class="chat chat-end">
+              <div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+              <div class="chat-bubble bg-primary">{m.content}</div>
             </div>
-          </footer>
+          {:else}
+            <div class="chat chat-start">
+              <div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+              <div class="chat-bubble bg-gray-300">{m.content}</div>
+            </div>
+          {/if}
+        {/each}
+      </main>
+
+      <footer class="border-t border-gray-300 bg-white p-4">
+        <div class="flex">
+          <input
+            type="text"
+            bind:value={newMessage}
+            placeholder="Tapez un message…"
+            class="input input-bordered flex-1"
+            on:keydown={e => e.key === 'Enter' && send()}
+          />
+          <button class="btn btn-primary ml-2" on:click={send}>→</button>
         </div>
-      </div>
+      </footer>
+    </div>
   </div>
 
   {#if showSlotModal}
-  <div class="modal modal-open">
-    <div class="modal-box">
-      <h3 class="font-bold text-lg">Choisir un créneau</h3>
-      <!-- Ici ton contenu de sélection de créneau… -->
-      <div class="modal-action">
-        <button class="btn" on:click={closeSlotModal}>Annuler</button>
-        <button class="btn btn-primary" on:click={() => {
-          /* valider le créneau */
-          closeSlotModal();
-        }}>
-          Confirmer
-        </button>
+    <div class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="text-lg font-bold">Choisir un créneau</h3>
+        <!-- contenu de sélection… -->
+        <div class="modal-action">
+          <button class="btn" on:click={closeSlotModal}>Annuler</button>
+          <button class="btn btn-primary" on:click={closeSlotModal}>Confirmer</button>
+        </div>
       </div>
     </div>
-  </div>
-{/if}
-
-  
-  <style>
-    /* Mark selected conversation */
-    li.bg-base-100 > div > span {
-      @apply text-primary;
-    }
-  </style>
-  
+  {/if}
+</div>
