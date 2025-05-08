@@ -3,6 +3,7 @@
   import { io, Socket } from 'socket.io-client';
   import { fetchFromAPI } from '$lib/utils/api';
   import { accessToken } from '$lib/stores/token';
+  import { user } from '$lib/stores/user';
   import { get } from 'svelte/store';
 
   interface Conversation {
@@ -21,9 +22,8 @@
 
   interface Message {
     id: number;
-    role: 'user' | 'other' | 'system';
     content: string;
-    sender: { name: string };
+    sender: { id?: number; name: string };  // <- on récupère sender.id
     conversation: { id: number };
   }
 
@@ -35,6 +35,7 @@
   let newMessage = '';
   let showSlotModal = false;
   let socket: Socket;
+  const currentUserId = get(user)?.id;      // <- id du user connecté
 
   function openSlotModal() { showSlotModal = true; }
   function closeSlotModal() { showSlotModal = false; }
@@ -99,7 +100,8 @@
 
   function connectWS(convId: number) {
     const token = get(accessToken);
-    socket = io('/ws', { auth: { token } });
+    const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+    socket = io(`${BACKEND}/ws`, { auth: { token } });
     socket.emit('joinConversation', { conversationId: convId });
     socket.on('newMessage', (msg: Message) => {
       if (msg.conversation.id === convId) {
@@ -131,7 +133,7 @@
     newMessage = '';
   }
 
-  // When the select changes:
+  // Lorsque l'utilisateur change la sélection
   $: if (convList.length && selectedConvId !== selectedConv?.id) {
     const c = convList.find((c) => c.id === selectedConvId);
     if (c) selectConv(c);
@@ -155,31 +157,38 @@
 
 <div class="h-screen">
   <div class="mt-20 flex h-[70vh] overflow-hidden rounded-2xl border-2 border-gray-300">
-    <!-- Sidebar desktop -->
-    <aside class="hidden md:flex w-64 flex-col overflow-hidden rounded-l-lg border-r border-gray-300 bg-white">
-      <ul class="flex-1 overflow-y-auto">
-        {#each convList as conv}
-          <button
-            class="flex w-full items-center border-b border-gray-200 p-3 hover:bg-gray-200 {selectedConv.id === conv.id ? 'bg-base-100' : ''}"
-            on:click={() => selectConv(conv)}
-          >
-            <div class="mr-3 h-8 w-1 rounded bg-green-500"></div>
-            <div class="flex flex-col">
-              <span class="font-semibold">Conversation #{conv.id}</span>
-            </div>
-          </button>
-        {/each}
-      </ul>
-    </aside>
+    {#if selectedConv}
+      <!-- Sidebar desktop -->
+      <aside class="hidden md:flex w-64 flex-col overflow-hidden rounded-l-lg border-r border-gray-300 bg-white">
+        <ul class="flex-1 overflow-y-auto">
+          {#each convList as conv}
+            <button
+              class="flex w-full items-center border-b border-gray-200 p-3 hover:bg-gray-200 {selectedConv.id === conv.id ? 'bg-base-100' : ''}"
+              on:click={() => selectConv(conv)}
+            >
+              <div class="mr-3 h-8 w-1 rounded bg-green-500"></div>
+              <div class="flex flex-col">
+                <span class="font-semibold">Conversation #{conv.id}</span>
+              </div>
+            </button>
+          {/each}
+        </ul>
+      </aside>
 
-    <!-- Mobile selector -->
-    <div class="md:hidden border-b border-gray-300 bg-white p-2">
-      <select bind:value={selectedConvId} class="select select-bordered w-full">
-        {#each convList as conv}
-          <option value={conv.id}>Conversation #{conv.id}</option>
-        {/each}
-      </select>
-    </div>
+      <!-- Mobile selector -->
+      <div class="md:hidden border-b border-gray-300 bg-white p-2">
+        <select bind:value={selectedConvId} class="select select-bordered w-full">
+          {#each convList as conv}
+            <option value={conv.id}>Conversation #{conv.id}</option>
+          {/each}
+        </select>
+      </div>
+    {:else}
+      <!-- loading -->
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-white">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    {/if}
 
     <!-- Main panel -->
     <div class="flex flex-1 flex-col rounded-r-lg border-gray-300">
@@ -205,17 +214,20 @@
 
       <main class="flex-1 overflow-y-auto bg-white p-4 space-y-4">
         {#each messages as m}
-          {#if m.role === 'system'}
+          {#if !m.sender.id}
+            <!-- notification -->
             <div class="chat chat-center">
               <div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
               <div class="chat-bubble bg-base-content text-white">{m.content}</div>
             </div>
-          {:else if m.role === 'user'}
+          {:else if m.sender.id === currentUserId}
+            <!-- message de l'utilisateur -->
             <div class="chat chat-end">
               <div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
               <div class="chat-bubble bg-primary">{m.content}</div>
             </div>
           {:else}
+            <!-- message de l'autre -->
             <div class="chat chat-start">
               <div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
               <div class="chat-bubble bg-gray-300">{m.content}</div>
@@ -243,7 +255,6 @@
     <div class="modal modal-open">
       <div class="modal-box">
         <h3 class="text-lg font-bold">Choisir un créneau</h3>
-        <!-- contenu de sélection… -->
         <div class="modal-action">
           <button class="btn" on:click={closeSlotModal}>Annuler</button>
           <button class="btn btn-primary" on:click={closeSlotModal}>Confirmer</button>

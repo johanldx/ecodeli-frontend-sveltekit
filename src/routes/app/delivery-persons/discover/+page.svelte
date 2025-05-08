@@ -145,7 +145,7 @@
 					price: ad.price, // ← prix de l'annonce shopping
 					userFrom: currentUser.id
 				}));
-			//goto(`/delivery-persons/chat?id=${convId}`);
+			goto(`/app/delivery-persons/chat?id=${convId}`);
 		} catch (err) {
 			console.error('Erreur création conversation', err);
 		}

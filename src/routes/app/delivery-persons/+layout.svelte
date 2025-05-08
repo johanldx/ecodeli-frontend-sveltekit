@@ -11,6 +11,7 @@
 
 	const links: { key: string; url: string }[] = [
 		{ key: 'discover_link', url: '/app/delivery-persons/discover' },
+		{ key: 'discussion_link', url: '/app/delivery-persons/chat' },
 		{ key: 'delivery_link', url: '/app/delivery-persons/deliveries' },
 		{ key: 'schedule_link', url: '/app/delivery-persons/planning' },
 		{ key: 'addresses_link', url: '/app/delivery-persons/addresses' }
