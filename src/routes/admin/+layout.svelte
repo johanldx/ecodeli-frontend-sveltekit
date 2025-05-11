@@ -14,7 +14,7 @@
 
 	const pages = [
 		{ name: users_title, url: '/admin/users' },
-		{ name: 'Prestataire', url: '/admin/providers' },
+		{ name: 'Professionels', url: '/admin/pro' },
 		{ name: addresses_title, url: '/admin/addresses' },
 		{ name: langs_title, url: '/admin/langs' },
 		{ name: ads_title, url: '/admin/ads' }

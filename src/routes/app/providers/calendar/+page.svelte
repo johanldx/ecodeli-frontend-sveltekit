@@ -1,144 +1,190 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { t } from '$lib/utils/t';
+	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
-	import { onDestroy } from 'svelte';
+	import dayjs from 'dayjs';
+	import isoWeek from 'dayjs/plugin/isoWeek';
+	import { t } from '$lib/utils/t';
 	import { tabTitle } from '$lib/utils/tabTitle';
+	import { fetchFromAPI } from '$lib/utils/api';
+	import { accessToken } from '$lib/stores/token';
+	import { notifications } from '$lib/stores/notifications';
+	import { profileIds } from '$lib/stores/profiles';
 
-	onMount(() => onDestroy(tabTitle('app.providers.calendar')));
+	dayjs.extend(isoWeek);
 
-	// Traductions
-	const add = t('app.providers.calendar.add');
-	const times = t('app.providers.calendar.time');
-	const titles = t('app.providers.calendar.title');
-	const cancel = t('app.providers.calendar.cancel');
-	const dayy = t('app.providers.calendar.day');
-	const place = t('app.providers.calendar.place');
-	const specials = t('app.providers.calendar.special');
-	const title_meeting = t('app.providers.calendar.title_meeting');
-	const weeks = t('app.providers.calendar.week');
+	// Labels
+	const addSlotLabel = 'Ajouter un créneau';
+	const saveLabel = 'Enregistrer';
+	const cancelLabel = 'Annuler';
+	const deleteLabel = 'Supprimer';
 
-	// Définition individuelle des jours
-	const monday = t('app.providers.calendar.monday');
-	const tuesday = t('app.providers.calendar.tuesday');
-	const wednesday = t('app.providers.calendar.wednesday');
-	const thursday = t('app.providers.calendar.thursday');
-	const friday = t('app.providers.calendar.friday');
-	const saturday = t('app.providers.calendar.saturday');
-	const sunday = t('app.providers.calendar.sunday');
+	// Day names
+	const mondayLabel = get(t('app.providers.calendar.monday'));
+	const tuesdayLabel = get(t('app.providers.calendar.tuesday'));
+	const wednesdayLabel = get(t('app.providers.calendar.wednesday'));
+	const thursdayLabel = get(t('app.providers.calendar.thursday'));
+	const fridayLabel = get(t('app.providers.calendar.friday'));
+	const saturdayLabel = get(t('app.providers.calendar.saturday'));
+	const sundayLabel = get(t('app.providers.calendar.sunday'));
 
-	// Pour le stockage interne, on garde les clés
 	const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+	const dayLabels = {
+		monday: mondayLabel,
+		tuesday: tuesdayLabel,
+		wednesday: wednesdayLabel,
+		thursday: thursdayLabel,
+		friday: fridayLabel,
+		saturday: saturdayLabel,
+		sunday: sundayLabel
+	};
 
-	// Fonction de traduction simplifiée
-	function translateDay(key: string): string {
-		switch (key) {
-			case 'monday':
-				return get(monday);
-			case 'tuesday':
-				return get(tuesday);
-			case 'wednesday':
-				return get(wednesday);
-			case 'thursday':
-				return get(thursday);
-			case 'friday':
-				return get(friday);
-			case 'saturday':
-				return get(saturday);
-			case 'sunday':
-				return get(sunday);
-			default:
-				return key;
-		}
+	// Hourly slots
+	const timeSlots: string[] = Array.from({ length: 24 }, (_, i) => `${i}h`);
+
+	interface ServiceType {
+		id: number;
+		name: string;
+	}
+	interface Schedule {
+		id: number;
+		providerId: number;
+		personalServiceTypeId: number;
+		startTime: string;
+		endTime: string;
+		status: 'available' | 'unavailable';
 	}
 
-	// Heures
-	const hours: string[] = Array.from({ length: 17 }, (_, i) => {
-		const hour = i + 8;
-		return hour === 24 ? '00h' : `${hour}h`;
-	});
-
-	// Types
-	interface Appointment {
-		id: string;
-		day: string; // stocke la clé (ex: 'monday')
-		hour: string;
-		title: string;
-		location?: string;
-		special?: boolean;
-	}
-
-	// États
-	let currentWeek = 12;
-	let appointments: Appointment[] = [];
-	let selectedAppointment: Appointment | null = null;
-	let showModal = false;
+	let currentWeek = dayjs().isoWeek();
+	let weekRangeLabel = '';
+	let schedules: Schedule[] = [];
+	let serviceTypes: ServiceType[] = [];
+	let authorizedTypeIds: number[] = [];
 	let loading = true;
 
 	let showAddModal = false;
-	let newAppointment: Appointment;
+	let showDetailModal = false;
+	let selectedSchedule: Schedule | null = null;
 
-	// Ajout de RDV
-	function openAddModal() {
-		showAddModal = true;
-		newAppointment = {
-			id: crypto.randomUUID(),
-			day: 'monday', // utilise directement la clé
-			hour: hours[0],
-			title: '',
-			location: '',
-			special: false
-		};
+	let newSchedule = {
+		personalServiceTypeId: null as number | null,
+		day: 'monday',
+		startSlot: timeSlots[0],
+		endSlot: timeSlots[1]
+	};
+
+	const profiles = get(profileIds);
+	const providerId = profiles.providerId;
+
+	onMount(() => {
+		onDestroy(tabTitle('app.providers.calendar'));
+		loadServiceTypes();
+		loadSchedules();
+	});
+
+	function computeWeekRange() {
+		const year = dayjs().year();
+		const start = dayjs().year(year).isoWeek(currentWeek).startOf('isoWeek');
+		const end = start.add(6, 'day').endOf('day');
+		weekRangeLabel = `Semaine du ${start.format('DD/MM/YYYY')} au ${end.format('DD/MM/YYYY')}`;
+		return { start, end };
 	}
 
-	function addAppointment() {
-		if (!newAppointment.title.trim()) return;
-		appointments = [...appointments, newAppointment];
-		showAddModal = false;
+	async function loadServiceTypes() {
+		const all = (await fetchFromAPI('/personal-service-types', {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` }
+		})) as ServiceType[];
+		serviceTypes = all;
+		const auths = (await fetchFromAPI(
+			`/personal-service-type-authorizations?providerId=${providerId}`,
+			{
+				method: 'GET',
+				headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` }
+			}
+		)) as { personalServiceTypeId: number }[];
+		authorizedTypeIds = auths.map((a) => a.personalServiceTypeId);
 	}
 
-	// Simulation API
-	async function fetchAppointments(week: number): Promise<Appointment[]> {
+	async function loadSchedules() {
 		loading = true;
-		await new Promise((res) => setTimeout(res, 300));
-
-		const mockData: Appointment[] = [
-			{ id: '1', day: 'monday', hour: '8h', title: 'Jardinage et élagage' },
-			{ id: '2', day: 'monday', hour: '9h', title: 'Jardinage', location: 'Lyon' },
-			{ id: '3', day: 'tuesday', hour: '21h', title: 'Arrosage', special: true },
-			{ id: '4', day: 'friday', hour: '00h', title: 'Intervention de nuit', location: 'Paris' }
-		];
-
+		const { start, end } = computeWeekRange();
+		schedules = (await fetchFromAPI(
+			`/provider-schedules?start=${start.toISOString()}&end=${end.toISOString()}`,
+			{
+				method: 'GET',
+				headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` }
+			}
+		)) as Schedule[];
 		loading = false;
-		return mockData;
 	}
-
-	async function loadAppointments() {
-		appointments = await fetchAppointments(currentWeek);
-	}
-
-	onMount(loadAppointments);
 
 	function prevWeek() {
 		currentWeek--;
-		loadAppointments();
+		loadSchedules();
 	}
-
 	function nextWeek() {
 		currentWeek++;
-		loadAppointments();
+		loadSchedules();
 	}
 
-	function handleAppointmentClick(appointment: Appointment) {
-		selectedAppointment = appointment;
-		showModal = true;
+	function openAddModal(dayKey = 'monday', slot = timeSlots[0]) {
+		showAddModal = true;
+		newSchedule = {
+			personalServiceTypeId: null,
+			day: dayKey,
+			startSlot: slot,
+			endSlot: timeSlots[timeSlots.indexOf(slot) + 1] || slot
+		};
 	}
 
-	function cancelAppointment() {
-		if (selectedAppointment) {
-			alert(`Rendez-vous annulé : ${selectedAppointment.title}`);
-			showModal = false;
-		}
+	function handleCellClick(dk: string, slot: string) {
+		openAddModal(dk, slot);
+	}
+
+	// ◀️ Update this function to close Add Modal and open Detail Modal ▶️
+	function handleScheduleClick(sched: Schedule) {
+		showAddModal = false;
+		selectedSchedule = sched;
+		showDetailModal = true;
+	}
+
+	function parseSlot(base: dayjs.Dayjs, slot: string) {
+		const [h, m] = slot.split('h').map(Number);
+		return base.hour(h).minute(m).second(0).toISOString();
+	}
+
+	async function addSchedule() {
+		if (!newSchedule.personalServiceTypeId) return;
+		const { start } = computeWeekRange();
+		const dayIndex = dayKeys.indexOf(newSchedule.day);
+		const base = start.add(dayIndex, 'day');
+		const startTime = parseSlot(base, newSchedule.startSlot);
+		const endTime = parseSlot(base, newSchedule.endSlot);
+		await fetchFromAPI('/provider-schedules', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` },
+			body: JSON.stringify({
+				providerId,
+				personalServiceTypeId: newSchedule.personalServiceTypeId,
+				startTime,
+				endTime,
+				status: 'available'
+			})
+		});
+		await loadSchedules();
+		notifications.success('Créneau ajouté');
+		showAddModal = false;
+	}
+
+	async function deleteSchedule() {
+		if (!selectedSchedule) return;
+		await fetchFromAPI(`/provider-schedules/${selectedSchedule.id}`, {
+			method: 'DELETE',
+			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` }
+		});
+		notifications.success('Créneau supprimé');
+		showDetailModal = false;
+		loadSchedules();
 	}
 </script>
 
@@ -148,51 +194,58 @@
 		<div class="mb-6 flex items-center justify-between">
 			<div class="flex items-center gap-4">
 				<button on:click={prevWeek} class="btn btn-circle btn-sm btn-outline">←</button>
-				<h1 class="font-author text-xl">{$weeks} {currentWeek}</h1>
+				<h1 class="font-author text-xl">{weekRangeLabel}</h1>
 				<button on:click={nextWeek} class="btn btn-circle btn-sm btn-outline">→</button>
 			</div>
-			<button class="btn btn-primary" on:click={openAddModal}>{$add}</button>
+			<!-- <button class="btn btn-primary" on:click={() => openAddModal()}>{addSlotLabel}</button> -->
 		</div>
 
-		<!-- Calendrier -->
+		<!-- Calendar -->
 		{#if loading}
-			<p class="text-center text-gray-500">Chargement des rendez-vous...</p>
+			<p class="text-center text-gray-500">Chargement...</p>
 		{:else}
 			<div class="border-base-300 overflow-x-auto rounded-lg border">
 				<table class="table-zebra table w-full">
 					<thead class="bg-base-200 font-author text-base">
 						<tr>
-							<th class="bg-base-200 text-right">{$times}</th>
-							<th class="text-center">{$monday}</th>
-							<th class="text-center">{$tuesday}</th>
-							<th class="text-center">{$wednesday}</th>
-							<th class="text-center">{$thursday}</th>
-							<th class="text-center">{$friday}</th>
-							<th class="text-center">{$saturday}</th>
-							<th class="text-center">{$sunday}</th>
+							<th class="bg-base-200 text-right">Heure</th>
+							{#each dayKeys as dk (dk)}
+								<th class="text-center">{dayLabels[dk as keyof typeof dayLabels]}</th>
+							{/each}
 						</tr>
 					</thead>
 					<tbody>
-						{#each hours as hour}
-							<tr class="hover:bg-base-100 transition">
-								<td class="font-author bg-base-100 text-right">{hour}</td>
-								{#each dayKeys as dayKey}
-									<td class="border-base-300 min-h-16 min-w-32 border align-top">
-										{#each appointments.filter((a) => a.day === dayKey && a.hour === hour) as appointment}
-											<div
-												on:click={() => handleAppointmentClick(appointment)}
-												class={`mb-1 cursor-pointer rounded p-2 text-sm shadow-sm
-                          ${
-														appointment.special
-															? 'bg-accent text-accent-content'
-															: 'bg-primary text-primary-content'
-													}`}
+						{#each timeSlots as slot}
+							<tr class="hover:bg-base-100">
+								<td class="font-author bg-base-100 text-right">{slot}</td>
+								{#each dayKeys as dk}
+									<td class="border-base-300 relative min-h-16 min-w-32 border p-0">
+										<!-- Add overlay -->
+										<button
+											type="button"
+											on:click={() => handleCellClick(dk, slot)}
+											class="absolute inset-0 z-10 h-full w-full opacity-0"
+										></button>
+
+										<!-- ◀️ Replace block with this: render each hour-spanning schedule as a full-cell button ▶️ -->
+										{#each schedules.filter((s) => {
+											const d = dayjs(s.startTime).day();
+											const key = d === 0 ? 'sunday' : dayKeys[d - 1];
+											const sh = dayjs(s.startTime).hour();
+											const eh = dayjs(s.endTime).hour();
+											const hr = Number(slot.replace('h', ''));
+											return key === dk && hr >= sh && hr < eh;
+										}) as sched}
+											<button
+												type="button"
+												on:click={() => handleScheduleClick(sched)}
+												class="absolute inset-0 z-20 flex items-center justify-center p-1 text-xs font-semibold shadow-sm
+                     {sched.status === 'available'
+													? 'bg-green-500 text-white'
+													: 'bg-red-500 text-white'}"
 											>
-												<div class="font-author">{appointment.title}</div>
-												{#if appointment.location}
-													<div class="text-xs opacity-80">{appointment.location}</div>
-												{/if}
-											</div>
+												{serviceTypes.find((st) => st.id === sched.personalServiceTypeId)?.name}
+											</button>
 										{/each}
 									</td>
 								{/each}
@@ -204,91 +257,87 @@
 		{/if}
 	</div>
 
-	<!-- Modal : Détail -->
-	{#if showModal && selectedAppointment}
+	<!-- Add Modal -->
+	{#if showAddModal}
 		<dialog class="modal modal-open">
 			<div class="modal-box">
-				<h3 class="font-author text-lg">{selectedAppointment.title}</h3>
-				{#if selectedAppointment.location}
-					<p class="py-2">📍 {selectedAppointment.location}</p>
-				{/if}
-				<p class="py-2">🗓 {translateDay(selectedAppointment.day)} à {selectedAppointment.hour}</p>
-
-				<div class="modal-action flex flex-col gap-2">
-					<button on:click={() => alert('Conversation ouverte')} class="btn btn-primary w-full">
-						Afficher la conversation
-					</button>
-					<button on:click={cancelAppointment} class="btn btn-error w-full">
-						{$cancel}
-					</button>
-					<button on:click={() => (showModal = false)} class="btn btn-ghost w-full">
-						{$cancel}
-					</button>
+				<h3 class="font-author mb-4 text-lg">{addSlotLabel}</h3>
+				<div class="form-control mb-2">
+					<label class="label"><span class="label-text">Type de service</span></label>
+					<select bind:value={newSchedule.personalServiceTypeId} class="select select-bordered">
+						<option value={null}>-- choisir --</option>
+						{#each serviceTypes as st}
+							<option value={st.id} disabled={!authorizedTypeIds.includes(st.id)}>
+								{st.name}
+							</option>
+						{/each}
+					</select>
+				</div>
+				<div class="mb-2 grid grid-cols-2 gap-4">
+					<div class="form-control">
+						<label class="label"><span class="label-text">Jour</span></label>
+						<select bind:value={newSchedule.day} class="select select-bordered">
+							{#each dayKeys as dk (dk)}
+								<option value={dk}>{dayLabels[dk]}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="form-control">
+						<label class="label"><span class="label-text">Début</span></label>
+						<select bind:value={newSchedule.startSlot} class="select select-bordered">
+							{#each timeSlots as ts}
+								<option value={ts}>{ts}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="form-control col-span-2">
+						<label class="label"><span class="label-text">Fin</span></label>
+						<select bind:value={newSchedule.endSlot} class="select select-bordered">
+							{#each timeSlots as ts}
+								<option
+									value={ts}
+									disabled={timeSlots.indexOf(ts) <= timeSlots.indexOf(newSchedule.startSlot)}
+								>
+									{ts}
+								</option>
+							{/each}
+						</select>
+					</div>
+				</div>
+				<div class="modal-action">
+					<button class="btn btn-primary" on:click={addSchedule}>{saveLabel}</button>
+					<button class="btn btn-error" on:click={() => (showAddModal = false)}
+						>{cancelLabel}</button
+					>
 				</div>
 			</div>
 		</dialog>
 	{/if}
 
-	<!-- Modal : Ajout -->
-	{#if showAddModal}
+	<!-- Detail Modal -->
+	{#if showDetailModal && selectedSchedule}
 		<dialog class="modal modal-open">
 			<div class="modal-box">
-				<h3 class="font-author mb-2 text-lg">{$title_meeting}</h3>
-
-				<div class="form-control mb-2">
-					<label class="label">
-						<span class="label-text">{$titles}</span>
-					</label>
-					<input type="text" bind:value={newAppointment.title} class="input input-bordered" />
-				</div>
-
-				<div class="form-control mb-2">
-					<label class="label">
-						<span class="label-text">{$dayy}</span>
-					</label>
-					<select bind:value={newAppointment.day} class="select select-bordered">
-						<option value="monday">{monday}</option>
-						<option value="tuesday">{tuesday}</option>
-						<option value="wednesday">{wednesday}</option>
-						<option value="thursday">{thursday}</option>
-						<option value="friday">{friday}</option>
-						<option value="saturday">{saturday}</option>
-						<option value="sunday">{sunday}</option>
-					</select>
-				</div>
-
-				<div class="form-control mb-2">
-					<label class="label">
-						<span class="label-text">{$times}</span>
-					</label>
-					<select bind:value={newAppointment.hour} class="select select-bordered">
-						{#each hours as h}
-							<option value={h}>{h}</option>
-						{/each}
-					</select>
-				</div>
-
-				<div class="form-control mb-2">
-					<label class="label">
-						<span class="label-text">{$place}</span>
-					</label>
-					<input type="text" bind:value={newAppointment.location} class="input input-bordered" />
-				</div>
-
-				<div class="form-control mb-4">
-					<label class="label cursor-pointer justify-start gap-2">
-						<input type="checkbox" class="checkbox" bind:checked={newAppointment.special} />
-						<span class="label-text">{$specials}</span>
-					</label>
-				</div>
-
-				<div class="modal-action flex flex-col gap-2">
-					<button on:click={addAppointment} class="btn btn-primary w-full">
-						{$add}
-					</button>
-					<button on:click={() => (showAddModal = false)} class="btn btn-error w-full">
-						{$cancel}
-					</button>
+				<h3 class="font-author text-lg">
+					{serviceTypes.find((st) => st.id === selectedSchedule!.personalServiceTypeId)?.name}
+				</h3>
+				<p class="py-2">
+					{dayLabels[
+						dayKeys[dayjs(selectedSchedule!.startTime).day() - 1 || 6] as keyof typeof dayLabels
+					]}
+					{' '}{dayjs(selectedSchedule!.startTime).format('HH:mm')} – {dayjs(
+						selectedSchedule!.endTime
+					).format('HH:mm')}
+				</p>
+				<p class="py-2">
+					Statut :
+					{@html selectedSchedule!.status === 'available'
+						? `<span class="badge badge-success">Disponible</span>`
+						: `<span class="badge badge-error">Réservé</span>`}
+				</p>
+				<div class="modal-action">
+					<button class="btn btn-error" on:click={deleteSchedule}>{deleteLabel}</button>
+					<button class="btn" on:click={() => (showDetailModal = false)}>{cancelLabel}</button>
 				</div>
 			</div>
 		</dialog>
