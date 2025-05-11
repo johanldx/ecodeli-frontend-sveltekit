@@ -138,13 +138,15 @@
 				})
 			});
 
-			console.log(JSON.stringify({
+			console.log(
+				JSON.stringify({
 					adType: 'ShoppingAds',
 					adId: ad.id,
 					status: 'pending',
 					price: ad.price, // ← prix de l'annonce shopping
 					userFrom: currentUser.id
-				}));
+				})
+			);
 			goto(`/app/delivery-persons/chat?id=${convId}`);
 		} catch (err) {
 			console.error('Erreur création conversation', err);
