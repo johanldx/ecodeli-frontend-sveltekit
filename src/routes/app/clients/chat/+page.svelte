@@ -35,7 +35,7 @@
 	let newMessage = '';
 	let showSlotModal = false;
 	let socket: Socket;
-	const currentUserId = get(user)?.id; // <- id du user connecté
+	const currentUserId = get(user)?.id;
 
 	function openSlotModal() {
 		showSlotModal = true;
@@ -138,7 +138,6 @@
 		newMessage = '';
 	}
 
-	// Lorsque l'utilisateur change la sélection
 	$: if (convList.length && selectedConvId !== selectedConv?.id) {
 		const c = convList.find((c) => c.id === selectedConvId);
 		if (c) selectConv(c);
@@ -163,7 +162,6 @@
 <div class="h-screen">
 	<div class="mt-20 flex h-[70vh] overflow-hidden rounded-2xl border-2 border-gray-300">
 		{#if selectedConv}
-			<!-- Sidebar desktop -->
 			<aside
 				class="hidden w-64 flex-col overflow-hidden rounded-l-lg border-r border-gray-300 bg-white md:flex"
 			>
@@ -185,7 +183,6 @@
 				</ul>
 			</aside>
 
-			<!-- Mobile selector -->
 			<div class="border-b border-gray-300 bg-white p-2 md:hidden">
 				<select bind:value={selectedConvId} class="select select-bordered w-full">
 					{#each convList as conv}
@@ -194,13 +191,11 @@
 				</select>
 			</div>
 		{:else}
-			<!-- loading -->
 			<div class="fixed inset-0 z-50 flex items-center justify-center bg-white">
 				<span class="loading loading-spinner loading-lg text-primary"></span>
 			</div>
 		{/if}
 
-		<!-- Main panel -->
 		<div class="flex flex-1 flex-col rounded-r-lg border-gray-300">
 			{#if ad}
 				<header class="flex items-start justify-between border-b border-gray-300 bg-white p-4">
@@ -225,19 +220,16 @@
 			<main class="flex-1 space-y-4 overflow-y-auto bg-white p-4">
 				{#each messages as m}
 					{#if !m.sender.id}
-						<!-- notification -->
 						<div class="chat chat-center">
 							<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
 							<div class="chat-bubble bg-base-content text-white">{m.content}</div>
 						</div>
 					{:else if m.sender.id === currentUserId}
-						<!-- message de l'utilisateur -->
 						<div class="chat chat-end">
 							<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
 							<div class="chat-bubble bg-primary">{m.content}</div>
 						</div>
 					{:else}
-						<!-- message de l'autre -->
 						<div class="chat chat-start">
 							<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
 							<div class="chat-bubble bg-gray-300">{m.content}</div>

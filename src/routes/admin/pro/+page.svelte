@@ -267,7 +267,6 @@
 </script>
 
 <div class="min-h-screen p-6">
-	<!-- Service Types -->
 	<h1 class="mt-10 mb-5 text-2xl font-medium">Gestion des type des services</h1>
 	{#if loadingTypes}
 		<div class="fixed inset-0 z-50 flex items-center justify-center bg-white">
@@ -323,7 +322,6 @@
 		</div>
 	{/if}
 
-	<!-- Providers -->
 	<h1 class="mt-16 mb-5 text-2xl font-medium">Gestion des prestataires</h1>
 	{#if loadingProviders}
 		<div class="fixed inset-0 z-50 flex items-center justify-center bg-white">
@@ -333,7 +331,6 @@
 		<Table columns={providersColumns} data={providersData} pageSize={5} onAction={handleAction} />
 	{/if}
 
-	<!-- Autorisations Modal -->
 	{#if showModalAuth}
 		<div class="modal modal-open">
 			<div class="modal-box w-3/5">
