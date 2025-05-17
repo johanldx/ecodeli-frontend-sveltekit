@@ -13,7 +13,7 @@
 
 	const links: { key: string; url: string }[] = [
 		{ key: 'discussion_link', url: '/app/traders/conversations' },
-		{ key: 'request_link', url: '/app/traders/demandes' },
+		{ key: 'request_link', url: '/app/traders/requests' },
 		{ key: 'addresses_link', url: '/app/traders/addresses' }
 	];
 

@@ -66,20 +66,6 @@
 				</button>
 			</div>
 		</div>
-
-		<button
-			on:click={handleManageAccount}
-			class="bg-primary text-primary-content hover:bg-primary-focus mb-3 w-full cursor-pointer rounded-md py-3 text-sm transition-colors"
-		>
-			{$manage_global_account}
-		</button>
-
-		<button
-			on:click={handleManageAddresses}
-			class="bg-secondary text-secondary-content hover:bg-secondary-focus w-full cursor-pointer rounded-md py-3 text-sm transition-colors"
-		>
-			{$manage_addresses}
-		</button>
 	</div>
 
 	<h1 class="font-author mb-6 text-2xl text-gray-800">{$wallet_title}</h1>

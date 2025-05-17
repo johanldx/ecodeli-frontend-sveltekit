@@ -48,15 +48,30 @@
 		stepNumber: number;
 	}
 
+	interface ReleaseCartAd {
+		id: number;
+		title: string;
+		description: string;
+		price: number;
+		packageSize: string;
+		imageUrls: string[];
+		departureLocation: Location;
+		arrivalLocation: Location;
+	}
+
+	let dataLoaded = false;
+
 	// Filter state
-	let filterType: 'all' | 'shopping' | 'delivery' = 'all';
+	let filterType: 'all' | 'shopping' | 'delivery' | 'release' = 'all';
 	let cityQuery = '';
 	let shoppingAds: ShoppingAd[] = [];
 	let steps: DeliveryStep[] = [];
+	let releases: ReleaseCartAd[] = [];
 
 	onMount(async () => {
 		onDestroy(tabTitle('app.clients.discover'));
 		await loadData();
+		dataLoaded = true;
 	});
 
 	async function loadData() {
@@ -69,6 +84,11 @@
 
 		// 2) Delivery Ads → Steps
 		const deliveryAds = await fetchFromAPI<any[]>('/delivery-ads', {
+			headers: { Authorization: `Bearer ${token}` }
+		});
+
+		// 3) Release Cart Ads
+		releases = await fetchFromAPI<ReleaseCartAd[]>('/release-cart-ads', {
 			headers: { Authorization: `Bearer ${token}` }
 		});
 
@@ -102,21 +122,35 @@
 	}
 
 	// Compute filtered lists
-	$: filteredShopping = shoppingAds.filter(
-		(ad) =>
-			(filterType === 'all' || filterType === 'shopping') &&
-			(!cityQuery ||
-				ad.departureLocation.city.toLowerCase().includes(cityQuery.toLowerCase()) ||
-				ad.arrivalLocation.city.toLowerCase().includes(cityQuery.toLowerCase()))
-	);
+	$: filteredShopping = dataLoaded
+		? shoppingAds.filter(
+				(ad) =>
+					(filterType === 'all' || filterType === 'shopping') &&
+					(!cityQuery ||
+						ad.departureLocation.city.toLowerCase().includes(cityQuery.toLowerCase()) ||
+						ad.arrivalLocation.city.toLowerCase().includes(cityQuery.toLowerCase()))
+			)
+		: [];
 
-	$: filteredSteps = steps.filter(
-		(st) =>
-			(filterType === 'all' || filterType === 'delivery') &&
-			(!cityQuery ||
-				st.departureLocation.city.toLowerCase().includes(cityQuery.toLowerCase()) ||
-				st.arrivalLocation.city.toLowerCase().includes(cityQuery.toLowerCase()))
-	);
+	$: filteredSteps = dataLoaded
+		? steps.filter(
+				(st) =>
+					(filterType === 'all' || filterType === 'delivery') &&
+					(!cityQuery ||
+						st.departureLocation.city.toLowerCase().includes(cityQuery.toLowerCase()) ||
+						st.arrivalLocation.city.toLowerCase().includes(cityQuery.toLowerCase()))
+			)
+		: [];
+
+	$: filteredReleases = dataLoaded
+		? releases.filter(
+				(ad) =>
+					(filterType === 'all' || filterType === 'release') &&
+					(!cityQuery ||
+						ad.departureLocation.city.toLowerCase().includes(cityQuery.toLowerCase()) ||
+						ad.arrivalLocation.city.toLowerCase().includes(cityQuery.toLowerCase()))
+			)
+		: [];
 
 	// --- Shopping : price = ad.price
 	async function handleContactShopping(ad: ShoppingAd) {
@@ -177,6 +211,30 @@
 			console.error('Erreur création conversation', err);
 		}
 	}
+
+	async function handleContactRelease(ad: ReleaseCartAd) {
+		const token = get(accessToken);
+		const currentUser = get(user)!;
+		try {
+			const { id: convId } = await fetchFromAPI<{ id: number }>('/conversations', {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					adType: 'ReleaseCartAds',
+					adId: ad.id,
+					status: 'pending',
+					price: ad.price,
+					userFrom: currentUser.id
+				})
+			});
+			goto(`/delivery-persons/chat?id=${convId}`);
+		} catch (err) {
+			console.error('Erreur création conversation', err);
+		}
+	}
 </script>
 
 <div class="bg-base-200 min-h-screen p-4 md:p-6">
@@ -186,6 +244,7 @@
 			<option value="all">{ALL_LABEL}</option>
 			<option value="shopping">{SHOPPING_LABEL}</option>
 			<option value="delivery">{DELIVERY_LABEL}</option>
+			<option value="release">Lâcher de chariot</option>
 		</select>
 		<input
 			type="text"
@@ -327,6 +386,68 @@
 						{step.arrivalLocation.name}, {step.arrivalLocation.city}
 					</p>
 					<button class="btn btn-primary btn-sm mt-4" on:click={() => handleContactStep(step)}>
+						{CONTACT_LABEL}
+					</button>
+				</div>
+			</div>
+		{/each}
+
+		<!-- Release Cart Ads -->
+		{#each filteredReleases as ad}
+			<div class="card bg-base-100 mx-auto w-full shadow-sm">
+				{#if ad.imageUrls?.length > 0}
+					<div class="carousel h-40 w-full rounded-t-lg sm:h-48">
+						{#each ad.imageUrls as url, i}
+							<div id={`item-shop-${ad.id}-${i}`} class="carousel-item relative w-full">
+								<img
+									src={url}
+									alt={`Image ${i + 1}`}
+									class="h-full w-full rounded-t-lg object-cover"
+									loading="lazy"
+								/>
+								<div
+									class="bg-opacity-50 absolute right-2 bottom-2 rounded bg-black px-2 py-1 text-xs text-white"
+								>
+									{i + 1}/{ad.imageUrls.length}
+								</div>
+							</div>
+						{/each}
+					</div>
+					<div class="mt-2 flex justify-center gap-2">
+						{#each ad.imageUrls as _, i}
+							<button
+								class="btn btn-xs"
+								on:click={() =>
+									document
+										.getElementById(`item-shop-${ad.id}-${i}`)
+										?.scrollIntoView({ behavior: 'smooth', inline: 'start' })}
+							>
+								{i + 1}
+							</button>
+						{/each}
+					</div>
+				{:else}
+					<figure class="flex h-40 items-center justify-center rounded-t-lg bg-gray-200 sm:h-48">
+						<span class="text-gray-500">Aucune photo disponible</span>
+					</figure>
+				{/if}
+				<div class="card-body p-4 md:p-6">
+					<div class="mb-2 flex flex-wrap items-center gap-2">
+						<span class="badge badge-accent badge-outline px-3 py-2">Lâcher de chariot</span>
+						<span class="badge">{ad.price} €</span>
+						<span class="badge">{ad.packageSize}</span>
+					</div>
+					<h2 class="card-title">{ad.title}</h2>
+					<p class="text-sm text-gray-600">{ad.description}</p>
+					<p class="mt-1 text-xs">
+						<strong>Départ:</strong>
+						{ad.departureLocation.name}, {ad.departureLocation.city}
+					</p>
+					<p class="text-xs">
+						<strong>Arrivée:</strong>
+						{ad.arrivalLocation.name}, {ad.arrivalLocation.city}
+					</p>
+					<button class="btn btn-primary btn-sm mt-4" on:click={() => handleContactRelease(ad)}>
 						{CONTACT_LABEL}
 					</button>
 				</div>

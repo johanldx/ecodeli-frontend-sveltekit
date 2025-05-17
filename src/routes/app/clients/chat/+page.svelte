@@ -114,6 +114,7 @@
 	}
 
 	async function selectConv(conv: Conversation) {
+		if (!conv) return;
 		selectedConv = conv;
 		selectedConvId = conv.id;
 		updateUrl(conv.id);
@@ -138,9 +139,14 @@
 		newMessage = '';
 	}
 
-	$: if (convList.length && selectedConvId !== selectedConv?.id) {
-		const c = convList.find((c) => c.id === selectedConvId);
-		if (c) selectConv(c);
+	let initialized = false;
+
+	$: if (!initialized && convList.length && selectedConvId && !selectedConv) {
+		const conv = convList.find((c) => c.id === selectedConvId);
+		if (conv) {
+			selectConv(conv);
+			initialized = true;
+		}
 	}
 
 	onMount(async () => {
@@ -149,9 +155,10 @@
 		const params = new URLSearchParams(window.location.search);
 		const raw = params.get('id');
 		const id = raw ? Number(raw) : NaN;
-		const first = convList.find((c) => c.id === id) ?? convList[0];
-
-		await selectConv(first);
+		if (convList.length) {
+			const first = convList.find((c) => c.id === id) ?? convList[0];
+			await selectConv(first);
+		}
 	});
 
 	onDestroy(() => {
@@ -185,9 +192,13 @@
 
 			<div class="border-b border-gray-300 bg-white p-2 md:hidden">
 				<select bind:value={selectedConvId} class="select select-bordered w-full">
-					{#each convList as conv}
-						<option value={conv.id}>Conversation #{conv.id}</option>
-					{/each}
+					{#if convList.length}
+						{#each convList as conv}
+							<option value={conv.id}>Conversation #{conv.id}</option>
+						{/each}
+					{:else}
+						<option disabled selected>Aucune conversation</option>
+					{/if}
 				</select>
 			</div>
 		{:else}
@@ -218,24 +229,28 @@
 			{/if}
 
 			<main class="flex-1 space-y-4 overflow-y-auto bg-white p-4">
-				{#each messages as m}
-					{#if !m.sender.id}
-						<div class="chat chat-center">
-							<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
-							<div class="chat-bubble bg-base-content text-white">{m.content}</div>
-						</div>
-					{:else if m.sender.id === currentUserId}
-						<div class="chat chat-end">
-							<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
-							<div class="chat-bubble bg-primary">{m.content}</div>
-						</div>
-					{:else}
-						<div class="chat chat-start">
-							<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
-							<div class="chat-bubble bg-gray-300">{m.content}</div>
-						</div>
-					{/if}
-				{/each}
+				{#if messages.length}
+					{#each messages as m}
+						{#if !m.sender.id}
+							<div class="chat chat-center">
+								<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+								<div class="chat-bubble bg-base-content text-white">{m.content}</div>
+							</div>
+						{:else if m.sender.id === currentUserId}
+							<div class="chat chat-end">
+								<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+								<div class="chat-bubble bg-primary">{m.content}</div>
+							</div>
+						{:else}
+							<div class="chat chat-start">
+								<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+								<div class="chat-bubble bg-gray-300">{m.content}</div>
+							</div>
+						{/if}
+					{/each}
+				{:else}
+					<p class="mt-4 text-center text-sm text-gray-500">Aucun message</p>
+				{/if}
 			</main>
 
 			<footer class="border-t border-gray-300 bg-white p-4">
