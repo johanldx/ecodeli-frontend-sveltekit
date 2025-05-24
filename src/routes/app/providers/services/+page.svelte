@@ -1,128 +1,203 @@
 <script lang="ts">
-	import { t } from '$lib/utils/t';
-	import { tabTitle } from '$lib/utils/tabTitle';
+	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
+	import { accessToken } from '$lib/stores/token';
+	import { profileIds } from '$lib/stores/profiles';
+	import { fetchFromAPI } from '$lib/utils/api';
+	import { notifications } from '$lib/stores/notifications';
 
-	const title = t('app.providers.my_announces.title');
-	const modify = t('app.providers.my_announces.modify');
-	const cancel = t('app.providers.my_announces.cancel');
-	const details = t('app.providers.my_announces.details');
-	const add_new_ads = t('app.providers.my_announces.add_new_ads');
-	import { onDestroy, onMount } from 'svelte';
+	type ServiceType = {
+		id: number;
+		name: string;
+	};
 
-	onMount(() => onDestroy(tabTitle('app.providers.service')));
+	let serviceTypes: ServiceType[] = [];
+	let authorizedTypeIds: number[] = [];
 
-	const announcements = [
-		{
-			id: 1,
-			type: 'Prestataire pro',
-			price: '75 €',
-			title: 'Jardinage et élagage sur Paris',
-			description:
-				"je m'occupe de votre jardin comme personne, vous voudrez y aller même en hiver ! ",
-			image: null
-		},
-		{
-			id: 2,
-			type: 'Particulier',
-			price: '75 €',
-			title: 'Jardinage et élagage sur Paris',
-			description:
-				"je m'occupe de votre jardin comme personne, vous voudrez y aller même en hiver ! ",
-			image: null
-		},
-		{
-			id: 3,
-			type: 'Particulier',
-			price: '75 €',
-			title: 'Jardinage et élagage sur Paris',
-			description:
-				"je m'occupe de votre jardin comme personne, vous voudrez y aller même en hiver ! ",
-			image: null
+	let title = '';
+	let description = '';
+	let selectedTypeId: number = -1;
+	let files: File[] = [];
+	let imageUrls: string[] = [];
+	let isSubmitting = false;
+	let showModal = false;
+
+	type PersonalServiceAd = {
+		id: number;
+		title: string;
+		description: string;
+		imageUrls: string[];
+		type: { id: number; name: string };
+		status: string;
+		createdAt: string;
+	};
+	let ads: PersonalServiceAd[] = [];
+
+	onMount(async () => {
+		await loadServiceTypes();
+		await loadAds();
+	});
+
+	async function loadAds() {
+		try {
+			ads = await fetchFromAPI('/personal-service-ads', {
+				headers: { Authorization: `Bearer ${get(accessToken)}` }
+			});
+		} catch {
+			notifications.error('Erreur lors du chargement des annonces.');
 		}
-	];
-
-	function handleEditAnnouncement(id: number) {
-		alert(`Modifier l'annonce ${id}`);
 	}
 
-	function handleViewDetails(id: number) {
-		alert(`Voir les détails de l'annonce ${id}`);
+	async function loadServiceTypes() {
+		try {
+			const all = await fetchFromAPI<ServiceType[]>('/personal-service-types', {
+				headers: getHeaders()
+			});
+			serviceTypes = all;
+
+			const auths = await fetchFromAPI<{ personalServiceTypeId: number }[]>(
+				`/personal-service-type-authorizations?providerId=${get(profileIds).providerId}`,
+				{ headers: getHeaders() }
+			);
+			authorizedTypeIds = auths.map((a) => a.personalServiceTypeId);
+		} catch {
+			notifications.error('Erreur lors du chargement des types de prestations');
+		}
 	}
 
-	function handleCancelAnnouncement(id: number) {
-		alert(`Annuler l'annonce ${id}`);
+	function handleFilesSelected(event: Event) {
+		const input = event.target as HTMLInputElement;
+		if (input.files) {
+			files = Array.from(input.files);
+			imageUrls = files.map((f) => URL.createObjectURL(f));
+		}
 	}
 
-	function handleAddAnnouncement() {
-		alert('Ajouter une nouvelle annonce');
+	async function handleSubmit() {
+		if (!title || !description || selectedTypeId < 0 || files.length === 0) {
+			return notifications.warning('Tous les champs sont obligatoires.');
+		}
+		if (!authorizedTypeIds.includes(selectedTypeId)) {
+			return notifications.error('Vous n’êtes pas autorisé à publier pour cette prestation.');
+		}
+
+		isSubmitting = true;
+		try {
+			const form = new FormData();
+			form.append('title', title);
+			form.append('description', description);
+			form.append('typeId', String(selectedTypeId));
+			files.forEach((f) => form.append('images', f));
+
+			await fetchFromAPI('/personal-service-ads', {
+				method: 'POST',
+				headers: { Authorization: `Bearer ${get(accessToken)}` },
+				body: form
+			});
+
+			notifications.success('Annonce créée avec succès');
+			title = '';
+			description = '';
+			selectedTypeId = -1;
+			files = [];
+			imageUrls = [];
+			showModal = false;
+		} catch {
+			notifications.error("Erreur lors de la création de l'annonce.");
+		} finally {
+			isSubmitting = false;
+		}
+	}
+
+	function getHeaders() {
+		return {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${get(accessToken)}`
+		};
 	}
 </script>
 
-<div class="bg-base-200 min-h-screen p-4 md:p-6">
-	<div class="mx-auto max-w-7xl">
-		<h1 class="font-author mb-4 text-2xl text-gray-800 md:mb-6">{$title}</h1>
+<div class="bg-base-200 mx-auto min-h-screen p-6">
+	<div class="mb-6 flex items-center justify-between">
+		<h1 class="font-author text-2xl text-gray-800">Mes prestations</h1>
+		<button on:click={() => (showModal = true)} class="btn btn-primary">Nouvelle annonce</button>
+	</div>
 
-		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-			{#each announcements as announcement}
-				<div class="card bg-base-100 mx-auto w-full shadow-sm">
-					<figure class="flex h-40 items-center justify-center bg-gray-200 sm:h-48">
-						{#if announcement.image}
-							<img
-								src={announcement.image}
-								alt={announcement.title}
-								class="h-full w-full object-cover"
-							/>
-						{:else}
-							<span class="text-gray-500">Aucune photo disponible</span>
-						{/if}
-					</figure>
+	{#if showModal}
+		<div class="modal modal-open">
+			<div class="modal-box max-w-xl">
+				<h3 class="mb-4 text-lg font-bold">Nouvelle annonce de prestation</h3>
 
-					<div class="card-body p-4 md:p-6">
-						<div class="mb-3 flex flex-wrap items-center gap-2">
-							<button class="btn btn-outline btn-neutral btn-xs sm:btn-sm">
-								{announcement.type}
-							</button>
-							<button class="btn btn-neutral btn-info btn-xs sm:btn-sm">
-								{announcement.price}
-							</button>
-						</div>
-
-						<h2 class="card-title text-sm sm:text-base">{announcement.title}</h2>
-						<p class="text-xs text-gray-600 sm:text-sm">{announcement.description}</p>
-
-						<div class="card-actions mt-4 flex flex-wrap justify-start gap-1 sm:gap-2">
-							<button
-								on:click={() => handleEditAnnouncement(announcement.id)}
-								class="btn btn-primary btn-xs sm:btn-sm rounded-md"
-							>
-								{$modify}
-							</button>
-							<button
-								on:click={() => handleViewDetails(announcement.id)}
-								class="btn btn-neutral-content btn-xs sm:btn-sm rounded-md"
-							>
-								{$details}
-							</button>
-							<button
-								on:click={() => handleCancelAnnouncement(announcement.id)}
-								class="btn btn-error btn-xs sm:btn-sm rounded-md"
-							>
-								{$cancel}
-							</button>
-						</div>
-					</div>
+				<div class="form-control mb-4">
+					<label class="label">Titre</label>
+					<input class="input input-bordered" bind:value={title} />
 				</div>
-			{/each}
-		</div>
 
-		<div class="mt-6 text-center md:mt-8">
-			<button on:click={handleAddAnnouncement} class="btn btn-primary btn-sm sm:btn-md rounded-md">
-				{$add_new_ads}
-			</button>
-		</div>
+				<div class="form-control mb-4">
+					<label class="label">Description</label>
+					<textarea class="textarea textarea-bordered" bind:value={description}></textarea>
+				</div>
 
-		<div class="mt-4 text-center text-sm text-green-600 sm:text-base md:mt-6">
-			// à définir dans le back message de confirmation
+				<div class="form-control mb-4">
+					<label class="label">Type de prestation</label>
+					<select bind:value={selectedTypeId} class="select select-bordered">
+						<option value={-1} disabled>Sélectionner</option>
+						{#each serviceTypes as st}
+							<option value={st.id} disabled={!authorizedTypeIds.includes(st.id)}>
+								{st.name}
+								{#if !authorizedTypeIds.includes(st.id)}(non autorisé){/if}
+							</option>
+						{/each}
+					</select>
+				</div>
+
+				<div class="form-control mb-4">
+					<label class="label">Images</label>
+					<input
+						type="file"
+						accept="image/*"
+						multiple
+						class="file-input file-input-bordered"
+						on:change={handleFilesSelected}
+					/>
+				</div>
+
+				{#if imageUrls.length}
+					<div class="mb-4 grid grid-cols-2 gap-2">
+						{#each imageUrls as url}
+							<img src={url} alt="Preview" class="h-24 w-full rounded border object-cover" />
+						{/each}
+					</div>
+				{/if}
+
+				<div class="modal-action">
+					<button class="btn" on:click={() => (showModal = false)}>Annuler</button>
+					<button class="btn btn-primary" on:click={handleSubmit} disabled={isSubmitting}
+						>Publier</button
+					>
+				</div>
+			</div>
 		</div>
+	{/if}
+
+	<div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		{#each ads as ad}
+			<div class="card bg-white shadow-md">
+				{#if ad.imageUrls?.length}
+					<img src={ad.imageUrls[0]} class="h-40 w-full rounded-t object-cover" alt="Image" />
+				{:else}
+					<div class="flex h-40 items-center justify-center rounded-t bg-gray-200 text-gray-500">
+						Pas d'image
+					</div>
+				{/if}
+				<div class="card-body p-4">
+					<h2 class="card-title text-lg">{ad.title}</h2>
+					<p class="text-sm text-gray-700">{ad.description}</p>
+					<p class="mt-2 text-xs text-gray-500">
+						{ad.type.name} – {new Date(ad.createdAt).toLocaleDateString()}
+					</p>
+				</div>
+			</div>
+		{/each}
 	</div>
 </div>

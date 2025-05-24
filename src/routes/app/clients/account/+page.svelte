@@ -1,108 +1,119 @@
 <script lang="ts">
+	import WalletBox from '$lib/components/WalletBox.svelte';
 	import { t } from '$lib/utils/t';
 	import { tabTitle } from '$lib/utils/tabTitle';
+	import { fetchFromAPI } from '$lib/utils/api';
+	import { get } from 'svelte/store';
+	import { accessToken } from '$lib/stores/token';
 	import { onDestroy, onMount } from 'svelte';
+	import { notifications } from '$lib/stores/notifications';
 
 	onMount(() => onDestroy(tabTitle('app.clients.account')));
 
-	let ibanInput: HTMLInputElement; // Référence directe à l'input
-
+	// Traductions
 	const account_title = t('app.clients.account.my_account.title');
 	const my_sub = t('app.clients.account.my_account.my_sub');
-	const sub_status_premium = t('app.clients.account.my_account.sub_status_premium');
-	const sub_status_basic = t('app.clients.account.my_account.sub_status_basic');
-	const sub_status_pro = t('app.clients.account.my_account.sub_status_pro');
 	const manage = t('app.clients.account.my_account.manage');
-	const manage_global_account = t('app.clients.account.my_account.manage_global_account');
-	const manage_addresses = t('app.clients.account.my_account.manage_addresses');
 	const wallet_title = t('app.clients.account.my_electronic_wallet.title');
-	const amount_available = t('app.clients.account.my_electronic_wallet.amount_available');
-	const amount_pending = t('app.clients.account.my_electronic_wallet.amount_pending');
-	const to_validate = t('app.clients.account.my_electronic_wallet.to_validate');
-	const iban = t('app.clients.account.my_electronic_wallet.iban');
-	const transfer_bank_account = t('app.clients.account.my_electronic_wallet.transfer_bank_account');
+
+	// Typages
+	type Subscription = {
+		id: number;
+		name: string;
+		price: number;
+	};
+
+	type SubscriptionPayment = {
+		id: number;
+		amount: number;
+		status: 'pending' | 'completed' | 'failed';
+		createdAt: string;
+		subscriptionId: number;
+	};
+
+	// État local
+	let subscriptions: Subscription[] = [];
+	let myPayments: SubscriptionPayment[] = [];
+	let latestSub: SubscriptionPayment | null = null;
+	let subscriptionStatus = 'none'; // 'active' | 'expired' | 'none'
+	let subscriptionName = '';
+	let subscriptionEndDate = '';
+
+	const getHeaders = () => ({
+		'Content-Type': 'application/json',
+		Authorization: `Bearer ${get(accessToken)}`
+	});
+
+	onMount(async () => {
+		try {
+			const [payments, subs] = await Promise.all([
+				fetchFromAPI<SubscriptionPayment[]>('/subscription-payments/me', {
+					headers: getHeaders()
+				}),
+				fetchFromAPI<Subscription[]>('/subscriptions', {
+					headers: getHeaders()
+				})
+			]);
+
+			myPayments = payments.sort(
+				(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+			);
+			subscriptions = subs;
+
+			if (myPayments.length > 0) {
+				latestSub = myPayments[0];
+				const sub = subscriptions.find((s) => s.id === latestSub!.subscriptionId);
+				subscriptionName = sub?.name || 'Inconnu';
+
+				const created = new Date(latestSub.createdAt);
+				const end = new Date(created.getTime() + 28 * 24 * 60 * 60 * 1000);
+				subscriptionEndDate = end.toLocaleDateString();
+
+				subscriptionStatus = end > new Date() ? 'active' : 'expired';
+			}
+		} catch (err) {
+			console.error('Erreur lors du chargement des abonnements', err);
+			notifications.error('Impossible de charger les informations d’abonnement');
+		}
+	});
 
 	function handleManageSubscription() {
-		alert("Redirection vers la gestion de l'abonnement...");
-	}
-
-	function handleManageAccount() {
-		window.location.href = '/auth/account';
-	}
-
-	function handleManageAddresses() {
-		window.location.href = '/app/clients/addresses';
-	}
-
-	function handleValidateIBAN() {
-		if (ibanInput && ibanInput.value) {
-			alert(`IBAN validé : ${ibanInput.value}`);
-		} else {
-			alert('Veuillez entrer un IBAN valide.');
-		}
-	}
-
-	function handleTransferToBank() {
-		alert('Redirection vers le transfert vers un compte bancaire...');
+		notifications.success("Redirection vers la gestion de l'abonnement...");
+		// redirige si une vraie page de gestion est disponible :
+		// window.location.href = '/app/clients/subscription/manage';
 	}
 </script>
 
 <div class="ml-0 min-h-screen max-w-2xl bg-[#FEFCF3] p-6">
 	<h1 class="font-author mb-6 text-2xl text-gray-800">{$account_title}</h1>
 
+	<!-- Bloc abonnement -->
 	<div class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-md">
-		<div class="mb-4">
-			<p class="mb-2 text-sm text-gray-600">{$my_sub}</p>
-			<div class="flex items-center">
+		<p class="mb-2 text-sm text-gray-600">{$my_sub}</p>
+
+		<div class="flex items-center justify-between">
+			{#if subscriptionStatus === 'none'}
+				<p class="text-gray-500 italic">Aucun abonnement actif.</p>
+			{:else}
 				<div class="mr-2 flex-grow rounded-md bg-gray-100 px-4 py-2">
-					<p class="text-gray-700">{$sub_status_premium}</p>
+					<p class="text-gray-700">
+						{subscriptionName}
+						<span class="ml-2 text-xs text-gray-500">
+							({subscriptionStatus === 'active' ? 'Actif jusqu’au ' : 'Expiré le '}
+							{subscriptionEndDate})
+						</span>
+					</p>
 				</div>
-
-				<button
-					on:click={handleManageSubscription}
-					class="bg-primary text-primary-content hover:bg-primary-focus rounded-md px-6 py-2 text-sm transition-colors"
-				>
-					{$manage}
-				</button>
-			</div>
-		</div>
-	</div>
-
-	<h1 class="font-author mb-6 text-2xl text-gray-800">{$wallet_title}</h1>
-
-	<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-md">
-		<div class="mb-6 flex justify-center gap-16">
-			<div class="text-center">
-				<p class="font-author text-2xl text-gray-800">49,75 €</p>
-				<p class="text-sm text-gray-600">{$amount_available}</p>
-			</div>
-			<div class="text-center">
-				<p class="font-auhtor text-2xl text-gray-800">49,75 €</p>
-				<p class="text-sm text-gray-600">{$amount_pending}</p>
-			</div>
-		</div>
-
-		<div class="mb-4 flex items-center gap-2">
-			<input
-				bind:this={ibanInput}
-				type="text"
-				placeholder={$iban}
-				class="focus:ring-primary focus:border-primary w-0 flex-[1_1_auto] rounded-md border border-gray-300 bg-gray-100 px-4 py-2"
-			/>
-
+			{/if}
 			<button
-				on:click={handleValidateIBAN}
-				class="bg-primary text-primary-content hover:bg-primary-focus flex-none rounded-md px-6 py-2 text-sm transition-colors"
+				on:click={handleManageSubscription}
+				class="bg-primary text-primary-content hover:bg-primary-focus rounded-md px-6 py-2 text-sm transition-colors"
 			>
-				{$to_validate}
+				{$manage}
 			</button>
 		</div>
-
-		<button
-			on:click={handleTransferToBank}
-			class="bg-primary text-primary-content hover:bg-primary-focus w-full rounded-md py-3 text-sm transition-colors"
-		>
-			{$transfer_bank_account}
-		</button>
 	</div>
+
+	<!-- Bloc Wallet -->
+	<WalletBox profileType="client" />
 </div>
