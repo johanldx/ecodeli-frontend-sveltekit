@@ -11,8 +11,8 @@
 
 	type Route = {
 		id: number;
-		departure_location: number;
-		arrival_location: number;
+		departureLocationEntity: { id: number; name: string };
+		arrivalLocationEntity: { id: number; name: string };
 		day: string;
 	};
 
@@ -54,6 +54,8 @@
 					headers: getHeaders()
 				}
 			);
+
+			console.log(routes);
 		} catch {
 			notifications.error('Impossible de charger vos trajets.');
 		}
@@ -72,8 +74,8 @@
 
 		const exists = routes.some(
 			(r) =>
-				r.departure_location === departure_location &&
-				r.arrival_location === arrival_location &&
+				r.departureLocationEntity?.id === departure_location &&
+				r.arrivalLocationEntity?.id === arrival_location &&
 				dayjs(r.day).isSame(day, 'day')
 		);
 
@@ -85,6 +87,14 @@
 		isSubmitting = true;
 
 		try {
+			console.log(
+				JSON.stringify({
+					delivery_person_id: get(profileIds).deliveryPersonId,
+					departure_location,
+					arrival_location,
+					day
+				})
+			);
 			await fetchFromAPI('/routes', {
 				method: 'POST',
 				headers: getHeaders(),
@@ -173,8 +183,10 @@
 				>
 					<div>
 						<p class="text-sm font-medium text-gray-700">
-							{formatLocation(route.departure_location)} → {formatLocation(route.arrival_location)}
+							{route.departureLocationEntity ? route.departureLocationEntity.name : '—'} →
+							{route.arrivalLocationEntity ? route.arrivalLocationEntity.name : '—'}
 						</p>
+
 						<p class="mt-1 text-xs text-gray-500">
 							Date : {dayjs(route.day).format('dddd D MMMM YYYY')}
 						</p>

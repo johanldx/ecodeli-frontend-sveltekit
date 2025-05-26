@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { notifications } from '$lib/stores/notifications';
+	import { profileIds } from '$lib/stores/profiles';
 	import { accessToken } from '$lib/stores/token';
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { t } from '$lib/utils/t';
@@ -7,7 +8,7 @@
 	import { get } from 'svelte/store';
 
 	// Paramètre passé au composant
-	export let profileType: 'client' | 'provider' | 'admin' | 'partner';
+	export let profileType: 'clients' | 'providers' | 'delivery-persons' | 'traders';
 
 	type WalletResponse = {
 		amout_available: number;
@@ -44,19 +45,20 @@
 
 	async function handleValidateIBAN() {
 		let endpoint = '';
+		let profile = get(profileIds);
 
 		switch (profileType) {
-			case 'client':
-				endpoint = '/client';
+			case 'clients':
+				endpoint = `/clients/${profile.clientId}`;
 				break;
-			case 'provider':
-				endpoint = '/provider';
+			case 'providers':
+				endpoint = `/providers/${profile.providerId}`;
 				break;
-			case 'admin':
-				endpoint = '/admin';
+			case 'delivery-persons':
+				endpoint = `/delivery-persons/${profile.deliveryPersonId}`;
 				break;
-			case 'partner':
-				endpoint = '/partner';
+			case 'traders':
+				endpoint = `/traders/${profile.traderId}`;
 				break;
 			default:
 				notifications.warning(`Type de profil inconnu : ${profileType}`);
@@ -65,7 +67,7 @@
 
 		try {
 			await fetchFromAPI(endpoint, {
-				method: 'PATCH',
+				method: 'PUT',
 				headers: getHeaders(),
 				body: JSON.stringify({ bank_account: ibanInput.value })
 			});

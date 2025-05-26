@@ -13,5 +13,5 @@
 			Pour gérer vos pièces justificatives, merci de contacter le support Ecodeli.
 		</p>
 	</div>
-	<WalletBox profileType="client" />
+	<WalletBox profileType="delivery-persons" />
 </div>

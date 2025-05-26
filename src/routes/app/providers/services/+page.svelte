@@ -39,13 +39,20 @@
 	});
 
 	async function loadAds() {
-		try {
-			ads = await fetchFromAPI('/personal-service-ads', {
-				headers: { Authorization: `Bearer ${get(accessToken)}` }
-			});
-		} catch {
-			notifications.error('Erreur lors du chargement des annonces.');
-		}
+		const fetchedAds = await fetchFromAPI<PersonalServiceAd[]>('/personal-service-ads', {
+			headers: { Authorization: `Bearer ${get(accessToken)}` }
+		});
+
+		// Remplir ads avec les données reçues
+		ads = await Promise.all(
+			fetchedAds.map(async (ad: PersonalServiceAd) => {
+				// Trouver le nom du type de service à partir de l'ID
+				const serviceType = serviceTypes.find((st) => st.id === ad.type.id);
+				ad.type.name = serviceType ? serviceType.name : 'Type inconnu';
+				return ad;
+			})
+		);
+		console.log(ads); // Vérifier les données
 	}
 
 	async function loadServiceTypes() {
@@ -184,7 +191,7 @@
 		{#each ads as ad}
 			<div class="card bg-white shadow-md">
 				{#if ad.imageUrls?.length}
-					<img src={ad.imageUrls[0]} class="h-40 w-full rounded-t object-cover" alt="Image" />
+					<img src={ad.imageUrls[0]} class="h-40 w-full rounded-t object-cover" alt={ad.title} />
 				{:else}
 					<div class="flex h-40 items-center justify-center rounded-t bg-gray-200 text-gray-500">
 						Pas d'image
