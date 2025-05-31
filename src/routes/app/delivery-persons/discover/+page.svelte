@@ -167,7 +167,7 @@
 					adType: 'ShoppingAds',
 					adId: ad.id,
 					status: 'pending',
-					price: ad.price, // ← prix de l'annonce shopping
+					price: ad.price,
 					userFrom: currentUser.id
 				})
 			});
@@ -177,7 +177,7 @@
 					adType: 'ShoppingAds',
 					adId: ad.id,
 					status: 'pending',
-					price: ad.price, // ← prix de l'annonce shopping
+					price: ad.price,
 					userFrom: currentUser.id
 				})
 			);
@@ -187,7 +187,6 @@
 		}
 	}
 
-	// --- Delivery Step : adId = step.deliveryAdId, price = prix de l'annonce (ici on utilise step.price)
 	async function handleContactStep(step: DeliveryStep) {
 		const token = get(accessToken);
 		const currentUser = get(user)!;
@@ -202,11 +201,11 @@
 					adType: 'DeliverySteps',
 					adId: step.deliveryAdId,
 					status: 'pending',
-					price: step.price, // ← prix de l'annonce delivery (step.price)
+					price: step.price,
 					userFrom: currentUser.id
 				})
 			});
-			goto(`/delivery-persons/chat?id=${convId}`);
+			goto(`/app/delivery-persons/chat?id=${convId}`);
 		} catch (err) {
 			console.error('Erreur création conversation', err);
 		}
@@ -215,6 +214,7 @@
 	async function handleContactRelease(ad: ReleaseCartAd) {
 		const token = get(accessToken);
 		const currentUser = get(user)!;
+		console.log(ad);
 		try {
 			const { id: convId } = await fetchFromAPI<{ id: number }>('/conversations', {
 				method: 'POST',
@@ -230,7 +230,7 @@
 					userFrom: currentUser.id
 				})
 			});
-			goto(`/delivery-persons/chat?id=${convId}`);
+			goto(`/app/delivery-persons/chat?id=${convId}`);
 		} catch (err) {
 			console.error('Erreur création conversation', err);
 		}

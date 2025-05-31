@@ -12,7 +12,7 @@
 	type Page = { name: string; url: string };
 
 	const links: { key: string; url: string }[] = [
-		{ key: 'discussion_link', url: '/app/traders/conversations' },
+		{ key: 'discussion_link', url: '/app/traders/chat' },
 		{ key: 'request_link', url: '/app/traders/requests' },
 		{ key: 'addresses_link', url: '/app/traders/addresses' }
 	];

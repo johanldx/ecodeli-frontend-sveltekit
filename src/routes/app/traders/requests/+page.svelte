@@ -132,7 +132,7 @@
 		formData.append('clientEmail', form.clientEmail);
 		formData.append('departureLocation', form.departureLocationId.toString());
 		formData.append('arrivalLocation', form.arrivalLocationId.toString());
-		formData.append('postedBy', currentUser.id.toString());
+		formData.append('posted_by', currentUser.id.toString());
 		formData.append('reference', reference);
 		formData.append('status', 'pending');
 		formData.append('packageSize', form.packageSize);

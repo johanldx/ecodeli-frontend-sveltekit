@@ -1,23 +1,20 @@
-<!-- <script lang="ts">
+<script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { io, Socket } from 'socket.io-client';
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { accessToken } from '$lib/stores/token';
 	import { user } from '$lib/stores/user';
+	import { notifications } from '$lib/stores/notifications';
 	import { get } from 'svelte/store';
+
+	let isLoading = true;
 
 	interface Conversation {
 		id: number;
-		adType: 'ShoppingAds' | 'DeliverySteps' | 'ServiceProvisions';
+		adType: 'ShoppingAds' | 'DeliverySteps' | 'PersonalServiceAds' | 'ReleaseCartAds';
 		adId: number;
-	}
-
-	interface Ad {
-		title: string;
-		description: string;
-		price: number;
-		type: 'delivery' | 'shopping' | 'service';
-		offerPrice?: number;
+		userFrom: { id: number };
+        price: number;
 	}
 
 	interface Message {
@@ -28,9 +25,9 @@
 	}
 
 	let convList: Conversation[] = [];
-	let selectedConv!: Conversation;
+	let selectedConv: Conversation | null = null;
 	let selectedConvId: number;
-	let ad: Ad | null = null;
+	let ad: any = null;
 	let messages: Message[] = [];
 	let newMessage = '';
 	let showSlotModal = false;
@@ -55,43 +52,58 @@
 		convList = await fetchFromAPI<Conversation[]>('/conversations', {
 			headers: { Authorization: `Bearer ${token}` }
 		});
+
+		console.log(convList);
 	}
 
-	async function fetchAd(conv: Conversation): Promise<Ad> {
+	async function fetchAd(conv: Conversation): Promise<any> {
 		const token = get(accessToken);
+		let raw;
 		if (conv.adType === 'ShoppingAds') {
-			const raw = await fetchFromAPI<any>(`/shopping-ads/${conv.adId}`, {
+			raw = await fetchFromAPI<any>(`/shopping-ads/${conv.adId}`, {
 				headers: { Authorization: `Bearer ${token}` }
 			});
-			return {
-				title: raw.title,
-				description: raw.description,
-				price: raw.price,
-				type: 'shopping',
-				offerPrice: raw.price
-			};
 		} else if (conv.adType === 'DeliverySteps') {
-			const raw = await fetchFromAPI<any>(`/delivery-ads/${conv.adId}`, {
+	raw = await fetchFromAPI<any>(`/delivery-steps/${conv.adId}`, {
+		headers: { Authorization: `Bearer ${token}` }
+	});
+
+	if (raw.deliveryAdId) {
+		const deliveryAd = await fetchFromAPI<any>(`/delivery-ads/${raw.deliveryAdId}`, {
+			headers: { Authorization: `Bearer ${token}` }
+		});
+		raw.title = deliveryAd.title;
+		raw.description = deliveryAd.description;
+		raw.packageSize = deliveryAd.packageSize;
+		raw.postedBy = deliveryAd.postedBy ?? null;
+		raw.price = deliveryAd.price;
+	}
+
+	try {
+		const [departureLocation, arrivalLocation] = await Promise.all([
+			fetchFromAPI<any>(`/locations/${raw.departureLocationId}`, {
+				headers: { Authorization: `Bearer ${token}` }
+			}),
+			fetchFromAPI<any>(`/locations/${raw.arrivalLocationId}`, {
+				headers: { Authorization: `Bearer ${token}` }
+			})
+		]);
+
+		raw.departureLocation = departureLocation;
+		raw.arrivalLocation = arrivalLocation;
+	} catch (e) {
+		console.warn('Impossible de charger les lieux de départ ou d’arrivée', e);
+	}
+		} else if (conv.adType === 'PersonalServiceAds') {
+			raw = await fetchFromAPI<any>(`/service-ads/${conv.adId}`, {
 				headers: { Authorization: `Bearer ${token}` }
 			});
-			return {
-				title: raw.title,
-				description: raw.description,
-				price: raw.price,
-				type: 'delivery',
-				offerPrice: raw.price
-			};
 		} else {
-			const raw = await fetchFromAPI<any>(`/service-ads/${conv.adId}`, {
+			raw = await fetchFromAPI<any>(`/release-cart-ads/${conv.adId}`, {
 				headers: { Authorization: `Bearer ${token}` }
 			});
-			return {
-				title: raw.title,
-				description: raw.description,
-				price: 0,
-				type: 'service'
-			};
 		}
+		return raw;
 	}
 
 	async function loadMessages(convId: number) {
@@ -105,7 +117,15 @@
 		const token = get(accessToken);
 		const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 		socket = io(`${BACKEND}/ws`, { auth: { token } });
+
 		socket.emit('joinConversation', { conversationId: convId });
+
+		socket.on('connect', () => {
+			//notifications.success('Connecté au chat.');
+		});
+		socket.on('disconnect', () => {
+			//notifications.warning('Déconnecté du chat.');
+		});
 		socket.on('newMessage', (msg: Message) => {
 			if (msg.conversation.id === convId) {
 				messages = [...messages, msg];
@@ -119,28 +139,22 @@
 		selectedConvId = conv.id;
 		updateUrl(conv.id);
 		if (socket) socket.disconnect();
-
 		ad = null;
-		await Promise.all([
-			(async () => {
-				ad = await fetchAd(conv);
-			})(),
-			loadMessages(conv.id)
-		]);
+		await Promise.all([fetchAd(conv).then((data) => (ad = data)), loadMessages(conv.id)]);
+		console.log(ad);
 		connectWS(conv.id);
 	}
 
 	function send() {
 		if (!newMessage.trim()) return;
 		socket.emit('sendMessage', {
-			conversationId: selectedConv.id,
+			conversationId: selectedConv!.id,
 			content: newMessage
 		});
 		newMessage = '';
 	}
 
 	let initialized = false;
-
 	$: if (!initialized && convList.length && selectedConvId && !selectedConv) {
 		const conv = convList.find((c) => c.id === selectedConvId);
 		if (conv) {
@@ -151,13 +165,15 @@
 
 	onMount(async () => {
 		await loadConversations();
-
+		isLoading = false;
 		const params = new URLSearchParams(window.location.search);
 		const raw = params.get('id');
 		const id = raw ? Number(raw) : NaN;
 		if (convList.length) {
 			const first = convList.find((c) => c.id === id) ?? convList[0];
 			await selectConv(first);
+		} else {
+			selectedConv = null;
 		}
 	});
 
@@ -168,7 +184,7 @@
 
 <div class="h-screen">
 	<div class="mt-20 flex h-[70vh] overflow-hidden rounded-2xl border-2 border-gray-300">
-		{#if selectedConv}
+		{#if convList.length && selectedConv}
 			<aside
 				class="hidden w-64 flex-col overflow-hidden rounded-l-lg border-r border-gray-300 bg-white md:flex"
 			>
@@ -197,9 +213,13 @@
 							<option value={conv.id}>Conversation #{conv.id}</option>
 						{/each}
 					{:else}
-						<option disabled selected>Aucune conversation</option>
+						<option disabled selected>Aucune conversation disponible</option>
 					{/if}
 				</select>
+			</div>
+		{:else if !isLoading && convList.length === 0}
+			<div class="flex flex-1 items-center justify-center bg-white">
+				<p class="text-sm text-gray-500">Aucune conversation pour le moment.</p>
 			</div>
 		{:else}
 			<div class="fixed inset-0 z-50 flex items-center justify-center bg-white">
@@ -212,16 +232,76 @@
 				<header class="flex items-start justify-between border-b border-gray-300 bg-white p-4">
 					<div>
 						<div class="mb-2 flex items-center space-x-2">
-							<button class="badge badge-neutral">Mon annonce</button>
-							<span class="badge badge-secondary">{ad.price} €</span>
+							{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+								<span class="badge badge-neutral">Mon annonce</span>
+							{/if}
+							<span class="badge badge-secondary">{selectedConv!.price ?? 0} €</span>
 						</div>
 						<h2 class="text-lg font-bold">{ad.title}</h2>
 						<p class="text-sm text-gray-600">{ad.description}</p>
+                        {#if ad.departureLocation && ad.arrivalLocation}
+                            <div class="mt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between text-sm text-gray-800 gap-4">
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-900 mb-1">📍 Départ</p>
+                                <p>{ad.departureLocation.name}</p>
+                                <p>{ad.departureLocation.address}</p>
+                                <p>{ad.departureLocation.cp} {ad.departureLocation.city}, {ad.departureLocation.country}</p>
+                            </div>
+                            
+                            <div class="hidden sm:flex items-center justify-center px-4">
+                                <span class="text-gray-400 text-xl">→</span>
+                            </div>
+                            
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-900 mb-1">🎯 Arrivée</p>
+                                <p>{ad.arrivalLocation.name}</p>
+                                <p>{ad.arrivalLocation.address}</p>
+                                <p>{ad.arrivalLocation.cp} {ad.arrivalLocation.city}, {ad.arrivalLocation.country}</p>
+                            </div>
+                            </div>
+
+                        {/if}
+
+                        {#if ad.packageSize}
+                            <p class="mt-2 text-sm">Taille du colis : {ad.packageSize}</p>
+                        {/if}
+                        {#if ad.shoppingList && ad.shoppingList.length}
+                            <p class="mt-2 text-sm">Liste de course :</p>
+                            <ul class="list-disc pl-5 text-sm text-gray-700">
+                                {#each ad.shoppingList as item}
+                                    <li>{item}</li>
+                                {/each}
+                            </ul>
+                        {/if}
 					</div>
-					{#if ad.type === 'delivery' || ad.type === 'shopping'}
-						<button class="btn btn-primary">Accepter {ad.offerPrice} €</button>
-					{:else}
-						<button class="btn btn-primary" on:click={openSlotModal}>Choisir un créneau</button>
+
+					{#if selectedConv!.adType === 'ShoppingAds'}
+						{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+							<button class="btn btn-outline">Payer</button>
+						{:else}
+							<button class="btn btn-primary" on:click={openSlotModal}>Proposer un nouveau prix</button>
+						{/if}
+					{:else if selectedConv!.adType === 'DeliverySteps'}
+						{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+                            <div>
+                                <button class="btn btn-outline">Payer</button>
+                            </div>
+						{:else}
+							<button class="btn btn-primary" on:click={openSlotModal}>Proposer un nouveau prix</button>
+						{/if}
+					{:else if selectedConv!.adType === 'PersonalServiceAds'}
+						{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+							<button class="btn btn-outline">Voir demandes</button>
+						{:else}
+							<button class="btn btn-primary" on:click={openSlotModal}>Choisir un créneau</button>
+						{/if}
+					{:else if selectedConv!.adType === 'ReleaseCartAds'}
+						{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+							<button class="btn btn-outline">Payer</button>
+						{:else}
+							<button class="btn btn-primary" on:click={openSlotModal}>Proposer un nouveau prix</button
+							>
+						{/if}
 					{/if}
 				</header>
 			{:else}
@@ -239,7 +319,7 @@
 						{:else if m.sender.id === currentUserId}
 							<div class="chat chat-end">
 								<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
-								<div class="chat-bubble bg-primary">{m.content}</div>
+								<div class="chat-bubble bg-primary text-white">{m.content}</div>
 							</div>
 						{:else}
 							<div class="chat chat-start">
@@ -249,7 +329,9 @@
 						{/if}
 					{/each}
 				{:else}
-					<p class="mt-4 text-center text-sm text-gray-500">Aucun message</p>
+					<p class="mt-4 text-center text-sm text-gray-500">
+						Aucun message dans cette conversation.
+					</p>
 				{/if}
 			</main>
 
@@ -271,7 +353,7 @@
 	{#if showSlotModal}
 		<div class="modal modal-open">
 			<div class="modal-box">
-				<h3 class="text-lg font-bold">Choisir un créneau</h3>
+				<h3 class="text-lg font-bold">{selectedConv!.adType}</h3>
 				<div class="modal-action">
 					<button class="btn" on:click={closeSlotModal}>Annuler</button>
 					<button class="btn btn-primary" on:click={closeSlotModal}>Confirmer</button>
@@ -279,9 +361,4 @@
 			</div>
 		</div>
 	{/if}
-</div> -->
-<script lang="ts">
-	import Chat from '$lib/components/Chat.svelte';
-</script>
-
-<Chat></Chat>
+</div>

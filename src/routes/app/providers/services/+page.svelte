@@ -14,6 +14,7 @@
 	let serviceTypes: ServiceType[] = [];
 	let authorizedTypeIds: number[] = [];
 
+	let showDeleteModal = false;
 	let title = '';
 	let description = '';
 	let selectedTypeId: number = -1;
@@ -28,6 +29,7 @@
 		description: string;
 		imageUrls: string[];
 		type: { id: number; name: string };
+		typeId: number;
 		status: string;
 		createdAt: string;
 	};
@@ -39,21 +41,29 @@
 	});
 
 	async function loadAds() {
-		const fetchedAds = await fetchFromAPI<PersonalServiceAd[]>('/personal-service-ads', {
-			headers: { Authorization: `Bearer ${get(accessToken)}` }
-		});
+	const fetchedAds = await fetchFromAPI<PersonalServiceAd[]>('/personal-service-ads', {
+		headers: { Authorization: `Bearer ${get(accessToken)}` }
+	});
 
-		// Remplir ads avec les données reçues
-		ads = await Promise.all(
-			fetchedAds.map(async (ad: PersonalServiceAd) => {
-				// Trouver le nom du type de service à partir de l'ID
-				const serviceType = serviceTypes.find((st) => st.id === ad.type.id);
-				ad.type.name = serviceType ? serviceType.name : 'Type inconnu';
-				return ad;
-			})
-		);
-		console.log(ads); // Vérifier les données
-	}
+	console.log(fetchedAds);
+
+	ads = await Promise.all(
+		fetchedAds.map(async (ad: any) => {
+			const typeId = ad.typeId ?? -1;
+			const serviceType = serviceTypes.find((st) => st.id === typeId);
+
+			// Injecter un objet type cohérent
+			ad.type = {
+				id: typeId,
+				name: serviceType ? serviceType.name : 'Type inconnu'
+			};
+
+			return ad;
+		})
+	);
+
+	console.log(ads);
+}
 
 	async function loadServiceTypes() {
 		try {
@@ -122,6 +132,36 @@
 			Authorization: `Bearer ${get(accessToken)}`
 		};
 	}
+
+	let deleteId: number | null = null;
+
+	function openDeleteModal(id: number) {
+		deleteId = id;
+		showDeleteModal = true;
+	}
+
+	function cancelDelete() {
+		showDeleteModal = false;
+		deleteId = null;
+	}
+
+	async function confirmDelete() {
+		if (deleteId === null) return;
+		try {
+			const res = await fetchFromAPI(`/personal-service-ads/${deleteId}`,
+				{ method: 'DELETE', headers: getHeaders() }
+			);
+			if (res == null) {
+				notifications.success('Annonce supprimée');
+				await loadAds();
+			}
+		} catch {
+			notifications.error('Erreur lors de la suppression');
+		} finally {
+			showDeleteModal = false;
+			deleteId = null;
+		}
+	}
 </script>
 
 <div class="bg-base-200 mx-auto min-h-screen p-6">
@@ -136,18 +176,18 @@
 				<h3 class="mb-4 text-lg font-bold">Nouvelle annonce de prestation</h3>
 
 				<div class="form-control mb-4">
-					<label class="label">Titre</label>
-					<input class="input input-bordered" bind:value={title} />
+					<label class="label" for="title-input">Titre</label>
+					<input id="title-input" class="input input-bordered w-full" bind:value={title} />
 				</div>
 
 				<div class="form-control mb-4">
-					<label class="label">Description</label>
-					<textarea class="textarea textarea-bordered" bind:value={description}></textarea>
+					<label class="label" for="description-input">Description</label>
+					<textarea id="description-input" class="textarea textarea-bordered w-full" bind:value={description}></textarea>
 				</div>
 
 				<div class="form-control mb-4">
-					<label class="label">Type de prestation</label>
-					<select bind:value={selectedTypeId} class="select select-bordered">
+					<label class="label" for="service-type-select">Type de prestation</label>
+					<select id="service-type-select" bind:value={selectedTypeId} class="select select-bordered w-full">
 						<option value={-1} disabled>Sélectionner</option>
 						{#each serviceTypes as st}
 							<option value={st.id} disabled={!authorizedTypeIds.includes(st.id)}>
@@ -159,12 +199,13 @@
 				</div>
 
 				<div class="form-control mb-4">
-					<label class="label">Images</label>
+					<label class="label" for="images-input">Images</label>
 					<input
+						id="images-input"
 						type="file"
 						accept="image/*"
 						multiple
-						class="file-input file-input-bordered"
+						class="file-input file-input-bordered w-full"
 						on:change={handleFilesSelected}
 					/>
 				</div>
@@ -190,21 +231,71 @@
 	<div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		{#each ads as ad}
 			<div class="card bg-white shadow-md">
-				{#if ad.imageUrls?.length}
-					<img src={ad.imageUrls[0]} class="h-40 w-full rounded-t object-cover" alt={ad.title} />
-				{:else}
-					<div class="flex h-40 items-center justify-center rounded-t bg-gray-200 text-gray-500">
-						Pas d'image
+				{#if ad.imageUrls?.length > 0}
+					<div class="carousel h-40 w-full rounded-t-lg sm:h-48">
+						{#each ad.imageUrls as url, i}
+							<div id="item-{ad.id}-{i}" class="carousel-item relative w-full">
+								<img
+									src={url}
+									alt="Image {i + 1}"
+									class="h-full w-full rounded-t-lg object-cover"
+									loading="lazy"
+								/>
+								<div
+									class="bg-opacity-50 absolute right-2 bottom-2 rounded bg-black px-2 py-1 text-xs text-white"
+								>
+									{i + 1}/{ad.imageUrls.length}
+								</div>
+							</div>
+						{/each}
 					</div>
+
+					<!-- Navigation -->
+					<div class="mt-2 flex justify-center gap-2">
+						{#each ad.imageUrls as _, i}
+							<button
+								class="btn btn-xs"
+								on:click={() => {
+									const el = document.getElementById(`item-${ad.id}-${i}`);
+									el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+								}}
+							>
+								{i + 1}
+							</button>
+						{/each}
+					</div>
+				{:else}
+					<figure class="flex h-40 items-center justify-center rounded-t-lg bg-gray-200 sm:h-48">
+						<span class="text-gray-500">Aucune photo disponible</span>
+					</figure>
 				{/if}
 				<div class="card-body p-4">
 					<h2 class="card-title text-lg">{ad.title}</h2>
 					<p class="text-sm text-gray-700">{ad.description}</p>
 					<p class="mt-2 text-xs text-gray-500">
-						{ad.type.name} – {new Date(ad.createdAt).toLocaleDateString()}
+						{ad.type.name} – Créé le {new Date(ad.createdAt).toLocaleDateString()}
 					</p>
+					<button
+						on:click={() => openDeleteModal(ad.id)}
+						class="btn btn-xs btn-error top-2 right-2"
+					>
+						Supprimer
+					</button>
 				</div>
 			</div>
 		{/each}
 	</div>
+
+	{#if showDeleteModal}
+		<div class="modal modal-open">
+			<div class="modal-box">
+				<h3 class="text-lg font-bold">Confirmer la suppression</h3>
+				<p>Voulez-vous vraiment supprimer cette annonce ?</p>
+				<div class="modal-action">
+					<button class="btn" on:click={cancelDelete}>Annuler</button>
+					<button class="btn btn-error" on:click={confirmDelete}>Supprimer</button>
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
