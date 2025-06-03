@@ -11,7 +11,7 @@
 
 	interface Conversation {
 		id: number;
-		adType: 'ShoppingAds' | 'DeliverySteps' | 'PersonalServiceAds' | 'ReleaseCartAds';
+		adType: 'ShoppingAds' | 'DeliverySteps' | 'ServiceProvisions' | 'ReleaseCartAds';
 		adId: number;
 		userFrom: { id: number };
         price: number;
@@ -94,8 +94,8 @@
 	} catch (e) {
 		console.warn('Impossible de charger les lieux de départ ou d’arrivée', e);
 	}
-		} else if (conv.adType === 'PersonalServiceAds') {
-			raw = await fetchFromAPI<any>(`/service-ads/${conv.adId}`, {
+		} else if (conv.adType === 'ServiceProvisions') {
+			raw = await fetchFromAPI<any>(`/personal-service-ads/${conv.adId}`, {
 				headers: { Authorization: `Bearer ${token}` }
 			});
 		} else {
@@ -289,7 +289,7 @@
 						{:else}
 							<button class="btn btn-primary" on:click={openSlotModal}>Proposer un nouveau prix</button>
 						{/if}
-					{:else if selectedConv!.adType === 'PersonalServiceAds'}
+					{:else if selectedConv!.adType === 'ServiceProvisions'}
 						{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
 							<button class="btn btn-outline">Voir demandes</button>
 						{:else}
