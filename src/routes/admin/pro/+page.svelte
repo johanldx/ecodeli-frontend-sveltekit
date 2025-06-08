@@ -7,19 +7,20 @@
 	import { notifications } from '$lib/stores/notifications';
 	import dayjs from 'dayjs';
 
-	// ——— Typage pour les ServiceTypes —————————————————————
 	interface ServiceType {
 		id: number;
 		name: string;
+		price: number;
 	}
+	type SelectedAuth = { id: number; price: number };
 
-	// —— Personal Service Types ——
 	let typesData: any[] = [];
 	let loadingTypes = true;
 
 	const typesColumns = [
 		{ Header: 'ID', accessor: 'id', sortable: true },
 		{ Header: 'Nom', accessor: 'name', sortable: true },
+		{ Header: 'Prix', accessor: 'price', sortable: true },
 		{ Header: 'Créé le', accessor: 'created_at', sortable: true },
 		{ Header: 'Modifié le', accessor: 'edited_at', sortable: true },
 		{ Header: 'Actions', accessor: 'actions', sortable: false }
@@ -30,13 +31,16 @@
 	let isEditingType = false;
 	let selectedType: any = null;
 	let typeName = '';
+	let typePrice = 0;
 
 	function openTypeModal(edit = false, row: any = null) {
 		isEditingType = edit;
 		selectedType = edit ? row : null;
 		typeName = edit ? row.name : '';
+		typePrice = edit ? row.price : 0;
 		showModalType = true;
 	}
+
 	function openDeleteTypeModal(row: any) {
 		selectedType = row;
 		showModalTypeDelete = true;
@@ -61,6 +65,7 @@
 			typesData = list.map((t) => ({
 				id: t.id,
 				name: t.name,
+				price: t.price,
 				created_at: formatDate(t.createdAt),
 				edited_at: formatDate(t.editedAt),
 				actions: [
@@ -84,7 +89,7 @@
 						'Content-Type': 'application/json',
 						Authorization: `Bearer ${get(accessToken)}`
 					},
-					body: JSON.stringify({ name: typeName })
+					body: JSON.stringify({ name: typeName, price: typePrice })
 				});
 				notifications.success('Type mis à jour');
 			} else {
@@ -94,7 +99,7 @@
 						'Content-Type': 'application/json',
 						Authorization: `Bearer ${get(accessToken)}`
 					},
-					body: JSON.stringify({ name: typeName })
+					body: JSON.stringify({ name: typeName, price: typePrice })
 				});
 				notifications.success('Type créé');
 			}
@@ -122,9 +127,9 @@
 		}
 	}
 
-	// —— Providers ——
 	let providersData: any[] = [];
 	let loadingProviders = true;
+	const formatDate = (d: string) => dayjs(d).format('DD/MM/YYYY HH:mm');
 
 	const providersColumns = [
 		{ Header: 'Nom', accessor: 'name', sortable: true },
@@ -141,9 +146,7 @@
 	let selectedProvider: any = null;
 	let serviceTypes: ServiceType[] = [];
 	let currentAuthIds: number[] = [];
-	let selectedAuthIds: number[] = [];
-
-	const formatDate = (d: string) => dayjs(d).format('DD/MM/YYYY HH:mm');
+	let selectedAuths: SelectedAuth[] = [];
 
 	async function loadProviders() {
 		loadingProviders = true;
@@ -160,13 +163,13 @@
 				.map((p) => ({
 					id: p.id,
 					name: `${p.user.first_name} ${p.user.last_name}`,
-					status: `<span class="badge badge-success">Validé</span>`,
-					identity_card_document: `<button class="btn btn-sm" onClick="window.open('${p.identity_card_document}','_blank')">Voir</button>`,
-					proof_of_business_document: `<button class="btn btn-sm" onClick="window.open('${p.proof_of_business_document}','_blank')">Voir</button>`,
+					status: `<span class='badge badge-success'>Validé</span>`,
+					identity_card_document: `<button class='btn btn-sm' onClick="window.open('${p.identity_card_document}','_blank')">Voir</button>`,
+					proof_of_business_document: `<button class='btn btn-sm' onClick="window.open('${p.proof_of_business_document}','_blank')">Voir</button>`,
 					certification_documents: p.certification_documents
 						.map(
 							(url: string) =>
-								`<button class="btn btn-xs mr-1 mb-1" onClick="window.open('${url}','_blank')">Voir</button>`
+								`<button class='btn btn-xs mr-1 mb-1' onClick="window.open('${url}','_blank')">Voir</button>`
 						)
 						.join(''),
 					bank_account: p.bank_account,
@@ -183,7 +186,6 @@
 	async function handleAction(action: string, row: any) {
 		if (action === 'Gérer autorisations') {
 			selectedProvider = row;
-			// liste de tous les types
 			serviceTypes = (await fetchFromAPI('/personal-service-types', {
 				method: 'GET',
 				headers: {
@@ -192,7 +194,6 @@
 				}
 			})) as ServiceType[];
 
-			// pour chaque type, check via GET /:providerId/:typeId
 			const authChecks = await Promise.all(
 				serviceTypes.map(async (st) => {
 					try {
@@ -210,35 +211,47 @@
 				})
 			);
 			currentAuthIds = authChecks.filter((id) => id !== null) as number[];
-			selectedAuthIds = [...currentAuthIds];
+			selectedAuths = serviceTypes
+				.filter((st) => currentAuthIds.includes(st.id))
+				.map((st) => ({ id: st.id, price: st.price }));
 			showModalAuth = true;
 		}
 	}
 
-	async function closeAuthModal() {
-		showModalAuth = false;
-		selectedProvider = null;
-		serviceTypes = [];
-		currentAuthIds = [];
-		selectedAuthIds = [];
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		location.reload();
-	}
-
 	async function saveAuthorizations() {
 		try {
-			const toAdd = selectedAuthIds.filter((id) => !currentAuthIds.includes(id));
-			const toRemove = currentAuthIds.filter((id) => !selectedAuthIds.includes(id));
+			const selectedIds = selectedAuths.map((a) => a.id);
+			const toAdd = selectedAuths.filter((a) => !currentAuthIds.includes(a.id));
+			const toRemove = currentAuthIds.filter((id) => !selectedIds.includes(id));
+			const toUpdate = selectedAuths.filter(
+				(a) =>
+					currentAuthIds.includes(a.id) &&
+					serviceTypes.find((st) => st.id === a.id)?.price !== a.price
+			);
 
 			await Promise.all([
-				...toAdd.map((id) =>
+				...toAdd.map((a) =>
 					fetchFromAPI('/personal-service-type-authorizations', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
 							Authorization: `Bearer ${get(accessToken)}`
 						},
-						body: JSON.stringify({ providerId: selectedProvider.id, personalServiceTypeId: id })
+						body: JSON.stringify({
+							providerId: selectedProvider.id,
+							personalServiceTypeId: a.id,
+							price: a.price
+						})
+					})
+				),
+				...toUpdate.map((a) =>
+					fetchFromAPI(`/personal-service-type-authorizations/${selectedProvider.id}/${a.id}`, {
+						method: 'PATCH',
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${get(accessToken)}`
+						},
+						body: JSON.stringify({ price: a.price })
 					})
 				),
 				...toRemove.map((id) =>
@@ -258,6 +271,16 @@
 		} catch {
 			notifications.error('Erreur lors de la mise à jour');
 		}
+	}
+
+	async function closeAuthModal() {
+		showModalAuth = false;
+		selectedProvider = null;
+		serviceTypes = [];
+		currentAuthIds = [];
+		selectedAuths = [];
+		await new Promise((r) => setTimeout(r, 1000));
+		location.reload();
 	}
 
 	onMount(() => {
@@ -301,6 +324,18 @@
 						placeholder="Entrez le nom du type"
 					/>
 				</fieldset>
+
+				<fieldset class="fieldset mb-4">
+					<legend>Prix (€)</legend>
+					<input
+						type="number"
+						class="input input-bordered w-full"
+						min="0"
+						step="0.01"
+						bind:value={typePrice}
+						placeholder="Prix par défaut pour ce type"
+					/>
+				</fieldset>
 				<div class="modal-action">
 					<button class="btn btn-primary" on:click={saveType}>Enregistrer</button>
 					<button class="btn" on:click={closeTypeModals}>Fermer</button>
@@ -341,15 +376,49 @@
 						class="grid max-h-64 grid-cols-2 gap-4 overflow-auto rounded border p-2 sm:grid-cols-3"
 					>
 						{#each serviceTypes as serviceType}
-							<label class="flex items-center">
-								<input
-									type="checkbox"
-									class="checkbox mr-2"
-									bind:group={selectedAuthIds}
-									value={serviceType.id}
-								/>
-								{serviceType.name}
-							</label>
+							<div class="flex flex-col gap-2 rounded border p-2">
+								<label class="flex items-center gap-2">
+									<input
+										type="checkbox"
+										class="checkbox"
+										checked={selectedAuths.some((a) => a.id === serviceType.id)}
+										on:change={(event) => {
+											const target = event.target as HTMLInputElement;
+											if (!target) return;
+
+											const exists = selectedAuths.find((a) => a.id === serviceType.id);
+											if (target.checked && !exists) {
+												selectedAuths = [
+													...selectedAuths,
+													{ id: serviceType.id, price: serviceType.price }
+												];
+											} else if (!target.checked && exists) {
+												selectedAuths = selectedAuths.filter((a) => a.id !== serviceType.id);
+											}
+										}}
+									/>
+									<span>{serviceType.name}</span>
+								</label>
+
+								{#if selectedAuths.some((a) => a.id === serviceType.id)}
+									<input
+										type="number"
+										class="input input-bordered input-sm"
+										min="0"
+										step="0.01"
+										value={selectedAuths.find((a) => a.id === serviceType.id)?.price}
+										on:input={(e) => {
+											const target = e.target as HTMLInputElement;
+											const updated = selectedAuths.map((a) =>
+												a.id === serviceType.id
+													? { ...a, price: parseFloat(target.value || '0') }
+													: a
+											);
+											selectedAuths = updated;
+										}}
+									/>
+								{/if}
+							</div>
 						{/each}
 					</div>
 				</fieldset>

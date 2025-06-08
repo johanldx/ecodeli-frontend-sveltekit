@@ -41,29 +41,29 @@
 	});
 
 	async function loadAds() {
-	const fetchedAds = await fetchFromAPI<PersonalServiceAd[]>('/personal-service-ads', {
-		headers: { Authorization: `Bearer ${get(accessToken)}` }
-	});
+		const fetchedAds = await fetchFromAPI<PersonalServiceAd[]>('/personal-service-ads', {
+			headers: { Authorization: `Bearer ${get(accessToken)}` }
+		});
 
-	console.log(fetchedAds);
+		console.log(fetchedAds);
 
-	ads = await Promise.all(
-		fetchedAds.map(async (ad: any) => {
-			const typeId = ad.typeId ?? -1;
-			const serviceType = serviceTypes.find((st) => st.id === typeId);
+		ads = await Promise.all(
+			fetchedAds.map(async (ad: any) => {
+				const typeId = ad.typeId ?? -1;
+				const serviceType = serviceTypes.find((st) => st.id === typeId);
 
-			// Injecter un objet type cohérent
-			ad.type = {
-				id: typeId,
-				name: serviceType ? serviceType.name : 'Type inconnu'
-			};
+				// Injecter un objet type cohérent
+				ad.type = {
+					id: typeId,
+					name: serviceType ? serviceType.name : 'Type inconnu'
+				};
 
-			return ad;
-		})
-	);
+				return ad;
+			})
+		);
 
-	console.log(ads);
-}
+		console.log(ads);
+	}
 
 	async function loadServiceTypes() {
 		try {
@@ -148,9 +148,10 @@
 	async function confirmDelete() {
 		if (deleteId === null) return;
 		try {
-			const res = await fetchFromAPI(`/personal-service-ads/${deleteId}`,
-				{ method: 'DELETE', headers: getHeaders() }
-			);
+			const res = await fetchFromAPI(`/personal-service-ads/${deleteId}`, {
+				method: 'DELETE',
+				headers: getHeaders()
+			});
 			if (res == null) {
 				notifications.success('Annonce supprimée');
 				await loadAds();
@@ -182,12 +183,20 @@
 
 				<div class="form-control mb-4">
 					<label class="label" for="description-input">Description</label>
-					<textarea id="description-input" class="textarea textarea-bordered w-full" bind:value={description}></textarea>
+					<textarea
+						id="description-input"
+						class="textarea textarea-bordered w-full"
+						bind:value={description}
+					></textarea>
 				</div>
 
 				<div class="form-control mb-4">
 					<label class="label" for="service-type-select">Type de prestation</label>
-					<select id="service-type-select" bind:value={selectedTypeId} class="select select-bordered w-full">
+					<select
+						id="service-type-select"
+						bind:value={selectedTypeId}
+						class="select select-bordered w-full"
+					>
 						<option value={-1} disabled>Sélectionner</option>
 						{#each serviceTypes as st}
 							<option value={st.id} disabled={!authorizedTypeIds.includes(st.id)}>
