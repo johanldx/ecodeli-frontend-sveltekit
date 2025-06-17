@@ -16,7 +16,7 @@
 		adId: number;
 		userFrom: { id: number };
 		price: number;
-		status?: string;
+		status: string;
 		hasError?: boolean;
 		label?: string;
 	}
@@ -32,7 +32,7 @@
 	interface Message {
 		id: number;
 		content: string;
-		sender: { id?: number; name: string };
+		sender: { id?: number; name: string } | null;
 		conversation: { id: number };
 	}
 
@@ -57,36 +57,41 @@
 	let selectedScheduleId: number | null = null;
 	let adPrice: number | null = null;
 
-	type GroupKey = 'actives' | 'terminees' | 'erreurs';
+	type GroupKey = 'actives' | 'terminees' | 'erreurs' | 'en_cours';
 	const groupLabels: Record<GroupKey, string> = {
 		actives: 'Conversations actives',
+		en_cours: 'Conversation en cours',
 		terminees: 'Conversations terminées',
-		erreurs: 'Erreurs de récupération'
+		erreurs: 'Erreurs de récupération',
 	};
 
 	const groupColors: Record<GroupKey, string> = {
 		actives: 'green-500',
+		en_cours: 'green-500',
 		terminees: 'gray-500',
-		erreurs: 'red-500'
+		erreurs: 'red-500',
 	};
 
 	let groupStates: Record<GroupKey, boolean> = {
 		actives: true,
+		en_cours: true,
 		terminees: true,
-		erreurs: true
+		erreurs: true,
 	};
 
 	type ConversationGroup = Record<GroupKey, Conversation[]>;
-	let groupedConvs: ConversationGroup = { actives: [], terminees: [], erreurs: [] };
+	let groupedConvs: ConversationGroup = { actives: [], en_cours: [], terminees: [], erreurs: [], };
 
 	$: {
-		groupedConvs = { actives: [], terminees: [], erreurs: [] };
+		groupedConvs = { actives: [], en_cours: [], terminees: [], erreurs: [] };
 
 		for (const conv of convList) {
 			if (conv.hasError) {
 				groupedConvs.erreurs.push(conv);
 			} else if ((conv.status === 'completed') || (conv.status === 'closed')) {
 				groupedConvs.terminees.push(conv);
+			} else if ((conv.status === 'ongoing')) {
+				groupedConvs.en_cours.push(conv);
 			} else {
 				groupedConvs.actives.push(conv);
 			}
@@ -128,6 +133,7 @@
 				notifications.error('Veuillez sélectionner un créneau.');
 				return;
 			}
+			// Réservation du créneau
 			await fetchFromAPI(`/conversations/${selectedConv!.id}`, {
 				method: 'PATCH',
 				headers: {
@@ -140,9 +146,49 @@
 				})
 			});
 			notifications.success('Créneau réservé. Redirection vers le paiement à venir.');
+
+			const response = await fetchFromAPI<{ url?: string }>('/stripe/checkout-session', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${get(accessToken)}`
+				},
+				body: JSON.stringify({
+					conversationId: selectedConv!.id,
+					url: window.location.href
+				})
+			});
+
+			if (response?.url) {
+				// Rediriger l'utilisateur vers l'URL de paiement Stripe
+				window.location.href = response.url;
+			} else {
+				notifications.error('Erreur lors de la création de la session de paiement.');
+			}
+		} else if (modalContext === 'payer') {
+			// Appel à Stripe pour la création de la session de paiement
+			const response = await fetchFromAPI<{ url?: string }>('/stripe/checkout-session', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${get(accessToken)}`
+				},
+				body: JSON.stringify({
+					conversationId: selectedConv!.id,
+					url: window.location.href
+				})
+			});
+
+			if (response?.url) {
+				// Rediriger l'utilisateur vers l'URL de paiement Stripe
+				window.location.href = response.url;
+			} else {
+				notifications.error('Erreur lors de la création de la session de paiement.');
+			}
 		}
 		closeSlotModal();
 	}
+
 
 	function updateUrl(id: number) {
 		const params = new URLSearchParams(window.location.search);
@@ -156,6 +202,8 @@
 			headers: { Authorization: `Bearer ${token}` }
 		});
 
+		console.log(rawList);
+
 		const result: Conversation[] = [];
 
 		for (const conv of rawList) {
@@ -167,7 +215,6 @@
 						<span class="">${adData?.title ?? 'Annonce inconnue'}</span>
 					</span>
 				`;
-				conv.status = adData?.status;
 			} catch (e) {
 				conv.label = `
 					<span class="flex items-center gap-2">
@@ -334,6 +381,14 @@
 		} else {
 			selectedConv = null;
 		}
+
+		const urlParams = new URLSearchParams(window.location.search);
+
+		if (urlParams.get('payment') === 'success') {
+			notifications.success("Votre paiement a bien été pris en compte");
+		} else if (urlParams.get('payment') === 'cancel') {
+			notifications.error("Votre paiement a bien été annulé");
+		}
 	});
 
 	onDestroy(() => {
@@ -460,30 +515,34 @@
 						{/if}
 					</div>
 
-					{#if selectedConv!.adType === 'ShoppingAds'}
-						{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
-							<button class="btn btn-outline" on:click={() => openSlotModal('payer')}>Payer</button>
-						{:else}
-							<button class="btn btn-primary" on:click={() => openSlotModal('prix')}>Proposer un nouveau prix</button>
+					{#if groupedConvs.actives.find(c => c.id === selectedConv!.id)}
+						{#if selectedConv!.adType === 'ShoppingAds'}
+							{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+								<button class="btn btn-outline" on:click={() => openSlotModal('payer')}>Payer</button>
+							{:else}
+								<button class="btn btn-primary" on:click={() => openSlotModal('prix')}>Proposer un nouveau prix</button>
+							{/if}
+						{:else if selectedConv!.adType === 'DeliverySteps'}
+							{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+								<button class="btn btn-outline" on:click={() => openSlotModal('payer')}>Payer</button>
+							{:else}
+								<button class="btn btn-primary" on:click={() => openSlotModal('prix')}>Proposer un nouveau prix</button>
+							{/if}
+						{:else if selectedConv!.adType === 'ServiceProvisions'}
+							{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+								<button class="btn btn-outline" on:click={() => openSlotModal('demandes')}>Voir demandes</button>
+							{:else}
+								<button class="btn btn-primary" on:click={() => openSlotModal('créneau')}>Choisir un créneau</button>
+							{/if}
+						{:else if selectedConv!.adType === 'ReleaseCartAds'}
+							{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+								<button class="btn btn-outline" on:click={() => openSlotModal('payer')}>Payer</button>
+							{:else}
+								<button class="btn btn-primary" on:click={() => openSlotModal('prix')}>Proposer un nouveau prix</button>
+							{/if}
 						{/if}
-					{:else if selectedConv!.adType === 'DeliverySteps'}
-						{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
-							<button class="btn btn-outline" on:click={() => openSlotModal('payer')}>Payer</button>
-						{:else}
-							<button class="btn btn-primary" on:click={() => openSlotModal('prix')}>Proposer un nouveau prix</button>
-						{/if}
-					{:else if selectedConv!.adType === 'ServiceProvisions'}
-						{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
-							<button class="btn btn-outline" on:click={() => openSlotModal('demandes')}>Voir demandes</button>
-						{:else}
-							<button class="btn btn-primary" on:click={() => openSlotModal('créneau')}>Choisir un créneau</button>
-						{/if}
-					{:else if selectedConv!.adType === 'ReleaseCartAds'}
-						{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
-							<button class="btn btn-outline" on:click={() => openSlotModal('payer')}>Payer</button>
-						{:else}
-							<button class="btn btn-primary" on:click={() => openSlotModal('prix')}>Proposer un nouveau prix</button>
-						{/if}
+					{:else}
+						<button class="btn btn-disabled" disabled>Finalisé</button>
 					{/if}
 				</header>
 			{:else}
@@ -493,9 +552,9 @@
 			<main class="flex-1 space-y-4 overflow-y-auto bg-white p-4">
 				{#if messages.length}
 					{#each messages as m}
-						{#if !m.sender.id}
+						{#if !m.sender || !m.sender.id}
 							<div class="chat chat-center">
-								<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+								<div class="chat-header text-xs text-gray-500">Ecodeli.fr</div>
 								<div class="chat-bubble bg-base-content text-white">{m.content}</div>
 							</div>
 						{:else if m.sender.id === currentUserId}

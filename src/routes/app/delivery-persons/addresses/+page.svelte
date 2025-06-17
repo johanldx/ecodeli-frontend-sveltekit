@@ -18,6 +18,8 @@
 		cp: string;
 		city: string;
 		country: string;
+		price: number;
+		public: boolean;
 	};
 
 	let addresses: Address[] = [];
@@ -32,7 +34,9 @@
 		address: '',
 		cp: '',
 		city: '',
-		country: 'France'
+		country: 'France',
+		price: 0,
+		public: false
 	};
 
 	let suggestions: any[] = [];
@@ -104,7 +108,9 @@
 			address: '',
 			cp: '',
 			city: '',
-			country: 'France'
+			country: 'France',
+			price: 0,
+			public: false
 		};
 		suggestions = [];
 		showSuggestions = false;
@@ -194,14 +200,24 @@
 					<h2 class="card-title text-lg">{addr.name}</h2>
 					<p class="text-sm text-gray-700">{addr.address}</p>
 					<p class="text-sm text-gray-700">{addr.cp} {addr.city}, {addr.country}</p>
-					<div class="card-actions mt-4 justify-end">
-						<button class="btn btn-sm btn-primary" on:click={() => openEditModal(addr)}
-							>{$modify}</button
-						>
-						<button class="btn btn-sm btn-error" on:click={() => openDeleteModal(addr)}
-							>{$delete_address}</button
-						>
+					<div class="flex items-center gap-2">
+						{#if addr.public}
+							<span class="badge badge-neutral">Ecodeli.fr</span>
+						{/if}
+						{#if addr.price}
+							<p class="text-sm text-gray-700">Prix : {addr.price} €</p>
+						{/if}
 					</div>
+					{#if !addr.public}
+						<div class="card-actions mt-4 justify-end">
+							<button class="btn btn-sm btn-primary" on:click={() => openEditModal(addr)}>
+								{$modify}
+							</button>
+							<button class="btn btn-sm btn-error" on:click={() => openDeleteModal(addr)}>
+								{$delete_address}
+							</button>
+						</div>
+					{/if}
 				</div>
 			</div>
 		{/each}

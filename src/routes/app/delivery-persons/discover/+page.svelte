@@ -199,7 +199,7 @@
 				},
 				body: JSON.stringify({
 					adType: 'DeliverySteps',
-					adId: step.deliveryAdId,
+					adId: step.id,
 					status: 'pending',
 					price: step.price,
 					userFrom: currentUser.id
