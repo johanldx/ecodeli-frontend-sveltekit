@@ -22,7 +22,7 @@
 	const footer_menu_business_space = t('landing.global.footer.menu.business_space');
 	const footer_menu_legal_mentions = t('landing.global.footer.menu.legal_mentions');
 	const footer_menu_admin = t('landing.global.footer.menu.admin');
-
+	const footer_menu_track = t('landing.global.footer.menu.track');
 	const hideLayout = derived(page, ($page) => {
 		if ($page.status && $page.status >= 400) return false;
 
@@ -138,6 +138,7 @@
 							<a href="/traders">{$footer_menu_business_space}</a>
 							<a href="/legal">{$footer_menu_legal_mentions}</a>
 							<a href="/admin">{$footer_menu_admin}</a>
+							<a href="/track">{$footer_menu_track}</a>
 						</div>
 					</div>
 				</div>
