@@ -4,6 +4,7 @@
 	import { t, tStatic } from '$lib/utils/t';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { getAndClearFallbackUrl } from '$lib/stores/fallbackUrl';
 
 	onMount(async () => {
 		const isLoggedIn = await checkAuth();
@@ -32,7 +33,12 @@
 			updateAllProfiles();
 			notifications.success(message);
 			if (access_token) {
-				goto('/auth/space');
+				const fallbackUrl = getAndClearFallbackUrl();
+				if (fallbackUrl && fallbackUrl !== '/auth/login') {
+					goto(fallbackUrl);
+				} else {
+					goto('/auth/space');
+				}
 			}
 		} catch (error: any) {
 			password = '';

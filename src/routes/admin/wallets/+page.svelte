@@ -21,16 +21,13 @@
 	const last_update = tStatic('admin.wallets.last_update');
 	const actions = tStatic('admin.wallets.actions');
 	const modify = tStatic('admin.wallets.modify');
-	const cancel = tStatic('admin.wallets.cancel');
 	const close_button = t('admin.wallets.close_button');
 	const record_button = t('admin.wallets.record_button');
 	const wallet_modify = t('admin.wallets.wallet_modify');
-	const wallet_delete = t('admin.wallets.wallet_delete');
-	const cancel_delete = t('admin.wallets.cancel_delete');
-	const delete_confirmation = t('admin.wallets.delete_confirmation');
 
 	onMount(() => onDestroy(tabTitle('admin.wallets')));
 
+	let walletsData: any[] = []; // Stockage des données complètes
 	let data: {
 		id: string;
 		user_name: string;
@@ -56,7 +53,6 @@
 
 	// Modales
 	let showModalEdit = false;
-	let showModalDelete = false;
 
 	let selectedWallet: any = null;
 	let editedWallet = { ...selectedWallet };
@@ -72,6 +68,9 @@
 				headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` }
 			})) as any[];
 
+			// Stocker les données complètes
+			walletsData = wallets;
+
 			data = wallets.map((wallet) => ({
 				id: wallet.id,
 				user_name: `${wallet.user.first_name} ${wallet.user.last_name}`,
@@ -81,8 +80,7 @@
 				created_at: formatDate(wallet.created_at),
 				edited_at: formatDate(wallet.edited_at),
 				actions: [
-					{ label: modify, class: 'btn btn-warning' },
-					{ label: cancel, class: 'btn btn-error' }
+					{ label: modify, class: 'btn btn-warning' }
 				]
 			}));
 
@@ -97,65 +95,53 @@
 	function handleAction(action: string, row: any) {
 		if (action === modify) {
 			openModal(row);
-		} else if (action === cancel) {
-			selectedWallet = row;
-			showModalDelete = true;
 		}
 	}
 
-	function openModal(wallet: any) {
-		selectedWallet = wallet;
-		editedWallet = { ...wallet };
-		fetchWalletDetails(wallet.id);
-		showModalEdit = true;
-	}
-
-	async function fetchWalletDetails(walletId: string) {
-		try {
-			const wallet = await fetchFromAPI(`/wallet/all`, {
-				method: 'GET',
-				headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` }
-			});
-
-			const foundWallet = (wallet as any[]).find(w => w.id === parseInt(walletId));
-			if (foundWallet) {
-				editedWallet = { 
-					...foundWallet,
-					amount_available: foundWallet.amout_available,
-					amount_pending: foundWallet.amout_pending
-				};
-			}
-		} catch (error) {
-			console.error("Erreur lors de la récupération des détails du wallet : ", error);
+	function openModal(row: any) {
+		// Trouver les données complètes du wallet
+		const fullWalletData = walletsData.find(w => w.id === parseInt(row.id));
+		if (fullWalletData) {
+			selectedWallet = row;
+			editedWallet = {
+				id: fullWalletData.id,
+				user_name: `${fullWalletData.user.first_name} ${fullWalletData.user.last_name}`,
+				user_email: fullWalletData.user.email,
+				amount_available: fullWalletData.amout_available,
+				amount_pending: fullWalletData.amout_pending
+			};
+			showModalEdit = true;
 		}
 	}
 
 	function closeModals() {
 		showModalEdit = false;
-		showModalDelete = false;
-	}
-
-	async function deleteWallet() {
-		try {
-			// Note: Il n'y a pas d'endpoint DELETE pour les wallets dans le backend actuel
-			// Cette fonction est préparée pour une future implémentation
-			notifications.error('La suppression des wallets n\'est pas encore implémentée');
-			closeModals();
-		} catch (error: any) {
-			closeModals();
-			notifications.error('Erreur lors de la suppression du wallet');
-		}
 	}
 
 	async function modifyWallet() {
 		try {
-			// Note: Il n'y a pas d'endpoint PATCH pour les wallets dans le backend actuel
-			// Cette fonction est préparée pour une future implémentation
-			notifications.error('La modification des wallets n\'est pas encore implémentée');
+			const updateData = {
+				amout_available: parseFloat(editedWallet.amount_available),
+				amout_pending: parseFloat(editedWallet.amount_pending)
+			};
+
+			await fetchFromAPI(`/wallet/${editedWallet.id}`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${get(accessToken)}`
+				},
+				body: JSON.stringify(updateData)
+			});
+
+			notifications.success('Le portefeuille a été modifié avec succès.');
 			closeModals();
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			location.reload();
 		} catch (error: any) {
+			console.error('Erreur lors de la modification du wallet :', error);
 			closeModals();
-			notifications.error('Erreur lors de la modification du wallet');
+			notifications.error('Erreur lors de la modification du portefeuille');
 		}
 	}
 </script>
@@ -179,27 +165,16 @@
 			<div class="modal-box">
 				<h2 class="mb-5 text-center text-xl font-semibold">{$wallet_modify}</h2>
 				{#if editedWallet}
-					<fieldset class="fieldset">
-						<legend>{user_name}</legend>
-						<input
-							class="input input-bordered"
-							value={editedWallet.user_name}
-							disabled
-						/>
-					</fieldset>
-					<fieldset class="fieldset">
-						<legend>{user_email}</legend>
-						<input
-							class="input input-bordered"
-							value={editedWallet.user_email}
-							disabled
-						/>
-					</fieldset>
+					<div class="mb-4 p-3 bg-gray-100 rounded">
+						<p class="text-sm text-gray-600"><strong>{user_name}:</strong> {editedWallet.user_name}</p>
+						<p class="text-sm text-gray-600"><strong>{user_email}:</strong> {editedWallet.user_email}</p>
+					</div>
 					<fieldset class="fieldset">
 						<legend>{amount_available}</legend>
 						<input
 							type="number"
 							step="0.01"
+							min="0"
 							class="input input-bordered"
 							bind:value={editedWallet.amount_available}
 						/>
@@ -209,6 +184,7 @@
 						<input
 							type="number"
 							step="0.01"
+							min="0"
 							class="input input-bordered"
 							bind:value={editedWallet.amount_pending}
 						/>
@@ -217,22 +193,6 @@
 				<div class="modal-action">
 					<button class="btn btn-primary" on:click={modifyWallet}>{$record_button}</button>
 					<button class="btn" on:click={closeModals}>{$close_button}</button>
-				</div>
-			</div>
-		</div>
-	{/if}
-
-	<!-- Modale suppression wallet -->
-	{#if showModalDelete}
-		<div class="modal modal-open">
-			<div class="modal-box">
-				<h2 class="mb-5 text-center text-xl font-semibold">{$wallet_delete}</h2>
-				{#if selectedWallet}
-					<p class="text-center">{$delete_confirmation} <strong>{selectedWallet.user_name}</strong> ?</p>
-				{/if}
-				<div class="modal-action">
-					<button class="btn btn-error" on:click={deleteWallet}>{cancel}</button>
-					<button class="btn" on:click={closeModals}>{$cancel_delete}</button>
 				</div>
 			</div>
 		</div>
