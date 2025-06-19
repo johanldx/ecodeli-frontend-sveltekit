@@ -7,6 +7,7 @@
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/stores/user';
+	import { notifications } from '$lib/stores/notifications';
 
 	// Labels
 	const ALL_LABEL = 'Tout';
@@ -29,6 +30,7 @@
 		packageSize: string;
 		deliveryDate: string;
 		imageUrls: string[];
+		status: string;
 		departureLocation: Location;
 		arrivalLocation: Location;
 		shoppingList: string[];
@@ -43,6 +45,7 @@
 		packageSize: string;
 		deliveryDate: string;
 		imageUrls: string[];
+		status: string;
 		departureLocation: Location;
 		arrivalLocation: Location;
 		stepNumber: number;
@@ -55,6 +58,7 @@
 		price: number;
 		packageSize: string;
 		imageUrls: string[];
+		status: string;
 		departureLocation: Location;
 		arrivalLocation: Location;
 	}
@@ -113,6 +117,7 @@
 					packageSize: ad.packageSize ?? ad.package_size ?? '—',
 					deliveryDate: ad.deliveryDate ?? ad.delivery_date ?? '',
 					imageUrls: ad.imageUrls ?? ad.image_urls ?? [],
+					status: ad.status ?? '',
 					departureLocation: dep,
 					arrivalLocation: arr,
 					stepNumber: s.stepNumber ?? s.step_number
@@ -126,6 +131,7 @@
 		? shoppingAds.filter(
 				(ad) =>
 					(filterType === 'all' || filterType === 'shopping') &&
+					ad.status === 'pending' &&
 					(!cityQuery ||
 						ad.departureLocation.city.toLowerCase().includes(cityQuery.toLowerCase()) ||
 						ad.arrivalLocation.city.toLowerCase().includes(cityQuery.toLowerCase()))
@@ -136,6 +142,7 @@
 		? steps.filter(
 				(st) =>
 					(filterType === 'all' || filterType === 'delivery') &&
+					st.status === 'pending' &&
 					(!cityQuery ||
 						st.departureLocation.city.toLowerCase().includes(cityQuery.toLowerCase()) ||
 						st.arrivalLocation.city.toLowerCase().includes(cityQuery.toLowerCase()))
@@ -146,11 +153,22 @@
 		? releases.filter(
 				(ad) =>
 					(filterType === 'all' || filterType === 'release') &&
+					ad.status === 'pending' &&
 					(!cityQuery ||
 						ad.departureLocation.city.toLowerCase().includes(cityQuery.toLowerCase()) ||
 						ad.arrivalLocation.city.toLowerCase().includes(cityQuery.toLowerCase()))
 			)
 		: [];
+
+	// Compteurs pour les statistiques
+	$: shoppingInProgressCount = dataLoaded ? shoppingAds.filter(ad => ad.status === 'in_progress').length : 0;
+	$: shoppingCompletedCount = dataLoaded ? shoppingAds.filter(ad => ad.status === 'completed').length : 0;
+	$: stepsInProgressCount = dataLoaded ? steps.filter(step => step.status === 'in_progress').length : 0;
+	$: stepsCompletedCount = dataLoaded ? steps.filter(step => step.status === 'completed').length : 0;
+	$: releasesInProgressCount = dataLoaded ? releases.filter(ad => ad.status === 'in_progress').length : 0;
+	$: releasesCompletedCount = dataLoaded ? releases.filter(ad => ad.status === 'completed').length : 0;
+	$: totalInProgress = shoppingInProgressCount + stepsInProgressCount + releasesInProgressCount;
+	$: totalCompleted = shoppingCompletedCount + stepsCompletedCount + releasesCompletedCount;
 
 	// --- Shopping : price = ad.price
 	async function handleContactShopping(ad: ShoppingAd) {
@@ -182,8 +200,13 @@
 				})
 			);
 			goto(`/app/delivery-persons/chat?id=${convId}`);
-		} catch (err) {
+		} catch (err: any) {
 			console.error('Erreur création conversation', err);
+			if (err.status === 403 && err.message?.includes('conversation existe déjà')) {
+				notifications.error('Vous avez déjà contacté cette annonce');
+			} else {
+				notifications.error('Erreur lors de la création de la conversation');
+			}
 		}
 	}
 
@@ -206,8 +229,13 @@
 				})
 			});
 			goto(`/app/delivery-persons/chat?id=${convId}`);
-		} catch (err) {
+		} catch (err: any) {
 			console.error('Erreur création conversation', err);
+			if (err.status === 403 && err.message?.includes('conversation existe déjà')) {
+				notifications.error('Vous avez déjà contacté cette annonce');
+			} else {
+				notifications.error('Erreur lors de la création de la conversation');
+			}
 		}
 	}
 
@@ -231,8 +259,13 @@
 				})
 			});
 			goto(`/app/delivery-persons/chat?id=${convId}`);
-		} catch (err) {
+		} catch (err: any) {
 			console.error('Erreur création conversation', err);
+			if (err.status === 403 && err.message?.includes('conversation existe déjà')) {
+				notifications.error('Vous avez déjà contacté cette annonce');
+			} else {
+				notifications.error('Erreur lors de la création de la conversation');
+			}
 		}
 	}
 </script>
@@ -454,4 +487,12 @@
 			</div>
 		{/each}
 	</div>
+
+	<!-- Statistiques en bas de page -->
+	{#if dataLoaded}
+		<div class="mt-8 text-center text-sm text-gray-600">
+			<p>{totalInProgress} annonce{totalInProgress > 1 ? 's' : ''} en cours grâce à Ecodeli</p>
+			<p>{totalCompleted} annonce{totalCompleted > 1 ? 's' : ''} terminée{totalCompleted > 1 ? 's' : ''} grâce à Ecodeli</p>
+		</div>
+	{/if}
 </div>

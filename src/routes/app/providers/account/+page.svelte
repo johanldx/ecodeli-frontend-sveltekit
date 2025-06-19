@@ -2,6 +2,7 @@
 	import { notifications } from '$lib/stores/notifications';
 	import { profileIds } from '$lib/stores/profiles';
 	import { accessToken } from '$lib/stores/token';
+	import { user } from '$lib/stores/user';
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { t } from '$lib/utils/t';
 	import { tabTitle } from '$lib/utils/tabTitle';
@@ -10,6 +11,11 @@
 
 	let serviceTypes: ServiceType[] = [];
 	let authorizedTypeIds: number[] = [];
+	let ratingStats: {
+		averageRating: number;
+		totalRatings: number;
+		ratingDistribution: { [key: number]: number };
+	} | null = null;
 
 	type ServiceType = {
 		id: number;
@@ -60,8 +66,25 @@
 		}
 	}
 
+	async function loadRatingStats() {
+		try {
+			const currentUser = get(user);
+			if (!currentUser) {
+				notifications.error('Utilisateur non connecté');
+				return;
+			}
+			
+			ratingStats = await fetchFromAPI(`/ratings/provider/${currentUser.id}/stats`, {
+				headers: getHeaders()
+			});
+		} catch {
+			notifications.error('Erreur lors du chargement des statistiques de notation');
+		}
+	}
+
 	onMount(() => {
 		loadServiceTypes();
+		loadRatingStats();
 		onDestroy(tabTitle('app.providers'));
 	});
 
@@ -117,6 +140,47 @@
 						>{$customer_service}</a
 					>
 				</div>
+			</div>
+		</div>
+
+		<!-- Carte des statistiques de rating -->
+		<div class="mt-6 lg:mt-0 lg:w-1/3">
+			<h2 class="font-author my-4 text-xl text-gray-800">Avis clients</h2>
+			<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-md">
+				{#if ratingStats && ratingStats.totalRatings > 0}
+					<div class="text-center mb-4">
+						<div class="flex justify-center items-center gap-2 mb-2">
+							<span class="text-3xl font-bold text-yellow-500">{ratingStats.averageRating}</span>
+							<div class="flex gap-1">
+								{#each Array(5) as _, i}
+									{@const starNumber = i + 1}
+									<span class="text-xl {starNumber <= Math.round(ratingStats.averageRating) ? 'text-yellow-400' : 'text-gray-300'}">★</span>
+								{/each}
+							</div>
+						</div>
+						<p class="text-sm text-gray-600">{ratingStats.totalRatings} avis</p>
+					</div>
+
+					<!-- Distribution des notes -->
+					<div class="space-y-2">
+						{#each [5, 4, 3, 2, 1] as rating}
+							{@const count = ratingStats.ratingDistribution[rating] || 0}
+							{@const percentage = ratingStats.totalRatings > 0 ? (count / ratingStats.totalRatings) * 100 : 0}
+							<div class="flex items-center gap-2">
+								<span class="text-sm w-4">{rating}★</span>
+								<div class="flex-1 bg-gray-200 rounded-full h-2">
+									<div class="bg-yellow-400 h-2 rounded-full" style="width: {percentage}%"></div>
+								</div>
+								<span class="text-xs text-gray-500 w-8">{count}</span>
+							</div>
+						{/each}
+					</div>
+				{:else}
+					<div class="text-center py-8">
+						<div class="text-gray-400 text-4xl mb-2">⭐</div>
+						<p class="text-gray-500 text-sm">Aucun avis pour le moment</p>
+					</div>
+				{/if}
 			</div>
 		</div>
 

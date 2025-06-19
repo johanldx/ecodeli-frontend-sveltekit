@@ -40,6 +40,7 @@
 		description: string;
 		price: number;
 		imageUrls: string[];
+		status: string;
 	}
 
 	interface DeliveryAd {
@@ -49,9 +50,11 @@
 		imageUrls: string[];
 		deliveryDate: string;
 		packageSize: string;
+		status: string;
 		deliverySteps?: {
 			stepNumber: number;
 			price: number;
+			status: string;
 			departureLocation: { id: number; name: string };
 			arrivalLocation: { id: number; name: string };
 		}[];
@@ -116,15 +119,17 @@
 				id: ad.id,
 				title: ad.title,
 				description: ad.description,
-				// gère imageUrls retourné sous l’un ou l’autre format
+				// gère imageUrls retourné sous l'un ou l'autre format
 				imageUrls: ad.imageUrls ?? ad.image_urls ?? [],
 				// date et packageSize
 				deliveryDate: ad.deliveryDate ?? ad.delivery_date,
 				packageSize: ad.packageSize ?? ad.package_size,
-				// mappe les étapes, qu’elles s’appellent deliverySteps ou delivery_steps
+				status: ad.status ?? 'pending',
+				// mappe les étapes, qu'elles s'appellent deliverySteps ou delivery_steps
 				deliverySteps: (ad.deliverySteps ?? ad.delivery_steps ?? []).map((s: any) => ({
 					stepNumber: s.stepNumber ?? s.step_number,
 					price: s.price,
+					status: s.status ?? 'pending',
 					departureLocation: {
 						id: s.departureLocation?.id ?? s.departure_location.id,
 						name: s.departureLocation?.name ?? s.departure_location.name
@@ -154,6 +159,38 @@
 		return {
 			Authorization: `Bearer ${get(accessToken)}`
 		};
+	}
+
+	function getStatusLabel(status: string): string {
+		const statusMap: Record<string, string> = {
+			'pending': 'En attente',
+			'in_progress': 'En cours',
+			'completed': 'Terminée',
+			'cancelled': 'Annulée',
+			'Pending': 'En attente',
+			'Ongoing': 'En cours',
+			'Completed': 'Terminée',
+			'PENDING': 'En attente de paiement',
+			'COMPLETED': 'Payé',
+			'FAILED': 'Échec'
+		};
+		return statusMap[status] || status;
+	}
+
+	function getStatusColor(status: string): string {
+		const colorMap: Record<string, string> = {
+			'pending': 'badge-warning',
+			'in_progress': 'badge-info',
+			'completed': 'badge-success',
+			'cancelled': 'badge-error',
+			'Pending': 'badge-warning',
+			'Ongoing': 'badge-info',
+			'Completed': 'badge-success',
+			'PENDING': 'badge-warning',
+			'COMPLETED': 'badge-success',
+			'FAILED': 'badge-error'
+		};
+		return colorMap[status] || 'badge-neutral';
 	}
 
 	function openAddModal() {
@@ -242,7 +279,7 @@
 	}
 
 	async function createDeliveryRequest(token: string) {
-		// 1) Création de l’annonce
+		// 1) Création de l'annonce
 		const formAd = new FormData();
 		formAd.append('title', form_delivery.title);
 		formAd.append('description', form_delivery.description);
@@ -294,8 +331,8 @@
 			const last = form_delivery.steps[form_delivery.steps.length - 1];
 			if (departureLocationId !== last.arrivalLocationId) {
 				return notifications.error(
-					`Le départ de l’étape ${form_delivery.steps.length + 1} doit être ` +
-						`l’arrivée de l’étape ${last.stepNumber} (${locations.find((l) => l.id === last.arrivalLocationId)?.name})`
+					`Le départ de l'étape ${form_delivery.steps.length + 1} doit être ` +
+						`l'arrivée de l'étape ${last.stepNumber} (${locations.find((l) => l.id === last.arrivalLocationId)?.name})`
 				);
 			}
 		}
@@ -316,7 +353,7 @@
 				status: 'pending'
 			};
 		} else {
-			notifications.error('Merci de remplir tous les champs de l’étape');
+			notifications.error('Merci de remplir tous les champs de l\'étape');
 		}
 	}
 
@@ -414,6 +451,11 @@
 					<div>
 						<p class="badge badge-neutral badge-outline mt-2 mr-2 px-3 py-2">Liste de courses</p>
 						<p class="badge badge-neutral mt-2 px-3 py-2">{ad.price} €</p>
+						{#if ad.status}
+							<span class="badge {getStatusColor(ad.status)} mt-2">
+								{getStatusLabel(ad.status)}
+							</span>
+						{/if}
 					</div>
 					<h2 class="card-title text-sm sm:text-base">{ad.title}</h2>
 					<p class="text-xs text-gray-600 sm:text-sm">{ad.description}</p>
@@ -431,7 +473,7 @@
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
 		{#each deliveryAds as ad}
 			<div class="card bg-base-100 mx-auto mt-10 w-full shadow-sm">
-				<!-- 1) Carousel d’images -->
+				<!-- 1) Carousel d'images -->
 				{#if ad.imageUrls?.length > 0}
 					<div class="carousel h-40 w-full rounded-t-lg sm:h-48">
 						{#each ad.imageUrls as url, i}
@@ -475,6 +517,11 @@
 					<div>
 						<p class="badge badge-info badge-outline mt-2 mr-2 px-3 py-2">Demande de livraison</p>
 						<p class="badge badge-neutral mt-2 px-3 py-2">{ad.packageSize}</p>
+						{#if ad.status}
+							<span class="badge {getStatusColor(ad.status)} mt-2">
+								{getStatusLabel(ad.status)}
+							</span>
+						{/if}
 					</div>
 					<h2 class="card-title text-sm sm:text-base">{ad.title}</h2>
 					<p class="text-xs text-gray-600 sm:text-sm">{ad.description}</p>
@@ -492,6 +539,11 @@
 								<li class="step step-primary">
 									<strong>Étape {step.stepNumber}:</strong>
 									{step.departureLocation.name} → {step.arrivalLocation.name} ({step.price}€)
+									{#if step.status}
+										<span class="badge {getStatusColor(step.status)} ml-2">
+											{getStatusLabel(step.status)}
+										</span>
+									{/if}
 								</li>
 							{/each}
 						</ul>
@@ -593,7 +645,7 @@
 							</div>
 
 							<div class="form-control w-full">
-								<label class="label"><span class="label-text">Lieu d’arrivée</span></label>
+								<label class="label"><span class="label-text">Lieu d'arrivée</span></label>
 								<select bind:value={form_arrivalLocationId} class="select select-bordered w-full">
 									<option value={-1} disabled selected>Choisir</option>
 									{#each locations as loc}

@@ -80,6 +80,38 @@
 		};
 	}
 
+	function getStatusLabel(status: string): string {
+		const statusMap: Record<string, string> = {
+			'pending': 'En attente',
+			'in_progress': 'En cours',
+			'completed': 'Terminée',
+			'cancelled': 'Annulée',
+			'Pending': 'En attente',
+			'Ongoing': 'En cours',
+			'Completed': 'Terminée',
+			'PENDING': 'En attente de paiement',
+			'COMPLETED': 'Payé',
+			'FAILED': 'Échec'
+		};
+		return statusMap[status] || status;
+	}
+
+	function getStatusColor(status: string): string {
+		const colorMap: Record<string, string> = {
+			'pending': 'badge-warning',
+			'in_progress': 'badge-info',
+			'completed': 'badge-success',
+			'cancelled': 'badge-error',
+			'Pending': 'badge-warning',
+			'Ongoing': 'badge-info',
+			'Completed': 'badge-success',
+			'PENDING': 'badge-warning',
+			'COMPLETED': 'badge-success',
+			'FAILED': 'badge-error'
+		};
+		return colorMap[status] || 'badge-neutral';
+	}
+
 	function handleFiles(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (input.files) {
@@ -220,6 +252,11 @@
 					<div>
 						<p class="badge badge-neutral badge-outline mt-2 mr-2 px-3 py-2">Lacher de chariot</p>
 						<p class="badge badge-neutral mt-2 px-3 py-2">{ad.price} €</p>
+						{#if ad.status}
+							<span class="badge {getStatusColor(ad.status)} mt-2">
+								{getStatusLabel(ad.status)}
+							</span>
+						{/if}
 					</div>
 					<h2 class="card-title">{ad.title}</h2>
 					<p class="text-sm text-gray-500">{ad.description}</p>
@@ -308,7 +345,7 @@
 				</div>
 				<div class="form-control mb-3">
 					<label class="label" for="arrival-location-select"
-						><span class="label-text">Lieu d’arrivée</span></label
+						><span class="label-text">Lieu d'arrivée</span></label
 					>
 					<select
 						id="arrival-location-select"
@@ -350,7 +387,7 @@
 	{#if showDeleteModal}
 		<div class="modal modal-open">
 			<div class="modal-box">
-				<h3 class="text-lg font-bold">Supprimer l’annonce ?</h3>
+				<h3 class="text-lg font-bold">Supprimer l'annonce ?</h3>
 				<div class="modal-action">
 					<button class="btn" on:click={() => (showDeleteModal = false)}>Annuler</button>
 					<button class="btn btn-error" on:click={confirmDelete}>Supprimer</button>
