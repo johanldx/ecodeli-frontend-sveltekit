@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import Table from '$lib/components/Table.svelte';
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { accessToken } from '$lib/stores/token';
 	import { notifications } from '$lib/stores/notifications';
 	import dayjs from 'dayjs';
+	import { tabTitle } from '$lib/utils/tabTitle';
 
 	interface ServiceType {
 		id: number;
@@ -286,6 +287,7 @@
 	onMount(() => {
 		loadTypes();
 		loadProviders();
+		onDestroy(tabTitle('admin.pro.tab_title'));
 	});
 </script>
 

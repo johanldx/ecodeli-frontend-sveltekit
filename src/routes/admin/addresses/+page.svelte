@@ -100,7 +100,7 @@
   }
 
   onMount(loadAddresses);
-  onMount(() => onDestroy(tabTitle('admin.addresses')));
+  onMount(() => onDestroy(tabTitle('admin.addresses.tab_title')));
 
   function handleAction(action: string, row: any) {
     if (action === 'Modifier') {
@@ -243,7 +243,7 @@
   {#if showModalEdit}
     <div class="modal modal-open">
       <div class="modal-box">
-        <h2 class="mb-4 text-center text-xl font-semibold">Modifier l’adresse</h2>
+        <h2 class="mb-4 text-center text-xl font-semibold">Modifier l'adresse</h2>
         <input
           class="input input-bordered mb-2 w-full"
           bind:value={editedAddress.name}
@@ -281,10 +281,10 @@
   {#if showModalDelete}
     <div class="modal modal-open">
       <div class="modal-box">
-        <h2 class="mb-4 text-center text-xl font-semibold">Supprimer l’adresse</h2>
+        <h2 class="mb-4 text-center text-xl font-semibold">Supprimer l'adresse</h2>
         {#if selectedAddress}
           <p class="text-center">
-            Confirmez-vous la suppression de l’adresse <strong>{selectedAddress.name}</strong> ?
+            Confirmez-vous la suppression de l'adresse <strong>{selectedAddress.name}</strong> ?
           </p>
         {/if}
         <div class="modal-action">

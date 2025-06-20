@@ -6,7 +6,7 @@
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { notifications } from '$lib/stores/notifications';
 
-	onMount(() => onDestroy(tabTitle('admin.global.tab_title')));
+	onMount(() => onDestroy(tabTitle('admin.langs.tab_title')));
 
 	let editorRef: any;
 	const langs = writable<string[]>([]);
@@ -108,7 +108,6 @@
 	}
 
 	onMount(() => {
-		onDestroy(tabTitle('admin.users'));
 		loadLangs().then(() => loadJson('fr'));
 	});
 </script>
