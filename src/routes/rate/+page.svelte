@@ -44,7 +44,7 @@
 	const rate_error_submission = t('rate.errors.submission_error');
 
 	onMount(() => {
-		onDestroy(tabTitle('rate'));
+		onDestroy(tabTitle('rate.tab_title'));
 		
 		const token = $page.url.searchParams.get('token');
 		if (!token) {

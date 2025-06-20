@@ -59,7 +59,7 @@
 	const rejected = tStatic('admin.users.rejected');
 	const none_validated = tStatic('admin.users.none_validated');
 
-	onMount(() => onDestroy(tabTitle('admin.users')));
+	onMount(() => onDestroy(tabTitle('admin.users.tab_title')));
 
 	let data: {
 		id: string;

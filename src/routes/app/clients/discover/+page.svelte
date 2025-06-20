@@ -30,8 +30,9 @@
 	let personalServiceTypes: PersonalServiceType[] = [];
 	let personalServiceAds: PersonalServiceAd[] = [];
 
+	onMount(() => onDestroy(tabTitle('app.clients.discover.tab_title')));
+
 	onMount(async () => {
-		onDestroy(tabTitle('app.clients.personal-services'));
 		await loadData();
 		dataLoaded = true;
 	});

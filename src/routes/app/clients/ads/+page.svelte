@@ -8,7 +8,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { tabTitle } from '$lib/utils/tabTitle';
 
-	onMount(() => onDestroy(tabTitle('app.clients.ads')));
+	onMount(() => onDestroy(tabTitle('app.clients.ads.tab_title')));
 
 	function waitUntil(conditionFn: () => boolean, interval = 50): Promise<void> {
 		return new Promise((resolve) => {

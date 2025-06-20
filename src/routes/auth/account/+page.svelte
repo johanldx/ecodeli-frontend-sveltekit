@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { t, tStatic } from '$lib/utils/t';
 	import GuardWrapper from '$lib/components/GuardWrapper.svelte';
 	import { user, type User } from '$lib/stores/user';
@@ -7,6 +7,7 @@
 	import { accessToken } from '$lib/stores/token';
 	import { get } from 'svelte/store';
 	import { notifications } from '$lib/stores/notifications';
+	import { tabTitle } from '$lib/utils/tabTitle';
 
 	const title = t('auth.account.title');
 	const first_name_placeholder = t('auth.account.profile.first_name_placeholder');
@@ -40,6 +41,7 @@
 		} catch (error) {
 			console.error('Erreur lors de la récupération du profil utilisateur', error);
 		}
+		onDestroy(tabTitle('auth.account.tab_title'));
 	});
 
 	async function handleProfileUpdate(e: Event) {

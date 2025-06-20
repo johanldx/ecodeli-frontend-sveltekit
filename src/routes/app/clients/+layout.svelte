@@ -7,7 +7,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { tabTitle } from '$lib/utils/tabTitle';
 
-	onMount(() => onDestroy(tabTitle('app.clients.new-ads')));
+	onMount(() => onDestroy(tabTitle('app.clients.new-ads.tab_title')));
 
 	let { children } = $props();
 

@@ -1,7 +1,7 @@
 import { tStatic } from '$lib/utils/t';
 
 export function tabTitle(path: string) {
-	const originalTitle = tStatic(`${path}.tab_title`);
+	const originalTitle = tStatic(path);
 	document.title = originalTitle;
 
 	const handleVisibilityChange = () => {

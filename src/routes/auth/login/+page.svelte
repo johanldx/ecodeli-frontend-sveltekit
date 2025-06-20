@@ -2,9 +2,10 @@
 	import { checkAuth, login, updateAllProfiles } from '$lib/utils/auth';
 	import { notifications } from '$lib/stores/notifications';
 	import { t, tStatic } from '$lib/utils/t';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { getAndClearFallbackUrl } from '$lib/stores/fallbackUrl';
+	import { tabTitle } from '$lib/utils/tabTitle';
 
 	onMount(async () => {
 		const isLoggedIn = await checkAuth();
@@ -14,6 +15,8 @@
 			notifications.success(message);
 			goto('/auth/space');
 		}
+
+		onDestroy(tabTitle('auth.login'));
 	});
 
 	const login_title = t('auth.login.title');

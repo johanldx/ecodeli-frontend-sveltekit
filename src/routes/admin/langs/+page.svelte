@@ -6,7 +6,7 @@
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { notifications } from '$lib/stores/notifications';
 
-	onMount(() => onDestroy(tabTitle('admin.global')));
+	onMount(() => onDestroy(tabTitle('admin.global.tab_title')));
 
 	let editorRef: any;
 	const langs = writable<string[]>([]);

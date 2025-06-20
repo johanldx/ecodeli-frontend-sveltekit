@@ -3,7 +3,7 @@
 	import { onDestroy, onMount } from 'svelte';
 
 	onMount(() => {
-		onDestroy(tabTitle('admin.ads'));
+		onDestroy(tabTitle('admin.ads.tab_title'));
 	});
 </script>
 

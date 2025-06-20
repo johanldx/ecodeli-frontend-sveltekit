@@ -73,7 +73,7 @@
 	const providerId = profiles.providerId;
 
 	onMount(() => {
-		onDestroy(tabTitle('app.providers.calendar'));
+		onDestroy(tabTitle('app.providers.calendar.tab_title'));
 		loadServiceTypes();
 		loadSchedules();
 	});

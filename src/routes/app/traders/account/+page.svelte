@@ -3,7 +3,7 @@
 	import { tabTitle } from '$lib/utils/tabTitle';
 	import { onDestroy, onMount } from 'svelte';
 
-	onMount(() => onDestroy(tabTitle('app.traders.account')));
+	onMount(() => onDestroy(tabTitle('app.traders.account.tab_title')));
 
 	const title = t('app.traders.account.title');
 	const manage_my_documents = t('app.traders.account.manage_my_documents');

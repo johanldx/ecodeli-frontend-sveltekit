@@ -3,7 +3,7 @@
 	import { tabTitle } from '$lib/utils/tabTitle';
 	import { onDestroy, onMount } from 'svelte';
 
-	onMount(() => onDestroy(tabTitle('landing.legal_mentions')));
+	onMount(() => onDestroy(tabTitle('landing.legal_mentions.tab_title')));
 
 	const legal_mentions_title = t('landing.legal_mentions.title');
 	const legal_mentions_intro = t('landing.legal_mentions.intro');

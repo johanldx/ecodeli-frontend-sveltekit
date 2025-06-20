@@ -7,7 +7,7 @@
 
 
 	onMount(() => {
-		onDestroy(tabTitle('track'));
+		onDestroy(tabTitle('track.tab_title'));
 
 		// Pré-remplissage via query params
 		const urlParams = new URLSearchParams(window.location.search);

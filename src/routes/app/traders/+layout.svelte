@@ -4,6 +4,8 @@
 	import Notifications from '$lib/components/Notifications.svelte';
 	import { t } from '$lib/utils/t';
 	import { derived, type Readable } from 'svelte/store';
+	import { tabTitle } from '$lib/utils/tabTitle';
+	import { onMount, onDestroy } from 'svelte';
 
 	import '../../../app.css';
 

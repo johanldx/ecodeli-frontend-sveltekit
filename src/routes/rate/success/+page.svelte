@@ -12,7 +12,7 @@
 	const rate_success_back = t('rate.success.back_button');
 
 	onMount(() => {
-		onDestroy(tabTitle('rate'));
+		onDestroy(tabTitle('rate.success.tab_title'));
 		
 		// Redirection automatique vers l'accueil après 5 secondes
 		const timer = setTimeout(() => {

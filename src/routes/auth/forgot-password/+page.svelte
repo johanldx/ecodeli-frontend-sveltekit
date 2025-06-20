@@ -2,6 +2,8 @@
 	import { notifications } from '$lib/stores/notifications';
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { t, tStatic } from '$lib/utils/t';
+	import { tabTitle } from '$lib/utils/tabTitle';
+	import { onMount, onDestroy } from 'svelte';
 
 	const forgot_password_title = t('auth.forgot_password.title');
 	const forgot_password_email_placeholder = t('auth.forgot_password.email_placeholder');
@@ -33,6 +35,10 @@
 		}
 		email = '';
 	};
+
+	onMount(() => {
+		onDestroy(tabTitle('auth.forgot_password'));
+	});
 </script>
 
 <div class="text-center">

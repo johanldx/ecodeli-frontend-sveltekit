@@ -4,7 +4,7 @@
 	import { tabTitle } from '$lib/utils/tabTitle';
 	import WalletBox from '$lib/components/WalletBox.svelte';
 
-	onMount(() => onDestroy(tabTitle('app.delivery.account')));
+	onMount(() => onDestroy(tabTitle('app.delivery-persons.account.tab_title')));
 </script>
 
 <div class="ml-0 min-h-screen max-w-2xl bg-[#FEFCF3] p-6">

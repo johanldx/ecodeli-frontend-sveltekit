@@ -4,6 +4,8 @@
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { clearTokens } from '$lib/utils/auth';
 	import { t, tStatic } from '$lib/utils/t';
+	import { tabTitle } from '$lib/utils/tabTitle';
+	import { onMount, onDestroy } from 'svelte';
 
 	let resetPasswordToken = '';
 	let password = '';
@@ -38,6 +40,10 @@
 		resetPasswordToken = '';
 		password = '';
 	};
+
+	onMount(() => {
+		onDestroy(tabTitle('auth.reset_password'));
+	});
 </script>
 
 <div class="text-center">

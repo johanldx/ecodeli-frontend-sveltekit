@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import { accessToken } from '$lib/stores/token';
 	import { fetchFromAPI } from '$lib/utils/api';
@@ -8,6 +7,10 @@
 	import dayjs from 'dayjs';
 	import 'dayjs/locale/fr';
 	dayjs.locale('fr');
+	import { tabTitle } from '$lib/utils/tabTitle';
+	import { onMount, onDestroy } from 'svelte';
+
+	onMount(() => onDestroy(tabTitle('app.delivery-persons.deliveries.tab_title')));
 
 	type Route = {
 		id: number;
@@ -68,7 +71,7 @@
 		}
 
 		if (departure_location === arrival_location) {
-			notifications.warning('Le lieu de départ et d’arrivée doivent être différents.');
+			notifications.warning("Le lieu de départ et d\'arrivée doivent être différents.");
 			return;
 		}
 
@@ -111,7 +114,7 @@
 			day = '';
 			await loadRoutes();
 		} catch {
-			notifications.error('Erreur lors de l’ajout du trajet.');
+			notifications.error("Erreur lors de l'ajout du trajet.");
 		} finally {
 			isSubmitting = false;
 		}
@@ -139,7 +142,7 @@
 	<h1 class="font-author mb-6 text-2xl text-gray-800">Mes trajets</h1>
 
 	<p class="mb-6 text-sm text-gray-600">
-		Vous recevrez une notification lorsqu'une mission correspond à l’un de vos trajets ce jour-là.
+		Vous recevrez une notification lorsqu'une mission correspond à l'un de vos trajets ce jour-là.
 	</p>
 
 	<div class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-md">
@@ -154,7 +157,7 @@
 			</select>
 
 			<select class="select select-bordered w-full" bind:value={arrival_location}>
-				<option value="0" disabled selected>Lieu d’arrivée</option>
+				<option value="0" disabled selected>Lieu d'arrivée</option>
 				{#each locations as loc}
 					<option value={loc.id}>{loc.name}</option>
 				{/each}

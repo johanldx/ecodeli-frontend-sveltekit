@@ -5,6 +5,7 @@
 	import { accessToken } from '$lib/stores/token';
 	import { user } from '$lib/stores/user';
 	import { get } from 'svelte/store';
+	import { tabTitle } from '$lib/utils/tabTitle';
 
 	interface Conversation {
 		id: number;
@@ -159,6 +160,7 @@
 			const first = convList.find((c) => c.id === id) ?? convList[0];
 			await selectConv(first);
 		}
+		onDestroy(tabTitle('app.clients.chat.tab_title'));
 	});
 
 	onDestroy(() => {
@@ -225,7 +227,7 @@
 					{/if}
 				</header>
 			{:else}
-				<div class="p-4">Chargement de l’annonce…</div>
+				<div class="p-4">Chargement de l'annonce…</div>
 			{/if}
 
 			<main class="flex-1 space-y-4 overflow-y-auto bg-white p-4">
@@ -282,6 +284,10 @@
 </div> -->
 <script lang="ts">
 	import Chat from '$lib/components/Chat.svelte';
+	import { tabTitle } from '$lib/utils/tabTitle';
+	import { onMount, onDestroy } from 'svelte';
+
+	onMount(() => onDestroy(tabTitle('app.clients.chat.tab_title')));
 </script>
 
 <Chat></Chat>

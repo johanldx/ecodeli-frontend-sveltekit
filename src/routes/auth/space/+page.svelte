@@ -4,7 +4,8 @@
 	import GuardWrapper from '$lib/components/GuardWrapper.svelte';
 	import { profileIds } from '$lib/stores/profiles';
 	import { get } from 'svelte/store';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { tabTitle } from '$lib/utils/tabTitle';
 
 	function waitUntil(conditionFn: () => boolean, interval = 50): Promise<void> {
 		return new Promise((resolve) => {
@@ -28,6 +29,7 @@
 	onMount(async () => {
 		await waitUntil(() => !!get(profileIds));
 		console.log(get(profileIds));
+		onDestroy(tabTitle('auth.space.tab_title'));
 	});
 
 	$: hasClientProfile = get(profileIds).clientId;

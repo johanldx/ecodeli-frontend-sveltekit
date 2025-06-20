@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
 	import { accessToken } from '$lib/stores/token';
 	import { profileIds } from '$lib/stores/profiles';
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { notifications } from '$lib/stores/notifications';
+	import { tabTitle } from '$lib/utils/tabTitle';
 
 	type ServiceType = {
 		id: number;
@@ -38,6 +39,7 @@
 	onMount(async () => {
 		await loadServiceTypes();
 		await loadAds();
+		onDestroy(tabTitle('app.providers.service.tab_title'));
 	});
 
 	async function loadAds() {
@@ -95,7 +97,7 @@
 			return notifications.warning('Tous les champs sont obligatoires.');
 		}
 		if (!authorizedTypeIds.includes(selectedTypeId)) {
-			return notifications.error('Vous n’êtes pas autorisé à publier pour cette prestation.');
+			return notifications.error("Vous n'êtes pas autorisé à publier pour cette prestation.");
 		}
 
 		isSubmitting = true;

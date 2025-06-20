@@ -9,7 +9,7 @@
 	import { onDestroy } from 'svelte';
 	import { tabTitle } from '$lib/utils/tabTitle';
 
-	onMount(() => onDestroy(tabTitle('app.providers.addresses')));
+	onMount(() => onDestroy(tabTitle('app.providers.addresses.tab_title')));
 
 	type Address = {
 		id: number;
@@ -213,7 +213,7 @@
 		<div class="modal modal-open">
 			<div class="modal-box relative w-full max-w-2xl">
 				<h3 class="mb-4 text-lg font-bold">
-					{modalType === 'add' ? 'Ajouter une adresse' : 'Modifier l’adresse'}
+					{modalType === 'add' ? 'Ajouter une adresse' : 'Modifier l\'adresse'}
 				</h3>
 
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -273,7 +273,7 @@
 								bind:checked={manualConfirmInvalid}
 							/>
 							<span class="label-text text-sm text-gray-600">
-								Je confirme que cette adresse est correcte même si elle n’a pas été reconnue
+								Je confirme que cette adresse est correcte même si elle n'a pas été reconnue
 								automatiquement.
 							</span>
 						</label>

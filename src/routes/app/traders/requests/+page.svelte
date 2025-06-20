@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
 	import { v4 as uuidv4 } from 'uuid';
-
 	import { accessToken } from '$lib/stores/token';
 	import { user } from '$lib/stores/user';
 	import { notifications } from '$lib/stores/notifications';
 	import { fetchFromAPI } from '$lib/utils/api';
+	import { tabTitle } from '$lib/utils/tabTitle';
 
 	interface Location {
 		id: number;
@@ -60,6 +60,7 @@
 	onMount(async () => {
 		await loadAds();
 		await loadLocations();
+		onDestroy(tabTitle('app.traders.requests.tab_title'));
 	});
 
 	async function loadAds() {

@@ -125,27 +125,28 @@
 			<p class="text-sm text-gray-600">{$pending}</p>
 		</div>
 	</div>
+	{#if profileType !== 'providers'}
+		<div class="mb-4 flex items-center gap-2">
+				<input
+					bind:this={ibanInput}
+					type="text"
+					placeholder={$iban}
+					class="focus:ring-primary focus:border-primary w-0 flex-[1_1_auto] rounded-md border border-gray-300 bg-gray-100 px-4 py-2"
+				/>
 
-	<div class="mb-4 flex items-center gap-2">
-		<input
-			bind:this={ibanInput}
-			type="text"
-			placeholder={$iban}
-			class="focus:ring-primary focus:border-primary w-0 flex-[1_1_auto] rounded-md border border-gray-300 bg-gray-100 px-4 py-2"
-		/>
+				<button
+					on:click={handleValidateIBAN}
+					class="bg-primary text-primary-content hover:bg-primary-focus flex-none rounded-md px-6 py-2 text-sm transition-colors"
+				>
+					{$to_validate}
+				</button>
+		</div>
 
 		<button
-			on:click={handleValidateIBAN}
-			class="bg-primary text-primary-content hover:bg-primary-focus flex-none rounded-md px-6 py-2 text-sm transition-colors"
+			on:click={handleTransferToBank}
+			class="bg-primary text-primary-content hover:bg-primary-focus w-full rounded-md py-3 text-sm transition-colors"
 		>
-			{$to_validate}
+			{$transfer_bank_account}
 		</button>
-	</div>
-
-	<button
-		on:click={handleTransferToBank}
-		class="bg-primary text-primary-content hover:bg-primary-focus w-full rounded-md py-3 text-sm transition-colors"
-	>
-		{$transfer_bank_account}
-	</button>
+	{/if}
 </div>

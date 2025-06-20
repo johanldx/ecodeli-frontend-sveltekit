@@ -8,7 +8,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { notifications } from '$lib/stores/notifications';
 
-	onMount(() => onDestroy(tabTitle('app.clients.account')));
+	onMount(() => onDestroy(tabTitle('app.clients.account.tab_title')));
 
 	// Traductions
 	const account_title = t('app.clients.account.my_account.title');
@@ -99,7 +99,7 @@
 					<p class="text-gray-700">
 						{subscriptionName}
 						<span class="ml-2 text-xs text-gray-500">
-							({subscriptionStatus === 'active' ? 'Actif jusqu’au ' : 'Expiré le '}
+							({subscriptionStatus === 'active' ? 'Actif jusqu\'au ' : 'Expiré le '}
 							{subscriptionEndDate})
 						</span>
 					</p>
@@ -115,5 +115,5 @@
 	</div>
 
 	<!-- Bloc Wallet -->
-	<WalletBox profileType="client" />
+	<WalletBox profileType="clients" />
 </div>

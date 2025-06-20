@@ -25,7 +25,7 @@
 	const record_button = t('admin.wallets.record_button');
 	const wallet_modify = t('admin.wallets.wallet_modify');
 
-	onMount(() => onDestroy(tabTitle('admin.wallets')));
+	onMount(() => onDestroy(tabTitle('admin.wallets.tab_title')));
 
 	let walletsData: any[] = []; // Stockage des données complètes
 	let data: {

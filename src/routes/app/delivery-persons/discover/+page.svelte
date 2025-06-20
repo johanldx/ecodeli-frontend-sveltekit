@@ -72,8 +72,9 @@
 	let steps: DeliveryStep[] = [];
 	let releases: ReleaseCartAd[] = [];
 
+	onMount(() => onDestroy(tabTitle('app.delivery-persons.discover.tab_title')));
+
 	onMount(async () => {
-		onDestroy(tabTitle('app.clients.discover'));
 		await loadData();
 		dataLoaded = true;
 	});
