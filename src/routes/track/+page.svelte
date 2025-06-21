@@ -79,9 +79,12 @@
 					headers: { 'Content-Type': 'application/json' }
 				}
 			);
-			trackingInfo.statutAnnonce = 'completed';
+			// Ne pas mettre à jour le statut de l'annonce pour les ServiceProvisions
+			if (trackingInfo.typeAnnonce !== 'ServiceProvisions') {
+				trackingInfo.statutAnnonce = 'completed';
+			}
 			trackingInfo.statutConversation = 'Completed';
-			trackingInfo.statutPaiement = 'COMPLETED';
+			trackingInfo.statutPaiement = 'completed';
 			notifications.success($success_validated);
 		} catch (err) {
 			console.error(err);
@@ -94,6 +97,12 @@
 	function refreshPage() {
 		// Recharge la page sans les query params
 		window.location.href = '/track';
+	}
+
+	// Fonction utilitaire pour vérifier si un paiement est validé
+	function isPaymentValidated(status: string): boolean {
+		const validatedStatuses = ['COMPLETED', 'PAID', 'completed'];
+		return validatedStatuses.includes(status);
 	}
 
 	// Fonctions utilitaires pour badges
@@ -171,11 +180,13 @@
 			</div>
 			<h2 class="text-2xl font-semibold mb-4">{$details_title}</h2>
 			<ul class="mb-4">
-				<li>{$status_ad} : {@html getStatusBadge(trackingInfo.statutAnnonce)}</li>
+				{#if trackingInfo.typeAnnonce !== 'ServiceProvisions'}
+					<li>{$status_ad} : {@html getStatusBadge(trackingInfo.statutAnnonce)}</li>
+				{/if}
 				<li>{$status_conversation} : {@html getStatusBadge(trackingInfo.statutConversation)}</li>
 				<li>{$status_payment} : {@html getStatusBadge(trackingInfo.statutPaiement)}</li>
 			</ul>
-			{#if trackingInfo.statutAnnonce !== 'completed'}
+			{#if !isPaymentValidated(trackingInfo.statutPaiement)}
 				<button class="btn btn-success" on:click={handleValidateOrder} disabled={isValidating}>
 					{#if isValidating}Validation...{:else}{$validate_button}{/if}
 				</button>

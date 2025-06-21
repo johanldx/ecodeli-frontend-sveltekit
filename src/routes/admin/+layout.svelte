@@ -22,6 +22,7 @@
 			items: [
 				{ name: users_title, url: '/admin/users' },
 				{ name: 'Professionels', url: '/admin/pro' },
+				{ name: 'Avis des prestataires', url: '/admin/ratings' },
 			]
 		},
 		{

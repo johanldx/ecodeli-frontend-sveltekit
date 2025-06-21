@@ -5,6 +5,7 @@ import { fetchFromAPI } from '$lib/utils/api';
 import { notifications } from '$lib/stores/notifications';
 import { accessToken } from '$lib/stores/token';
 import { get } from 'svelte/store';
+import Table from '$lib/components/Table.svelte';
 
 let invoices: any[] = [];
 let loading = true;
@@ -22,12 +23,33 @@ let generateAllYear = new Date().getFullYear();
 let generateAllMonth = new Date().getMonth() + 1;
 let providers: any[] = [];
 
+let columns = [
+	{ Header: 'ID', accessor: 'id', sortable: true },
+	{ Header: 'Provider', accessor: 'providerId', sortable: true },
+	{ Header: 'Mois', accessor: 'createdAt', sortable: true },
+	{ Header: 'Statut', accessor: 'status', sortable: true },
+	{ Header: 'PDF', accessor: 'pdf', sortable: false },
+	{ Header: 'Actions', accessor: 'actions', sortable: false }
+];
+
 async function loadInvoices() {
   loading = true;
   try {
-    invoices = await fetchFromAPI('/invoices', {
+    const rawInvoices: any[] = await fetchFromAPI('/invoices', {
       headers: { Authorization: `Bearer ${get(accessToken)}` }
     });
+    
+    // Formater les données pour le composant Table
+    invoices = rawInvoices.map((invoice: any) => ({
+      id: invoice.id,
+      providerId: `#${invoice.providerId}`,
+      createdAt: formatMonthYear(invoice.createdAt),
+      status: `<span class="badge badge-success">${invoice.status}</span>`,
+      pdf: `<button class="btn btn-xs btn-outline" onclick="window.open('${invoice.documentUrl}', '_blank')">Voir PDF</button>`,
+      actions: [
+        { label: 'Générer ce mois pour ce provider', class: 'btn btn-xs btn-secondary' }
+      ]
+    }));
   } catch (e) {
     notifications.error('Erreur lors du chargement des factures');
   }
@@ -158,7 +180,6 @@ function formatMonthYear(dateStr: string) {
   return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 }
 
-
 async function generateForProvider() {
   if (!selectedProvider) return;
   generatingForProvider = true;
@@ -179,9 +200,17 @@ async function generateForProvider() {
   }
   generatingForProvider = false;
 }
+
+function handleAction(action: string, row: any) {
+  if (action === 'Générer ce mois pour ce provider') {
+    // Extraire l'ID du provider depuis la colonne providerId (format: "#123")
+    const providerId = parseInt(row.providerId.replace('#', ''));
+    openModal(providerId);
+  }
+}
 </script>
 
-<div class="mx-auto max-w-5xl min-h-screen p-6">
+<div class="mx-auto min-h-screen p-6">
   <div class="flex items-center justify-between mb-6 gap-2 flex-wrap">
     <h1 class="font-author text-2xl text-gray-800">Factures générées</h1>
     <div class="flex gap-2 flex-wrap">
@@ -196,41 +225,12 @@ async function generateForProvider() {
 
   {#if loading}
     <div>Chargement…</div>
-  {:else}
-    <div class="overflow-x-auto">
-      <table class="table w-full table-zebra table-striped">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Provider</th>
-            <th>Mois</th>
-            <th>Statut</th>
-            <th>PDF</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each invoices as invoice}
-            <tr>
-              <td>{invoice.id}</td>
-              <td>{invoice.providerId}</td>
-              <td>{formatMonthYear(invoice.createdAt)}</td>
-              <td>{invoice.status}</td>
-              <td>
-                <button class="btn btn-xs btn-outline" on:click={() => window.open(invoice.documentUrl, '_blank')}>
-                  Voir PDF
-                </button>
-              </td>
-              <td>
-                <button class="btn btn-xs btn-secondary" on:click={() => openModal(invoice.providerId)}>
-                  Générer ce mois pour ce provider
-                </button>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+  {:else if invoices.length === 0}
+    <div class="text-center py-12">
+      <p class="text-gray-500 text-lg">Aucune facture trouvée</p>
     </div>
+  {:else}
+    <Table {columns} data={invoices} pageSize={10} onAction={handleAction} />
   {/if}
 
   {#if showModal && selectedProvider}
