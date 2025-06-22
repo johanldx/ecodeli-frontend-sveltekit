@@ -36,10 +36,9 @@
 		{
 			group: 'Contenus',
 			items: [
-				{ name: 'Gestion des annonces', url: '/admin/ads-management' },
+				{ name: ads_title, url: '/admin/ads-management' },
 				{ name: addresses_title, url: '/admin/addresses' },
 				{ name: langs_title, url: '/admin/langs' },
-				{ name: ads_title, url: '/admin/ads' }
 			]
 		}
 	];

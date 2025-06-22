@@ -56,6 +56,7 @@
 	let availableSchedules: Schedule[] = [];
 	let selectedScheduleId: number | null = null;
 	let adPrice: number | null = null;
+	let proposedPrice: number | null = null;
 
 	type GroupKey = 'actives' | 'terminees' | 'erreurs' | 'en_cours';
 	const groupLabels: Record<GroupKey, string> = {
@@ -117,6 +118,8 @@
 				
 				availableSchedules = res as Schedule[];
 			}
+		} else if (context === 'prix') {
+			proposedPrice = selectedConv?.price ?? null;
 		}
 	}
 
@@ -125,6 +128,7 @@
 		availableSchedules = [];
 		selectedScheduleId = null;
 		adPrice = null;
+		proposedPrice = null;
 	}
 
 	async function confirmSlot() {
@@ -184,6 +188,35 @@
 				window.location.href = response.url;
 			} else {
 				notifications.error('Erreur lors de la création de la session de paiement.');
+			}
+		} else if (modalContext === 'prix') {
+			if (!proposedPrice || proposedPrice <= 0) {
+				notifications.error('Veuillez entrer un prix valide et positif.');
+				return; // Ne pas fermer la modale si erreur
+			}
+			try {
+				await fetchFromAPI(`/conversations/${selectedConv!.id}`, {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${get(accessToken)}`
+					},
+					body: JSON.stringify({ price: proposedPrice })
+				});
+
+				socket.emit('sendMessage', {
+					conversationId: selectedConv!.id,
+					content: `Proposition : Je vous propose un nouveau prix de ${proposedPrice}€.`
+				});
+
+				if (selectedConv) {
+					selectedConv.price = proposedPrice;
+				}
+				notifications.success('Nouvelle proposition de prix envoyée.');
+			} catch (error) {
+				notifications.error('Une erreur est survenue lors de la proposition.');
+				console.error('Price proposal error:', error);
+				return; // Ne pas fermer la modale si erreur
 			}
 		}
 		closeSlotModal();
@@ -267,7 +300,7 @@
 					raw.departureLocation = departureLocation;
 					raw.arrivalLocation = arrivalLocation;
 				} catch (e) {
-					console.warn('Impossible de charger les lieux de départ ou d’arrivée', e);
+					console.warn("Impossible de charger les lieux de départ ou d'arrivée", e);
 				}
 			} else if (conv.adType === 'ServiceProvisions') {
 				raw = await fetchFromAPI<any>(`/personal-service-ads/${conv.adId}`, {
@@ -546,7 +579,7 @@
 					{/if}
 				</header>
 			{:else}
-				<div class="p-4">Chargement de l’annonce…</div>
+				<div class="p-4">Chargement de l'annonce…</div>
 			{/if}
 
 			<main class="flex-1 space-y-4 overflow-y-auto bg-white p-4">
@@ -598,7 +631,7 @@
 					{#if modalContext === 'payer'}Paiement de la prestation{/if}
 					{#if modalContext === 'prix'}Proposition de nouveau prix{/if}
 					{#if modalContext === 'demandes'}Demandes du client{/if}
-					{#if modalContext === 'créneau'}Choix d’un créneau{/if}
+					{#if modalContext === 'créneau'}Choix d'un créneau{/if}
 				</h3>
 
 				<p class="text-sm text-gray-600">
@@ -607,6 +640,21 @@
 					{#if modalContext === 'demandes'}(Voici les demandes spécifiques du client.){/if}
 					{#if modalContext === 'créneau'}Choisissez un créneau horaire pour la prestation.{/if}
 				</p>
+
+				{#if modalContext === 'prix'}
+					<div>
+						<label for="new-price" class="label">
+							<span class="label-text">Votre proposition de prix (€)</span>
+						</label>
+						<input
+							id="new-price"
+							type="number"
+							bind:value={proposedPrice}
+							class="input input-bordered w-full"
+							placeholder="Ex: 25.50"
+						/>
+					</div>
+				{/if}
 
 				{#if modalContext === 'créneau'}
 					<p>Prix à payer : <strong>{adPrice ?? '—'} €</strong></p>

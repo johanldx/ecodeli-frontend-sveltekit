@@ -25,6 +25,7 @@
 	const service_provider_label = t('auth.space.options.service_provider_link');
 	const account_label = t('auth.space.options.account_link');
 	const logout_label = t('auth.space.logout');
+	const admin_label = t('auth.space.options.admin_link') || 'Administration';
 
 	onMount(async () => {
 		await waitUntil(() => !!get(profileIds));
@@ -60,6 +61,11 @@
 				class="btn {hasMerchantProfile ? 'btn-primary' : 'border-primary'} w-full"
 				>{$merchant_label}</a
 			>
+
+			{#if $user?.administrator}
+			<a href="/admin" class="btn btn-error w-full">{$admin_label}</a>
+			{/if}
+
 			<a
 				href="/auth/space/providers"
 				class="btn {hasServiceProviderProfile ? 'btn-primary' : 'border-primary'} w-full"

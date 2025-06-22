@@ -36,6 +36,7 @@
 	const create_it = tStatic('admin.users.create_it');
 	const proof_of_activity = tStatic('admin.users.proof_of_activity');
 	const certification_document = tStatic('admin.users.certification_document');
+	const reduction_percent = tStatic('admin.users.reduction_percent');
 	const user_modify = t('admin.users.user_modify');
 	const active = tStatic('admin.users.active');
 	const verify = t('admin.users.verify');
@@ -58,6 +59,9 @@
 	const pending = tStatic('admin.users.pending');
 	const rejected = tStatic('admin.users.rejected');
 	const none_validated = tStatic('admin.users.none_validated');
+	const subscription = tStatic('admin.users.subscription');
+	const history = tStatic('admin.users.history');
+	const payment_history_title = t('admin.users.payment_history_title');
 
 	onMount(() => onDestroy(tabTitle('admin.users.tab_title')));
 
@@ -85,14 +89,29 @@
 	let showModalEdit = false;
 	let showModalUserDelete = false;
 	let showModalClientDelete = false;
+	let showModalHistory = false;
 
 	let selectedUser: any = null;
 	let editedUser = { ...selectedUser };
+	let paymentHistory: any[] = [];
+	let loadingHistory = false;
 
 	const formatActiveStatus = (status: boolean) =>
 		status
 			? `<span class="badge badge-success">${active}</span>`
 			: `<span class="badge badge-error">Inactif</span>`;
+
+	function formatSubscription(user: any) {
+		if (!user.currentSubscription) {
+			return '<span class="badge">Aucun</span>';
+		}
+		const sub = user.currentSubscription;
+		const endDate = user.subscription_end_date ? new Date(user.subscription_end_date) : null;
+		const isActive = sub.name === 'Free' || (endDate && endDate > new Date());
+		const color = isActive ? 'badge-success' : 'badge-error';
+
+		return `<span class="badge ${color}">${sub.name}</span>`;
+	}
 
 	function formatStatus(status: string) {
 		switch (status) {
@@ -123,17 +142,19 @@
 			actions: [
 				{ label: modify, class: 'btn btn-warning' },
 				{ label: cancel, class: 'btn btn-error' }
-			]
+			],
+			original: user
 		}));
 
 		loadingUsers = false;
 	});
 
 	function handleAction(action: string, row: any) {
+		const user = row.original;
 		if (action === modify) {
-			openModal(row);
+			openModal(user);
 		} else if (action === cancel) {
-			selectedUser = row;
+			selectedUser = user;
 			showModalUserDelete = true;
 		}
 	}
@@ -143,6 +164,22 @@
 		editedUser = { ...user };
 		fetchUserDetails(user.id);
 		showModalEdit = true;
+	}
+
+	async function openHistoryModal(user: any) {
+		selectedUser = user;
+		showModalHistory = true;
+		loadingHistory = true;
+		try {
+			paymentHistory = await fetchFromAPI(`/subscription-payments/user/${user.id}`, {
+				headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` }
+			});
+		} catch (error) {
+			notifications.error("Erreur lors du chargement de l'historique.");
+			console.error(error);
+		} finally {
+			loadingHistory = false;
+		}
 	}
 
 	async function fetchUserDetails(userId: string) {
@@ -168,6 +205,7 @@
 		showModalTraderDelete = false;
 		showModalProviderEdit = false;
 		showModalProviderDelete = false;
+		showModalHistory = false;
 	}
 
 	async function deleteUser() {
@@ -216,6 +254,7 @@
 	let clientsColumns = [
 		{ Header: user_name, accessor: 'name', sortable: true },
 		{ Header: user_email, accessor: 'email', sortable: true },
+		{ Header: subscription, accessor: 'subscription', sortable: false },
 		{ Header: status, accessor: 'onboarding', sortable: true },
 		{ Header: creation_date, accessor: 'created_at', sortable: true },
 		{ Header: actions, accessor: 'actions', sortable: false }
@@ -234,20 +273,28 @@
 			id: client.id,
 			name: `${client.user.first_name} ${client.user.last_name}`,
 			email: client.user.email,
+			subscription: formatSubscription(client.user),
 			onboarding: client.onboarding
 				? `<span class="badge badge-success">${to_validate}</span>`
 				: `<span class="badge badge-error">${none_validated}</span>`,
 			created_at: formatDate(client.created_at),
-			actions: [{ label: cancel, class: 'btn btn-error' }]
+			actions: [
+				{ label: cancel, class: 'btn btn-error' },
+				{ label: history, class: 'btn btn-info' }
+			],
+			original: client
 		}));
 
 		loadingClients = false;
 	});
 
 	function handleClientAction(action: string, row: any) {
+		const client = row.original;
 		if (action === cancel) {
-			selectedClient = row;
+			selectedClient = client;
 			showModalClientDelete = true;
+		} else if (action === history) {
+			openHistoryModal(client.user);
 		}
 	}
 
@@ -340,8 +387,9 @@
 	let tradersData: any[] = [];
 	let tradersColumns = [
 		{ Header: user_name, accessor: 'name', sortable: true },
-		{ Header: user_name, accessor: 'email', sortable: true },
+		{ Header: user_email, accessor: 'email', sortable: true },
 		{ Header: status, accessor: 'status', sortable: true },
+		{ Header: reduction_percent, accessor: 'reduction_percent', sortable: true },
 		{ Header: card_id, accessor: 'identity_card_document', sortable: false },
 		{ Header: proof_of_activity, accessor: 'proof_of_business_document', sortable: false },
 		{ Header: RIB, accessor: 'bank_account', sortable: false },
@@ -367,6 +415,8 @@
 			email: trader.user.email,
 			status: formatStatus(trader.status),
 			raw_status: trader.status,
+			reduction_percent: trader.reduction_percent > 0 ? `${trader.reduction_percent}%` : 'Tarif standard',
+			raw_reduction_percent: trader.reduction_percent,
 			identity_card_document: `<button class="btn btn-sm" onClick="window.open('${trader.identity_card_document}', '_blank')">Voir</button>`,
 			proof_of_business_document: `<button class="btn btn-sm" onClick="window.open('${trader.proof_of_business_document}', '_blank')">Voir</button>`,
 			bank_account: trader.bank_account,
@@ -383,7 +433,7 @@
 	function handleTraderAction(action: string, row: any) {
 		if (action === modify) {
 			selectedTrader = row;
-			editedTrader = { ...row, status: row.raw_status || 'pending' };
+			editedTrader = { ...row, status: row.raw_status || 'pending', reduction_percent: row.raw_reduction_percent || 0 };
 			showModalTraderEdit = true;
 		} else if (action === cancel) {
 			selectedTrader = row;
@@ -399,10 +449,13 @@
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${get(accessToken)}`
 				},
-				body: JSON.stringify({ status: editedTrader.status })
+				body: JSON.stringify({ 
+					status: editedTrader.status,
+					reduction_percent: editedTrader.reduction_percent
+				})
 			});
 
-			notifications.success('Le statut du commerçant a bien été mis à jour.');
+			notifications.success('Le statut et la réduction du commerçant ont bien été mis à jour.');
 			closeModals();
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 			location.reload();
@@ -767,6 +820,18 @@
 					{/each}
 				</select>
 
+				<label class="label" for="trader-reduction">{reduction_percent} (%)</label>
+				<input
+					id="trader-reduction"
+					type="number"
+					min="0"
+					max="100"
+					class="input input-bordered w-full"
+					bind:value={editedTrader.reduction_percent}
+					placeholder="0"
+				/>
+				<p class="text-sm text-gray-600 mt-1">0 = Tarif standard, 1-100 = Pourcentage de réduction</p>
+
 				<div class="modal-action">
 					<button class="btn btn-primary" on:click={modifyTrader}>{$record_button}</button>
 					<button class="btn" on:click={closeModals}>{$close_button}</button>
@@ -839,6 +904,58 @@
 				<div class="modal-action">
 					<button class="btn btn-error" on:click={deleteProvider}>{cancel}</button>
 					<button class="btn" on:click={closeModals}>{$cancel_delete}</button>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Modale historique des paiements -->
+	{#if showModalHistory}
+		<div class="modal modal-open">
+			<div class="modal-box w-11/12 max-w-3xl">
+				<h3 class="font-bold text-lg">
+					{$payment_history_title} pour {selectedUser.first_name} {selectedUser.last_name}
+				</h3>
+				{#if loadingHistory}
+					<div class="flex justify-center items-center py-8">
+						<span class="loading loading-lg"></span>
+					</div>
+				{:else if paymentHistory.length === 0}
+					<p class="py-4">Aucun paiement d'abonnement trouvé pour cet utilisateur.</p>
+				{:else}
+					<div class="overflow-x-auto py-4">
+						<table class="table w-full">
+							<thead>
+								<tr>
+									<th>Date</th>
+									<th>Plan</th>
+									<th>Montant</th>
+									<th>Statut</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each paymentHistory as payment}
+									<tr>
+										<td>{formatDate(payment.createdAt)}</td>
+										<td>{payment.subscription?.name || 'N/A'}</td>
+										<td>{payment.amount}€</td>
+										<td>
+											<span
+												class="badge {payment.status === 'completed'
+													? 'badge-success'
+													: 'badge-error'}"
+											>
+												{payment.status}
+											</span>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				{/if}
+				<div class="modal-action">
+					<button class="btn" on:click={closeModals}>{$close_button}</button>
 				</div>
 			</div>
 		</div>

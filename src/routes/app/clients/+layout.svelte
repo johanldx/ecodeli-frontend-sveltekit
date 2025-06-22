@@ -6,8 +6,58 @@
 	import { derived, type Readable } from 'svelte/store';
 	import { onDestroy, onMount } from 'svelte';
 	import { tabTitle } from '$lib/utils/tabTitle';
+	import { page } from '$app/stores';
+	import { tStatic } from '$lib/utils/t';
+	import OnboardingModal from '$lib/components/OnboardingModal.svelte';
+	import { isTourActive, tourSteps, startTour } from '$lib/stores/tour';
+	import type { TourStep } from '$lib/types/tour';
 
-	onMount(() => onDestroy(tabTitle('app.clients.new-ads.tab_title')));
+	onMount(() => {
+		onDestroy(tabTitle('app.clients.new-ads.tab_title'));
+
+		// Définit les étapes du tutoriel
+		tourSteps.set([
+			{
+				title: 'Bienvenue sur votre espace EcoDeli !',
+				content: "Suivez ce guide rapide pour découvrir les fonctionnalités principales."
+			},
+			{
+				title: 'Menu de Navigation',
+				content: "Utilisez ce menu pour naviguer entre les différentes sections de votre espace.",
+				targetSelector: '#main-nav'
+			},
+			{
+				title: 'Découvrir des annonces',
+				content: 'La section <b>Découvrir</b> vous permet de trouver toutes les annonces disponibles.',
+				targetSelector: '#nav-discover'
+			},
+			{
+				title: 'Gérer vos annonces',
+				content: 'Dans <b>Mes annonces</b>, vous pouvez créer et gérer toutes les annonces que vous publiez.',
+				targetSelector: '#nav-ads'
+			},
+			{
+				title: 'Messagerie instantanée',
+				content: 'La section <b>Messages</b> contient toutes vos conversations avec les autres utilisateurs.',
+				targetSelector: '#nav-chat'
+			},
+			{
+				title: 'Gestion du compte',
+				content: 'Dans <b>Mon compte</b>, vous pouvez gérer vos informations, votre portefeuille et vos abonnements.',
+				targetSelector: '#nav-account'
+			},
+			{
+				title: 'Vous êtes prêt !',
+				content: 'Vous pouvez maintenant explorer la plateforme. Vous pouvez revoir ce tutoriel à tout moment depuis la page "Mon compte".'
+			}
+		]);
+
+		const hasSeenTour = localStorage.getItem('tutorialSeen');
+		if (!hasSeenTour) {
+			// Attend un court instant pour que l'UI se charge
+			setTimeout(startTour, 500);
+		}
+	});
 
 	let { children } = $props();
 
@@ -31,6 +81,8 @@
 		}))
 	);
 </script>
+
+<OnboardingModal />
 
 <GuardWrapper>
 	<Notifications />
