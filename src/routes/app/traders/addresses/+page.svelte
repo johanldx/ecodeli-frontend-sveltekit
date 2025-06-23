@@ -75,7 +75,7 @@
 
 	function selectSuggestion(s: any) {
 		const p = s.properties;
-		selectedAddress.address = p.name + (p.street ? ' ' + p.street : '');
+		selectedAddress.address = p.name;
 		selectedAddress.cp = p.postcode;
 		selectedAddress.city = p.city;
 		selectedAddress.country = 'France';

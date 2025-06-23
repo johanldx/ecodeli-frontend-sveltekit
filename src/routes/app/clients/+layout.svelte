@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppMenu from '$lib/components/AppMenu.svelte';
 	import GuardWrapper from '$lib/components/GuardWrapper.svelte';
+	import ProfileGuard from '$lib/components/ProfileGuard.svelte';
 	import Notifications from '$lib/components/Notifications.svelte';
 	import { t } from '$lib/utils/t';
 	import { derived, type Readable } from 'svelte/store';
@@ -85,9 +86,11 @@
 <OnboardingModal />
 
 <GuardWrapper>
-	<Notifications />
-	<AppMenu pages={$pages} />
-	<div class="container mx-auto">
-		{@render children()}
-	</div>
+	<ProfileGuard profileType="clients">
+		<Notifications />
+		<AppMenu pages={$pages} />
+		<div class="container mx-auto">
+			{@render children()}
+		</div>
+	</ProfileGuard>
 </GuardWrapper>

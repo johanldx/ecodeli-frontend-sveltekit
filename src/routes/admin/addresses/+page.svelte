@@ -61,6 +61,12 @@
   let showModalDelete = false;
   let showModalCreate = false;
 
+  // Variables pour l'autocomplétion d'adresse
+  let suggestions: any[] = [];
+  let showSuggestions = false;
+  let addressValid = false;
+  let manualConfirmInvalid = false;
+
   const formatDate = (date: string) => dayjs(date).format('DD/MM/YYYY HH:mm');
 
   let newLocation = {
@@ -70,9 +76,38 @@
     cp: '',
     city: '',
     country: '',
-    public: true,
+    public: true, // Forcé à true
     price: 0,
   };
+
+  async function searchAddressInField() {
+    const query = newLocation.address;
+    if (query.length < 3) {
+      suggestions = [];
+      showSuggestions = false;
+      return;
+    }
+
+    const res = await fetch(
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`
+    );
+    const data = await res.json();
+    suggestions = data.features;
+    showSuggestions = true;
+    addressValid = false;
+    manualConfirmInvalid = false;
+  }
+
+  function selectSuggestion(s: any) {
+    const p = s.properties;
+    newLocation.address = p.name;
+    newLocation.cp = p.postcode;
+    newLocation.city = p.city;
+    newLocation.country = 'France';
+    addressValid = true;
+    manualConfirmInvalid = true;
+    showSuggestions = false;
+  }
 
   async function loadAddresses() {
     try {
@@ -156,6 +191,22 @@
 
   function openCreateModal() {
     showModalCreate = true;
+    // Réinitialiser les variables d'autocomplétion
+    suggestions = [];
+    showSuggestions = false;
+    addressValid = false;
+    manualConfirmInvalid = false;
+    // Réinitialiser newLocation avec public forcé à true
+    newLocation = {
+      userId: 0,
+      name: '',
+      address: '',
+      cp: '',
+      city: '',
+      country: '',
+      public: true, // Forcé à true
+      price: 0,
+    };
   }
 
   function closeCreateModal() {
@@ -163,8 +214,18 @@
   }
 
   async function createLocation() {
+    if (!newLocation.name) {
+      notifications.error('Le nom de l\'adresse est obligatoire.');
+      return;
+    }
+
     if (!newLocation.price || newLocation.price <= 0) {
       notifications.error('Le prix est obligatoire et doit être positif.');
+      return;
+    }
+
+    if (!addressValid && !manualConfirmInvalid) {
+      notifications.warning('Veuillez cocher la case pour confirmer une adresse non reconnue.');
       return;
     }
 
@@ -205,37 +266,103 @@
   <!-- Modale Création -->
   {#if showModalCreate}
     <div class="modal modal-open">
-      <div class="modal-box">
+      <div class="modal-box relative w-full max-w-2xl">
         <h2 class="mb-4 text-center text-xl font-semibold">Créer une nouvelle location</h2>
 
-        <input class="input input-bordered mb-2 w-full" bind:value={newLocation.name} placeholder="Nom" />
-        <input class="input input-bordered mb-2 w-full" bind:value={newLocation.address} placeholder="Adresse" />
-        <input class="input input-bordered mb-2 w-full" bind:value={newLocation.cp} placeholder="Code postal" />
-        <input class="input input-bordered mb-2 w-full" bind:value={newLocation.city} placeholder="Ville" />
-        <input class="input input-bordered mb-2 w-full" bind:value={newLocation.country} placeholder="Pays" />
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <input 
+            class="input input-bordered w-full" 
+            bind:value={newLocation.name} 
+            placeholder="Nom" 
+          />
 
-        <!-- Champ Public -->
-        <div class="form-control mb-2">
+          <div class="relative">
+            <input 
+              class="input input-bordered w-full" 
+              bind:value={newLocation.address} 
+              placeholder="Adresse" 
+              on:input={searchAddressInField}
+            />
+            {#if Array.isArray(suggestions) && showSuggestions && suggestions.length > 0}
+              <ul class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded border border-gray-300 bg-white shadow">
+                {#each suggestions as suggestion}
+                  <button
+                    type="button"
+                    class="hover:bg-base-200 w-full cursor-pointer px-4 py-2 text-left text-sm"
+                    on:click={() => selectSuggestion(suggestion)}
+                  >
+                    {suggestion.properties.label}
+                  </button>
+                {/each}
+              </ul>
+            {/if}
+          </div>
+
+          <input 
+            class="input input-bordered w-full" 
+            bind:value={newLocation.cp} 
+            placeholder="Code postal" 
+          />
+          <input 
+            class="input input-bordered w-full" 
+            bind:value={newLocation.city} 
+            placeholder="Ville" 
+          />
+          <input 
+            class="input input-bordered w-full" 
+            bind:value={newLocation.country} 
+            placeholder="Pays" 
+          />
+          <input
+            class="input input-bordered w-full"
+            type="number"
+            min="1"
+            bind:value={newLocation.price}
+            placeholder="Prix"
+          />
+        </div>
+
+        <!-- Champ Public forcé à true -->
+        <div class="form-control mt-4">
           <label class="label cursor-pointer">
-            <span class="label-text">Public</span>
-            <input type="checkbox" class="toggle toggle-primary" bind:checked={newLocation.public} />
+            <span class="label-text">Public (obligatoire)</span>
+            <input 
+              type="checkbox" 
+              class="toggle toggle-primary" 
+              bind:checked={newLocation.public} 
+              disabled 
+            />
           </label>
         </div>
 
-        <!-- Champ Prix -->
-        <input
-          class="input input-bordered mb-2 w-full"
-          type="number"
-          min="1"
-          bind:value={newLocation.price}
-          placeholder="Prix"
-        />
+        {#if !addressValid}
+          <div class="form-control mt-4">
+            <label class="label cursor-pointer gap-2">
+              <input
+                type="checkbox"
+                class="checkbox checkbox-warning"
+                bind:checked={manualConfirmInvalid}
+              />
+              <span class="label-text text-sm text-gray-600">
+                Je confirme que cette adresse est correcte même si elle n'a pas été reconnue
+                automatiquement.
+              </span>
+            </label>
+          </div>
+        {/if}
 
         <div class="modal-action">
           <button class="btn btn-primary" on:click={createLocation}>Créer</button>
           <button class="btn" on:click={closeCreateModal}>Annuler</button>
         </div>
       </div>
+      <button
+        type="button"
+        class="modal-backdrop"
+        aria-label="Close modal"
+        on:click={closeCreateModal}
+        on:keydown={(e) => e.key === 'Enter' && closeCreateModal()}
+      ></button>
     </div>
   {/if}
 

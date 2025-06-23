@@ -25,7 +25,7 @@
 		ShoppingAds: 'Course',
 		DeliverySteps: 'Livraison',
 		ServiceProvisions: 'Service',
-		ReleaseCartAds: 'Lacher de chariot'
+		ReleaseCartAds: 'Chariot'
 	};
 
 
@@ -574,6 +574,8 @@
 								<button class="btn btn-primary" on:click={() => openSlotModal('prix')}>Proposer un nouveau prix</button>
 							{/if}
 						{/if}
+					{:else if groupedConvs.en_cours.find(c => c.id === selectedConv!.id)}
+						<button class="btn btn-disabled" disabled>En cours de livraison</button>
 					{:else}
 						<button class="btn btn-disabled" disabled>Finalisé</button>
 					{/if}

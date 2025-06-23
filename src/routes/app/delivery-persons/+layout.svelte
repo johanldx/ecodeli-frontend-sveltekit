@@ -1,9 +1,14 @@
 <script lang="ts">
 	import AppMenu from '$lib/components/AppMenu.svelte';
 	import GuardWrapper from '$lib/components/GuardWrapper.svelte';
+	import ProfileGuard from '$lib/components/ProfileGuard.svelte';
 	import Notifications from '$lib/components/Notifications.svelte';
 	import { t } from '$lib/utils/t';
 	import { derived, type Readable } from 'svelte/store';
+	import { tabTitle } from '$lib/utils/tabTitle';
+	import { onMount, onDestroy } from 'svelte';
+
+	import '../../../app.css';
 
 	let { children } = $props();
 
@@ -27,9 +32,11 @@
 </script>
 
 <GuardWrapper>
-	<Notifications />
-	<AppMenu pages={$pages} />
-	<div class="container mx-auto">
-		{@render children()}
-	</div>
+	<ProfileGuard profileType="delivery-persons">
+		<Notifications />
+		<AppMenu pages={$pages} />
+		<div class="container mx-auto">
+			{@render children()}
+		</div>
+	</ProfileGuard>
 </GuardWrapper>

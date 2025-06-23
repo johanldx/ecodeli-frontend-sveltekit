@@ -62,15 +62,16 @@
 				>{$merchant_label}</a
 			>
 
-			{#if $user?.administrator}
-			<a href="/admin" class="btn btn-error w-full">{$admin_label}</a>
-			{/if}
-
 			<a
 				href="/auth/space/providers"
 				class="btn {hasServiceProviderProfile ? 'btn-primary' : 'border-primary'} w-full"
 				>{$service_provider_label}</a
 			>
+
+			{#if $user?.administrator}
+			<a href="/admin" class="btn btn-error w-full">{$admin_label}</a>
+			{/if}
+
 			<a href="/auth/account" class="btn btn-secondary w-full">{$account_label}</a>
 		</div>
 

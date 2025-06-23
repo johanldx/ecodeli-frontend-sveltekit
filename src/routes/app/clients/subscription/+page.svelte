@@ -49,16 +49,16 @@
 	async function loadData() {
 		isLoading = true;
 		try {
-			const [subscription, subscriptions] = await Promise.all([
+			const [subscriptionResponse, subscriptions] = await Promise.all([
 				fetchFromAPI<CurrentSubscription>('/subscriptions/me', {
 					headers: getHeaders()
-				}),
+				}).catch(() => null), // Retourne null si pas d'abonnement
 				fetchFromAPI<Subscription[]>('/subscriptions', {
 					headers: getHeaders()
 				})
 			]);
 
-			currentSubscription = subscription;
+			currentSubscription = subscriptionResponse;
 			availableSubscriptions = subscriptions;
 		} catch (err) {
 			console.error("Erreur lors du chargement de l'abonnement", err);
@@ -78,7 +78,7 @@
 
 		try {
 			// Si l'utilisateur a déjà un abonnement PAYANT, on le modifie directement
-			if (currentSubscription?.subscription.name !== 'Free') {
+			if (currentSubscription && currentSubscription.subscription.name !== 'Free') {
 				notifications.info('Mise à jour de votre abonnement...');
 				await fetchFromAPI('/stripe/change-subscription', {
 					method: 'POST',
