@@ -7,6 +7,45 @@
 	import { notifications } from '$lib/stores/notifications';
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { tabTitle } from '$lib/utils/tabTitle';
+	import { t, tStatic } from '$lib/utils/t';
+
+	// Traductions
+	const page_title = t('app.traders.requests.tab_title');
+	const title = t('app.traders.requests.title');
+	const new_announcement = t('app.traders.requests.new_announcement');
+	const no_photo = t('app.traders.requests.no_photo');
+	const cart_release = t('app.traders.requests.cart_release');
+	const client = t('app.traders.requests.client');
+	const departure = t('app.traders.requests.departure');
+	const arrival = t('app.traders.requests.arrival');
+	const delete_btn = t('app.traders.requests.delete');
+	
+	// Modal traductions
+	const modal_title = t('app.traders.requests.modal.title');
+	const title_label = t('app.traders.requests.modal.title_label');
+	const description_label = t('app.traders.requests.modal.description_label');
+	const package_size_label = t('app.traders.requests.modal.package_size_label');
+	const price_label = t('app.traders.requests.modal.price_label');
+	const price_advice = t('app.traders.requests.modal.price_advice');
+	const client_email_label = t('app.traders.requests.modal.client_email_label');
+	const departure_location_label = t('app.traders.requests.modal.departure_location_label');
+	const arrival_location_label = t('app.traders.requests.modal.arrival_location_label');
+	const images_label = t('app.traders.requests.modal.images_label');
+	const choose = t('app.traders.requests.modal.choose');
+	const cancel = t('app.traders.requests.modal.cancel');
+	const create = t('app.traders.requests.modal.create');
+	
+	// Delete modal traductions
+	const delete_modal_title = t('app.traders.requests.delete_modal.title');
+	const delete_modal_cancel = t('app.traders.requests.delete_modal.cancel');
+	const delete_modal_delete = t('app.traders.requests.delete_modal.delete');
+	
+	// Notifications traductions
+	const all_fields_required = t('app.traders.requests.notifications.all_fields_required');
+	const invalid_email = t('app.traders.requests.notifications.invalid_email');
+	const user_not_authenticated = t('app.traders.requests.notifications.user_not_authenticated');
+	const announcement_created = t('app.traders.requests.notifications.announcement_created');
+	const announcement_deleted = t('app.traders.requests.notifications.announcement_deleted');
 
 	interface Location {
 		id: number;
@@ -83,16 +122,16 @@
 
 	function getStatusLabel(status: string): string {
 		const statusMap: Record<string, string> = {
-			'pending': 'En attente',
-			'in_progress': 'En cours',
-			'completed': 'Terminée',
-			'cancelled': 'Annulée',
-			'Pending': 'En attente',
-			'Ongoing': 'En cours',
-			'Completed': 'Terminée',
-			'PENDING': 'En attente de paiement',
-			'COMPLETED': 'Payé',
-			'FAILED': 'Échec'
+			'pending': tStatic('app.traders.requests.status.pending'),
+			'in_progress': tStatic('app.traders.requests.status.in_progress'),
+			'completed': tStatic('app.traders.requests.status.completed'),
+			'cancelled': tStatic('app.traders.requests.status.cancelled'),
+			'Pending': tStatic('app.traders.requests.status.pending'),
+			'Ongoing': tStatic('app.traders.requests.status.in_progress'),
+			'Completed': tStatic('app.traders.requests.status.completed'),
+			'PENDING': tStatic('app.traders.requests.status.payment_pending'),
+			'COMPLETED': tStatic('app.traders.requests.status.paid'),
+			'FAILED': tStatic('app.traders.requests.status.failed')
 		};
 		return statusMap[status] || status;
 	}
@@ -143,12 +182,12 @@
 			form.departureLocationId === -1 ||
 			form.arrivalLocationId === -1
 		) {
-			return notifications.error('Tous les champs obligatoires doivent être remplis');
+			return notifications.error(tStatic('app.traders.requests.notifications.all_fields_required'));
 		}
 
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(form.clientEmail)) {
-			return notifications.error('Email invalide');
+			return notifications.error(tStatic('app.traders.requests.notifications.invalid_email'));
 		}
 
 		const token = get(accessToken);
@@ -156,7 +195,7 @@
 		const reference = uuidv4();
 
 		if (!currentUser || !currentUser.id) {
-			return notifications.error('Utilisateur non authentifié');
+			return notifications.error(tStatic('app.traders.requests.notifications.user_not_authenticated'));
 		}
 
 		const formData = new FormData();
@@ -182,7 +221,7 @@
 
 		showModal = false;
 		await loadAds();
-		notifications.success('Annonce trader créée');
+		notifications.success(tStatic('app.traders.requests.notifications.announcement_created'));
 	}
 
 	function openDeleteModal(id: number) {
@@ -199,14 +238,14 @@
 		deleteId = null;
 		showDeleteModal = false;
 		await loadAds();
-		notifications.success('Annonce supprimée');
+		notifications.success(tStatic('app.traders.requests.notifications.announcement_deleted'));
 	}
 </script>
 
-<div class="bg-base-200 min-h-screen p-6">
+<div class="bg-base-200 p-6">
 	<div class="mb-6 flex items-center justify-between">
-		<h1 class="font-author text-2xl text-gray-800">Annonces Traders</h1>
-		<button class="btn btn-primary" on:click={openAddModal}>Nouvelle annonce</button>
+		<h1 class="font-author text-2xl text-gray-800">{$title}</h1>
+		<button class="btn btn-primary" on:click={openAddModal}>{$new_announcement}</button>
 	</div>
 
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -246,12 +285,12 @@
 					</div>
 				{:else}
 					<figure class="flex h-40 items-center justify-center rounded-t-lg bg-gray-200 sm:h-48">
-						<span class="text-gray-500">Aucune photo</span>
+						<span class="text-gray-500">{$no_photo}</span>
 					</figure>
 				{/if}
 				<div class="card-body">
 					<div>
-						<p class="badge badge-neutral badge-outline mt-2 mr-2 px-3 py-2">Lacher de chariot</p>
+						<p class="badge badge-neutral badge-outline mt-2 mr-2 px-3 py-2">{$cart_release}</p>
 						<p class="badge badge-neutral mt-2 px-3 py-2">{ad.price} €</p>
 						{#if ad.status}
 							<span class="badge {getStatusColor(ad.status)} mt-2">
@@ -261,13 +300,13 @@
 					</div>
 					<h2 class="card-title">{ad.title}</h2>
 					<p class="text-sm text-gray-500">{ad.description}</p>
-					<p class="text-sm">Client : {ad.clientEmail}</p>
+					<p class="text-sm">{$client} : {ad.clientEmail}</p>
 					<p class="text-xs">
-						Départ : {ad.departureLocation.name} → Arrivée : {ad.arrivalLocation.name}
+						{$departure} : {ad.departureLocation.name} → {$arrival} : {ad.arrivalLocation.name}
 					</p>
 					<div class="mt-2 flex justify-end">
 						<button class="btn btn-xs btn-error" on:click={() => openDeleteModal(ad.id)}
-							>Supprimer</button
+							>{$delete_btn}</button
 						>
 					</div>
 				</div>
@@ -278,14 +317,14 @@
 	{#if showModal}
 		<div class="modal modal-open">
 			<div class="modal-box max-w-xl">
-				<h3 class="mb-4 text-lg">Nouvelle annonce</h3>
+				<h3 class="mb-4 text-lg">{$modal_title}</h3>
 				<div class="form-control mb-3">
-					<label class="label" for="title-input"><span class="label-text">Titre</span></label>
+					<label class="label" for="title-input"><span class="label-text">{$title_label}</span></label>
 					<input id="title-input" class="input input-bordered w-full" bind:value={form.title} />
 				</div>
 				<div class="form-control mb-3">
 					<label class="label" for="description-input"
-						><span class="label-text">Description</span></label
+						><span class="label-text">{$description_label}</span></label
 					>
 					<textarea
 						id="description-input"
@@ -295,7 +334,7 @@
 				</div>
 				<div class="form-control mb-3">
 					<label class="label" for="package-size-select"
-						><span class="label-text">Taille du colis</span></label
+						><span class="label-text">{$package_size_label}</span></label
 					>
 					<select
 						id="package-size-select"
@@ -310,18 +349,18 @@
 					</select>
 				</div>
 				<div class="form-control mb-3">
-					<label class="label" for="price-input"><span class="label-text">Prix (€)</span></label>
+					<label class="label" for="price-input"><span class="label-text">{$price_label}</span></label>
 					<input
 						id="price-input"
 						type="number"
 						class="input input-bordered w-full"
 						bind:value={form.price}
 					/>
-					<p class="mt-1 text-xs text-gray-500">Conseil : 1€ du km</p>
+					<p class="mt-1 text-xs text-gray-500">{$price_advice}</p>
 				</div>
 				<div class="form-control mb-3">
 					<label class="label" for="client-email-input"
-						><span class="label-text">Email client</span></label
+						><span class="label-text">{$client_email_label}</span></label
 					>
 					<input
 						id="client-email-input"
@@ -331,14 +370,14 @@
 				</div>
 				<div class="form-control mb-3">
 					<label class="label" for="departure-location-select"
-						><span class="label-text">Lieu de départ</span></label
+						><span class="label-text">{$departure_location_label}</span></label
 					>
 					<select
 						id="departure-location-select"
 						class="select select-bordered w-full"
 						bind:value={form.departureLocationId}
 					>
-						<option value={-1} disabled selected>Choisir</option>
+						<option value={-1} disabled selected>{$choose}</option>
 						{#each locations as loc}
 							<option value={loc.id}>{loc.name} ({loc.cp})</option>
 						{/each}
@@ -346,21 +385,21 @@
 				</div>
 				<div class="form-control mb-3">
 					<label class="label" for="arrival-location-select"
-						><span class="label-text">Lieu d'arrivée</span></label
+						><span class="label-text">{$arrival_location_label}</span></label
 					>
 					<select
 						id="arrival-location-select"
 						class="select select-bordered w-full"
 						bind:value={form.arrivalLocationId}
 					>
-						<option value={-1} disabled selected>Choisir</option>
+						<option value={-1} disabled selected>{$choose}</option>
 						{#each locations as loc}
 							<option value={loc.id}>{loc.name} ({loc.cp})</option>
 						{/each}
 					</select>
 				</div>
 				<div class="form-control mb-3">
-					<label class="label" for="images-input"><span class="label-text">Images</span></label>
+					<label class="label" for="images-input"><span class="label-text">{$images_label}</span></label>
 					<input
 						id="images-input"
 						type="file"
@@ -378,8 +417,8 @@
 					</div>
 				{/if}
 				<div class="modal-action">
-					<button class="btn" on:click={() => (showModal = false)}>Annuler</button>
-					<button class="btn btn-primary" on:click={handleCreate}>Créer</button>
+					<button class="btn" on:click={() => (showModal = false)}>{$cancel}</button>
+					<button class="btn btn-primary" on:click={handleCreate}>{$create}</button>
 				</div>
 			</div>
 		</div>
@@ -388,10 +427,10 @@
 	{#if showDeleteModal}
 		<div class="modal modal-open">
 			<div class="modal-box">
-				<h3 class="text-lg font-bold">Supprimer l'annonce ?</h3>
+				<h3 class="text-lg font-bold">{$delete_modal_title}</h3>
 				<div class="modal-action">
-					<button class="btn" on:click={() => (showDeleteModal = false)}>Annuler</button>
-					<button class="btn btn-error" on:click={confirmDelete}>Supprimer</button>
+					<button class="btn" on:click={() => (showDeleteModal = false)}>{$delete_modal_cancel}</button>
+					<button class="btn btn-error" on:click={confirmDelete}>{$delete_modal_delete}</button>
 				</div>
 			</div>
 		</div>

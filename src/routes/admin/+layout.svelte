@@ -11,22 +11,27 @@
 	const langs_title = tStatic('admin.global.langs_title');
 	const ads_title = tStatic('admin.global.ads_title');
 	const wallets_title = tStatic('admin.global.wallets_title');
-	const invoices_title = 'Factures';
-	const payments_title = 'Paiements';
+	const invoices_title = tStatic('admin.global.invoices_title');
+	const payments_title = tStatic('admin.global.payments_title');
+	const professionals_title = tStatic('admin.global.professionals_title');
+	const ratings_title = tStatic('admin.global.ratings_title');
+	const users_group = tStatic('admin.global.users_group');
+	const accounting_group = tStatic('admin.global.accounting_group');
+	const content_group = tStatic('admin.global.content_group');
 
 	let { children } = $props();
 
 	const groupedPages = [
 		{
-			group: 'Utilisateurs',
+			group: users_group,
 			items: [
 				{ name: users_title, url: '/admin/users' },
-				{ name: 'Professionels', url: '/admin/pro' },
-				{ name: 'Avis des prestataires', url: '/admin/ratings' },
+				{ name: professionals_title, url: '/admin/pro' },
+				{ name: ratings_title, url: '/admin/ratings' },
 			]
 		},
 		{
-			group: 'Comptabilité',
+			group: accounting_group,
 			items: [
 				{ name: wallets_title, url: '/admin/wallets' },
 				{ name: invoices_title, url: '/admin/invoices' },
@@ -34,7 +39,7 @@
 			]
 		},
 		{
-			group: 'Contenus',
+			group: content_group,
 			items: [
 				{ name: ads_title, url: '/admin/ads-management' },
 				{ name: addresses_title, url: '/admin/addresses' },

@@ -93,7 +93,11 @@
 	async function loadAddresses() {
 		try {
 			const res = await fetchFromAPI<Address[]>('/locations', { headers: getHeaders() });
-			addresses = res;
+			// Trier les adresses : privées d'abord, puis publiques
+			addresses = res.sort((a, b) => {
+				if (a.public === b.public) return 0;
+				return a.public ? 1 : -1; // false (privées) avant true (publiques)
+			});
 		} catch {
 			notifications.error('Impossible de charger les adresses.');
 		}
@@ -187,7 +191,7 @@
 </script>
 
 <!-- Page -->
-<div class="min-h-screen p-6">
+<div class="p-6">
 	<div class="mb-6 flex items-center justify-between">
 		<h1 class="font-author text-2xl text-gray-800">{$title}</h1>
 		<button on:click={openAddModal} class="btn btn-secondary">{$add_address}</button>
@@ -200,15 +204,15 @@
 					<h2 class="card-title text-lg">{addr.name}</h2>
 					<p class="text-sm text-gray-700">{addr.address}</p>
 					<p class="text-sm text-gray-700">{addr.cp} {addr.city}, {addr.country}</p>
-					<div class="flex items-center gap-2">
-						{#if addr.public}
-							<span class="badge badge-neutral">Ecodeli.fr</span>
-						{/if}
-						{#if addr.price}
-							<p class="text-sm text-gray-700">Prix : {addr.price} €</p>
-						{/if}
-					</div>
-					{#if !addr.public}
+					
+					{#if addr.public}
+						<div class="mt-4 flex items-center justify-between">
+							<span class="badge badge-neutral">Spécial</span>
+							{#if addr.price > 0}
+								<span class="text-sm font-semibold text-neutral">{addr.price}€</span>
+							{/if}
+						</div>
+					{:else}
 						<div class="card-actions mt-4 justify-end">
 							<button class="btn btn-sm btn-primary" on:click={() => openEditModal(addr)}>
 								{$modify}

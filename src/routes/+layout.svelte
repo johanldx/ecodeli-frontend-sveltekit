@@ -13,6 +13,7 @@
 
 	const header_register_btn = t('landing.global.header.menu.register');
 	const header_login_btn = t('landing.global.header.menu.login');
+	const close_btn = t('landing.global.common.close');
 
 	const footer_title = t('landing.global.footer.title');
 	const footer_cta_button = t('landing.global.footer.cta_button');
@@ -90,18 +91,18 @@
 				: 'translate-x-full'}"
 		>
 			<div class="flex flex-col space-y-4 p-6">
-				<button class="btn btn-ghost self-end" onclick={() => isOpen.set(false)}> ✕ </button>
+				<button class="btn btn-ghost self-end" onclick={() => isOpen.set(false)}> {$close_btn} </button>
 				<a
 					href="/register"
 					class="relative transition duration-200 ease-in-out after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 after:bg-current after:transition-all after:duration-200 after:ease-in-out hover:after:w-full"
 				>
-					S’inscrire
+					{$header_register_btn}
 				</a>
 				<a
 					href="/login"
 					class="relative transition duration-200 ease-in-out after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 after:bg-current after:transition-all after:duration-200 after:ease-in-out hover:after:w-full"
 				>
-					Se connecter
+					{$header_login_btn}
 				</a>
 				<LanguageSwitcher />
 			</div>

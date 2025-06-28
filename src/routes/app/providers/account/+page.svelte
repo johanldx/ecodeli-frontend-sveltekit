@@ -12,6 +12,7 @@
 
 	let serviceTypes: ServiceType[] = [];
 	let authorizedTypeIds: number[] = [];
+	let authorizedServicesWithPrices: { id: number; name: string; price: number }[] = [];
 	let ratingStats: {
 		averageRating: number;
 		totalRatings: number;
@@ -34,6 +35,11 @@
 		name: string;
 	};
 
+	type Authorization = {
+		personalServiceTypeId: number;
+		price: number;
+	};
+
 	const account_title = t('app.providers.account.title');
 	const customer_service = t('app.providers.service.customer_service');
 
@@ -51,11 +57,21 @@
 			});
 			serviceTypes = all;
 
-			const auths = await fetchFromAPI<{ personalServiceTypeId: number }[]>(
+			const auths = await fetchFromAPI<Authorization[]>(
 				`/personal-service-type-authorizations?providerId=${get(profileIds).providerId}`,
 				{ headers: getHeaders() }
 			);
 			authorizedTypeIds = auths.map((a) => a.personalServiceTypeId);
+			
+			// Créer une liste des services autorisés avec leurs prix
+			authorizedServicesWithPrices = auths.map(auth => {
+				const serviceType = serviceTypes.find(st => st.id === auth.personalServiceTypeId);
+				return {
+					id: auth.personalServiceTypeId,
+					name: serviceType?.name || 'Service inconnu',
+					price: auth.price
+				};
+			});
 		} catch {
 			notifications.error('Erreur lors du chargement des types de prestations');
 		}
@@ -115,7 +131,7 @@
 	}
 </script>
 
-<div class="bg-base-200 mx-auto min-h-screen p-6">
+<div class="bg-base-200 mx-auto p-6">
 	<div class="mx-auto">
 		<h1 class="font-author mb-6 text-2xl text-gray-800">{$account_title}</h1>
 
@@ -136,10 +152,17 @@
 			<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-md">
 				<div class="space-y-1">
 					{#each serviceTypes as service}
+						{@const isAuthorized = authorizedTypeIds.includes(service.id)}
+						{@const authorizedService = authorizedServicesWithPrices.find(s => s.id === service.id)}
 						<div
-							class={authorizedTypeIds.includes(service.id) ? '' : ' text-gray-500 line-through'}
+							class={isAuthorized ? '' : ' text-gray-500 line-through'}
 						>
-							<p class="text-sm">{service.name}</p>
+							<p class="text-sm">
+								{service.name}
+								{#if isAuthorized && authorizedService}
+									<span class="text-green-600 font-medium">({authorizedService.price}€)</span>
+								{/if}
+							</p>
 						</div>
 					{/each}
 					<a href="mailto:hello@ecodeli.fr" class="btn btn-neutral mt-2 w-full"

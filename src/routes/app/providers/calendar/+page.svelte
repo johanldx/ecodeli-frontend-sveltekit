@@ -209,7 +209,7 @@
 	}
 </script>
 
-<div class="bg-base-100 min-h-screen p-6">
+<div class="bg-base-100 p-6">
 	<div class="mx-auto max-w-7xl">
 		<div class="mb-6 flex items-center justify-between">
 			<div class="flex items-center gap-4">

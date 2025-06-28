@@ -291,7 +291,7 @@
 	});
 </script>
 
-<div class="min-h-screen p-6">
+<div class="p-6">
 	<h1 class="mt-10 mb-5 text-2xl font-medium">Gestion des type des services</h1>
 	{#if loadingTypes}
 		<div class="fixed inset-0 z-50 flex items-center justify-center bg-white">

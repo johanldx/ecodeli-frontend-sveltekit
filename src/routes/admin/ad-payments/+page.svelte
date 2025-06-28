@@ -44,7 +44,7 @@
   onMount(() => onDestroy(tabTitle('admin.ad-payments.tab_title')));
 </script>
 
-<div class="min-h-screen p-6">
+<div class="p-6">
   <div class="flex items-center justify-between mt-10 mb-5">
     <h1 class="text-2xl font-medium">Paiements</h1>
   </div>

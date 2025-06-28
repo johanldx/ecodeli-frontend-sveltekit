@@ -1,5 +1,14 @@
 <script lang="ts">
 	import { isTourActive, tourStep, tourSteps, endTour } from '$lib/stores/tour';
+	import { t } from '$lib/utils/t';
+
+	// Traductions
+	const step_label = t('components.onboarding.step');
+	const of_label = t('components.onboarding.of');
+	const previous_label = t('components.onboarding.previous');
+	const next_label = t('components.onboarding.next');
+	const finish_label = t('components.onboarding.finish');
+	const skip_tutorial_label = t('components.onboarding.skip_tutorial');
 
 	function nextStep() {
 		tourStep.update((n) => {
@@ -24,23 +33,23 @@
 
 			<div class="flex justify-between items-center mt-4">
 				<span class="text-sm text-gray-500">
-					Étape {$tourStep + 1} sur {$tourSteps.length}
+					{$step_label} {$tourStep + 1} {$of_label} {$tourSteps.length}
 				</span>
 				<div class="modal-action mt-0">
 					{#if $tourStep > 0}
-						<button class="btn btn-ghost" on:click={prevStep}>Précédent</button>
+						<button class="btn btn-ghost" on:click={prevStep}>{$previous_label}</button>
 					{/if}
 					<button class="btn btn-primary" on:click={nextStep}>
 						{#if $tourStep === $tourSteps.length - 1}
-							Terminer
+							{$finish_label}
 						{:else}
-							Suivant
+							{$next_label}
 						{/if}
 					</button>
 				</div>
 			</div>
 			<div class="modal-action">
-				<button class="btn btn-sm btn-ghost absolute bottom-2 right-2" on:click={endTour}>Passer le tutoriel</button>
+				<button class="btn btn-sm btn-ghost absolute bottom-2 right-2" on:click={endTour}>{$skip_tutorial_label}</button>
 			</div>
 		</div>
 	</div>

@@ -11,16 +11,8 @@
 	onMount(() => onDestroy(tabTitle('app.traders.account.tab_title')));
 
 	const title = t('app.traders.account.title');
-	const manage_my_documents = t('app.traders.account.manage_my_documents');
-	const manage_global_account = t('app.traders.account.manage_global_account');
-	const manage_my_addresses = t('app.traders.account.manage_my_addresses');
-	const samples_title = t('app.traders.samples.title');
-	const amount_billed_month = t('app.traders.samples.amount_billed_month');
-	const manage_samples = t('app.traders.samples.manage_samples');
 	const pricing_title = t('app.traders.pricing.title');
-	const customer_service = t('app.traders.pricing.title');
 	const customer_contact = t('app.traders.pricing.customer_contact');
-	const invoice_title = t('app.traders.invoice.title');
 	const reduction_title = t('app.traders.account.reduction_title');
 	const standard_rate = t('app.traders.account.standard_rate');
 	const reduction_rate = t('app.traders.account.reduction_rate');
@@ -49,7 +41,7 @@
 </script>
 
 <div class="bg-[#FEFCF3] p-6">
-	<div class="mx-auto h-screen">
+	<div class="mx-auto">
 		<h1 class="font-author mb-6 text-2xl text-gray-800">{$title}</h1>
 
 		<!-- Encadré de contact support -->

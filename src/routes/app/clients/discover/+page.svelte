@@ -85,7 +85,7 @@
 	}
 </script>
 
-<div class="bg-base-200 min-h-screen p-4 md:p-6">
+<div class="bg-base-200 p-4 md:p-6">
 	<div class="mb-6 flex items-center gap-4">
 		<select id="typeFilter" bind:value={selectedTypeId} class="select select-bordered max-w-xs">
 			<option value="all">Tous</option>

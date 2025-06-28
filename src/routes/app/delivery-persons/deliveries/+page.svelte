@@ -138,7 +138,7 @@
 	}
 </script>
 
-<div class="mx-auto min-h-screen max-w-3xl bg-[#FEFCF3] p-6">
+<div class="mx-auto max-w-3xl bg-[#FEFCF3] p-6">
 	<h1 class="font-author mb-6 text-2xl text-gray-800">Mes trajets</h1>
 
 	<p class="mb-6 text-sm text-gray-600">

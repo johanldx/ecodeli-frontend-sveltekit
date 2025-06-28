@@ -6,6 +6,7 @@
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { notifications } from '$lib/stores/notifications';
 	import { tabTitle } from '$lib/utils/tabTitle';
+	import { t } from '$lib/utils/t';
 
 	type ServiceType = {
 		id: number;
@@ -14,6 +15,7 @@
 
 	let serviceTypes: ServiceType[] = [];
 	let authorizedTypeIds: number[] = [];
+	let authorizedServicesWithPrices: { id: number; name: string; price: number }[] = [];
 
 	let showDeleteModal = false;
 	let title = '';
@@ -35,6 +37,27 @@
 		createdAt: string;
 	};
 	let ads: PersonalServiceAd[] = [];
+
+	type Authorization = {
+		personalServiceTypeId: number;
+		price: number;
+	};
+
+	// Traductions
+	const page_title = t('app.providers.service.tab_title');
+	const new_announcement = t('landing.global.forms.new_announcement');
+	const new_service_announcement = t('landing.global.forms.new_service_announcement');
+	const cancel = t('landing.global.common.cancel');
+	const publish = t('landing.global.common.publish');
+	const delete_btn = t('landing.global.common.delete');
+	const confirm_delete = t('landing.global.modals.confirm_delete');
+	const confirm_delete_announcement = t('landing.global.modals.confirm_delete_announcement');
+	const unauthorized_service = t('landing.global.notifications.unauthorized_service');
+	const all_fields_required = t('landing.global.notifications.all_fields_required');
+	const announcement_created = t('landing.global.notifications.announcement_created');
+	const announcement_creation_error = t('landing.global.notifications.announcement_creation_error');
+	const announcement_deleted = t('landing.global.notifications.announcement_deleted');
+	const announcement_cancelled = t('landing.global.notifications.announcement_cancelled');
 
 	onMount(async () => {
 		await loadServiceTypes();
@@ -74,11 +97,21 @@
 			});
 			serviceTypes = all;
 
-			const auths = await fetchFromAPI<{ personalServiceTypeId: number }[]>(
+			const auths = await fetchFromAPI<Authorization[]>(
 				`/personal-service-type-authorizations?providerId=${get(profileIds).providerId}`,
 				{ headers: getHeaders() }
 			);
 			authorizedTypeIds = auths.map((a) => a.personalServiceTypeId);
+			
+			// Créer une liste des services autorisés avec leurs prix
+			authorizedServicesWithPrices = auths.map(auth => {
+				const serviceType = serviceTypes.find(st => st.id === auth.personalServiceTypeId);
+				return {
+					id: auth.personalServiceTypeId,
+					name: serviceType?.name || 'Service inconnu',
+					price: auth.price
+				};
+			});
 		} catch {
 			notifications.error('Erreur lors du chargement des types de prestations');
 		}
@@ -94,10 +127,10 @@
 
 	async function handleSubmit() {
 		if (!title || !description || selectedTypeId < 0 || files.length === 0) {
-			return notifications.warning('Tous les champs sont obligatoires.');
+			return notifications.warning($all_fields_required);
 		}
 		if (!authorizedTypeIds.includes(selectedTypeId)) {
-			return notifications.error("Vous n'êtes pas autorisé à publier pour cette prestation.");
+			return notifications.error($unauthorized_service);
 		}
 
 		isSubmitting = true;
@@ -114,7 +147,7 @@
 				body: form
 			});
 
-			notifications.success('Annonce créée avec succès');
+			notifications.success($announcement_created);
 			title = '';
 			description = '';
 			selectedTypeId = -1;
@@ -122,7 +155,7 @@
 			imageUrls = [];
 			showModal = false;
 		} catch {
-			notifications.error("Erreur lors de la création de l'annonce.");
+			notifications.error($announcement_creation_error);
 		} finally {
 			isSubmitting = false;
 		}
@@ -150,14 +183,18 @@
 	async function confirmDelete() {
 		if (deleteId === null) return;
 		try {
-			const res = await fetchFromAPI(`/personal-service-ads/${deleteId}`, {
+			const res = await fetchFromAPI<{ action: 'deleted' | 'cancelled' }>(`/personal-service-ads/${deleteId}`, {
 				method: 'DELETE',
 				headers: getHeaders()
 			});
-			if (res == null) {
-				notifications.success('Annonce supprimée');
-				await loadAds();
+			
+			if (res.action === 'deleted') {
+				notifications.success($announcement_deleted);
+			} else {
+				notifications.success($announcement_cancelled);
 			}
+			
+			await loadAds();
 		} catch {
 			notifications.error('Erreur lors de la suppression');
 		} finally {
@@ -167,16 +204,16 @@
 	}
 </script>
 
-<div class="bg-base-200 mx-auto min-h-screen p-6">
+<div class="bg-base-200 mx-auto p-6">
 	<div class="mb-6 flex items-center justify-between">
 		<h1 class="font-author text-2xl text-gray-800">Mes prestations</h1>
-		<button on:click={() => (showModal = true)} class="btn btn-primary">Nouvelle annonce</button>
+		<button on:click={() => (showModal = true)} class="btn btn-primary">{$new_announcement}</button>
 	</div>
 
 	{#if showModal}
 		<div class="modal modal-open">
 			<div class="modal-box max-w-xl">
-				<h3 class="mb-4 text-lg font-bold">Nouvelle annonce de prestation</h3>
+				<h3 class="mb-4 text-lg font-bold">{$new_service_announcement}</h3>
 
 				<div class="form-control mb-4">
 					<label class="label" for="title-input">Titre</label>
@@ -201,9 +238,15 @@
 					>
 						<option value={-1} disabled>Sélectionner</option>
 						{#each serviceTypes as st}
-							<option value={st.id} disabled={!authorizedTypeIds.includes(st.id)}>
+							{@const isAuthorized = authorizedTypeIds.includes(st.id)}
+							{@const authorizedService = authorizedServicesWithPrices.find(s => s.id === st.id)}
+							<option value={st.id} disabled={!isAuthorized}>
 								{st.name}
-								{#if !authorizedTypeIds.includes(st.id)}(non autorisé){/if}
+								{#if isAuthorized && authorizedService}
+									({authorizedService.price}€)
+								{:else if !isAuthorized}
+									(non autorisé)
+								{/if}
 							</option>
 						{/each}
 					</select>
@@ -230,9 +273,9 @@
 				{/if}
 
 				<div class="modal-action">
-					<button class="btn" on:click={() => (showModal = false)}>Annuler</button>
+					<button class="btn" on:click={() => (showModal = false)}>{$cancel}</button>
 					<button class="btn btn-primary" on:click={handleSubmit} disabled={isSubmitting}
-						>Publier</button
+						>{$publish}</button
 					>
 				</div>
 			</div>
@@ -290,7 +333,7 @@
 						on:click={() => openDeleteModal(ad.id)}
 						class="btn btn-xs btn-error top-2 right-2"
 					>
-						Supprimer
+						{$delete_btn}
 					</button>
 				</div>
 			</div>
@@ -300,11 +343,11 @@
 	{#if showDeleteModal}
 		<div class="modal modal-open">
 			<div class="modal-box">
-				<h3 class="text-lg font-bold">Confirmer la suppression</h3>
-				<p>Voulez-vous vraiment supprimer cette annonce ?</p>
+				<h3 class="text-lg font-bold">{$confirm_delete}</h3>
+				<p>{$confirm_delete_announcement}</p>
 				<div class="modal-action">
-					<button class="btn" on:click={cancelDelete}>Annuler</button>
-					<button class="btn btn-error" on:click={confirmDelete}>Supprimer</button>
+					<button class="btn" on:click={cancelDelete}>{$cancel}</button>
+					<button class="btn btn-error" on:click={confirmDelete}>{$delete_btn}</button>
 				</div>
 			</div>
 		</div>

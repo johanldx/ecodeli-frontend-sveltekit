@@ -26,6 +26,15 @@
 	const available = t('app.clients.account.my_electronic_wallet.available');
 	const pending = t('app.clients.account.my_electronic_wallet.pending');
 
+	// Notifications traductions
+	const iban_sent_success = t('components.wallet.iban_sent_success');
+	const iban_validation_error = t('components.wallet.iban_validation_error');
+	const no_amount_available = t('components.wallet.no_amount_available');
+	const transfer_success = t('components.wallet.transfer_success');
+	const transfer_error = t('components.wallet.transfer_error');
+	const unknown_profile = t('components.wallet.unknown_profile');
+	const load_wallet_error = t('components.wallet.load_wallet_error');
+
 	const getHeaders = () => ({
 		'Content-Type': 'application/json',
 		Authorization: `Bearer ${get(accessToken)}`
@@ -39,7 +48,7 @@
 			amount_available = `${wallet.amout_available.toFixed(2)} €`;
 			amount_pending = `${wallet.amout_pending.toFixed(2)} €`;
 		} catch (e) {
-			console.error('Erreur lors du chargement du wallet', e);
+			console.error($load_wallet_error, e);
 		}
 	});
 
@@ -61,7 +70,7 @@
 				endpoint = `/traders/${profile.traderId}`;
 				break;
 			default:
-				notifications.warning(`Type de profil inconnu : ${profileType}`);
+				notifications.warning(`${$unknown_profile} ${profileType}`);
 				return;
 		}
 
@@ -71,10 +80,10 @@
 				headers: getHeaders(),
 				body: JSON.stringify({ bank_account: ibanInput.value })
 			});
-			notifications.success('IBAN envoyé avec succès');
+			notifications.success($iban_sent_success);
 		} catch (err) {
-			console.error('Erreur lors de la validation de l’IBAN', err);
-			notifications.error('Erreur lors de la validation de l’IBAN');
+			console.error($iban_validation_error, err);
+			notifications.error($iban_validation_error);
 		}
 	}
 
@@ -87,7 +96,7 @@
 		const amount = parseAmount(amount_available);
 
 		if (!amount || amount <= 0) {
-			notifications.warning('Aucun montant disponible à transférer.');
+			notifications.warning($no_amount_available);
 			return;
 		}
 
@@ -102,12 +111,12 @@
 				})
 			});
 
-			notifications.success('Montant transféré avec succès');
+			notifications.success($transfer_success);
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 			location.reload();
 		} catch (e) {
-			console.error('Erreur lors du transfert bancaire', e);
-			notifications.error('Erreur lors du transfert');
+			console.error($transfer_error, e);
+			notifications.error($transfer_error);
 		}
 	}
 </script>

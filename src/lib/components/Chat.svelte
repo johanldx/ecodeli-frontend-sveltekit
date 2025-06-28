@@ -100,6 +100,8 @@
 	}
 
 	let modalContext: 'payer' | 'prix' | 'demandes' | 'créneau' | null = null;
+	let isAdExpanded = false;
+	let showConversationList = true; // Pour mobile: true = liste, false = conversation
 
 	async function openSlotModal(context: typeof modalContext) {
 		modalContext = context;
@@ -369,6 +371,11 @@
 		if (socket) socket.disconnect();
 		ad = null;
 
+		// Sur mobile, passer en mode conversation
+		if (window.innerWidth < 768) {
+			showConversationList = false;
+		}
+
 		if ((conv as any).fullAd) {
 			ad = (conv as any).fullAd;
 			await loadMessages(conv.id);
@@ -429,11 +436,12 @@
 	});
 </script>
 
-<div class="h-screen">
-	<div class="mt-20 flex h-[70vh] overflow-hidden rounded-2xl border-2 border-gray-300">
+<div class="">
+	<!-- Version Desktop -->
+	<div class="hidden lg:flex mt-20 h-[70vh] overflow-hidden rounded-2xl border-2 border-gray-300">
 		{#if convList.length && selectedConv}
 			<aside
-				class="hidden w-64 flex-col overflow-hidden rounded-l-lg border-r border-gray-300 bg-white md:flex"
+				class="w-64 flex-col overflow-hidden rounded-l-lg border-r border-gray-300 bg-white flex"
 			>
 				<ul class="flex-1 overflow-y-auto">
 					{#each Object.entries(groupedConvs) as [key, group]}
@@ -471,18 +479,6 @@
 					{/each}
 				</ul>
 			</aside>
-
-			<div class="border-b border-gray-300 bg-white p-2 md:hidden">
-				<select bind:value={selectedConvId} class="select select-bordered w-full">
-					{#if convList.length}
-						{#each convList as conv}
-							<option value={conv.id}>{@html conv.label}</option>
-						{/each}
-					{:else}
-						<option disabled selected>Aucune conversation disponible</option>
-					{/if}
-				</select>
-			</div>
 		{:else if !isLoading && convList.length === 0}
 			<div class="flex flex-1 items-center justify-center bg-white">
 				<p class="text-sm text-gray-500">Aucune conversation pour le moment.</p>
@@ -493,137 +489,392 @@
 			</div>
 		{/if}
 
-		<div class="flex flex-1 flex-col rounded-r-lg border-gray-300">
+		<div class="flex flex-1 flex-col rounded-r-lg border-gray-300 relative">
 			{#if ad}
-				<header class="flex items-start justify-between border-b border-gray-300 bg-white p-4">
-					<div>
-						<div class="mb-2 flex items-center space-x-2">
-							{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
-								<span class="badge badge-neutral">Mon annonce</span>
-							{/if}
-							<span class="badge badge-secondary">{selectedConv!.price ?? 0} €</span>
-						</div>
-						<h2 class="text-lg font-bold">{ad.title}</h2>
-						<p class="text-sm text-gray-600">{ad.description}</p>
-						{#if ad.departureLocation && ad.arrivalLocation}
-							<div
-								class="mt-4 flex flex-col gap-4 text-sm text-gray-800 sm:flex-row sm:items-start sm:justify-between"
-							>
-								<div class="flex-1">
-									<p class="mb-1 font-medium text-gray-900">📍 Départ</p>
-									<p>{ad.departureLocation.name}</p>
-									<p>{ad.departureLocation.address}</p>
-									<p>
-										{ad.departureLocation.cp}
-										{ad.departureLocation.city}, {ad.departureLocation.country}
-									</p>
-								</div>
-
-								<div class="hidden items-center justify-center px-4 sm:flex">
-									<span class="text-xl text-gray-400">→</span>
-								</div>
-
-								<div class="flex-1">
-									<p class="mb-1 font-medium text-gray-900">🎯 Arrivée</p>
-									<p>{ad.arrivalLocation.name}</p>
-									<p>{ad.arrivalLocation.address}</p>
-									<p>
-										{ad.arrivalLocation.cp}
-										{ad.arrivalLocation.city}, {ad.arrivalLocation.country}
-									</p>
-								</div>
+				<header class="border-b border-gray-300 bg-white">
+					<!-- Version compacte (toujours visible) -->
+					<div class="flex items-start justify-between p-4">
+						<div class="flex-1 min-w-0">
+							<div class="mb-2 flex items-center space-x-2">
+								{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+									<span class="badge badge-neutral">Mon annonce</span>
+								{/if}
+								<span class="badge badge-secondary">{selectedConv!.price ?? 0} €</span>
 							</div>
-						{/if}
+							<h2 class="text-lg font-bold truncate">{ad.title}</h2>
+							<p class="text-sm text-gray-600 line-clamp-2">{ad.description}</p>
+						</div>
 
-						{#if ad.packageSize}
-							<p class="mt-2 text-sm">Taille du colis : {ad.packageSize}</p>
-						{/if}
-						{#if ad.shoppingList && ad.shoppingList.length}
-							<p class="mt-2 text-sm">Liste de course :</p>
-							<ul class="list-disc pl-5 text-sm text-gray-700">
-								{#each ad.shoppingList as item}
-									<li>{item}</li>
-								{/each}
-							</ul>
-						{/if}
+						<div class="flex items-start gap-2 ml-4">
+							<button 
+								class="btn btn-ghost btn-sm" 
+								on:click={() => isAdExpanded = !isAdExpanded}
+								title={isAdExpanded ? "Réduire" : "Développer"}
+							>
+								{isAdExpanded ? '▼' : '▲'}
+							</button>
+							
+							{#if groupedConvs.actives.find(c => c.id === selectedConv!.id)}
+								{#if selectedConv!.adType === 'ShoppingAds'}
+									{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+										<button class="btn btn-outline btn-sm" on:click={() => openSlotModal('payer')}>Payer</button>
+									{:else}
+										<button class="btn btn-primary btn-sm" on:click={() => openSlotModal('prix')}>Nouveau prix</button>
+									{/if}
+								{:else if selectedConv!.adType === 'DeliverySteps'}
+									{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+										<button class="btn btn-outline btn-sm" on:click={() => openSlotModal('payer')}>Payer</button>
+									{:else}
+										<button class="btn btn-primary btn-sm" on:click={() => openSlotModal('prix')}>Nouveau prix</button>
+									{/if}
+								{:else if selectedConv!.adType === 'ServiceProvisions'}
+									{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+										<button class="btn btn-outline btn-sm" on:click={() => openSlotModal('demandes')}>Demandes</button>
+									{:else}
+										<button class="btn btn-primary btn-sm" on:click={() => openSlotModal('créneau')}>Créneau</button>
+									{/if}
+								{:else if selectedConv!.adType === 'ReleaseCartAds'}
+									{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+										<button class="btn btn-outline btn-sm" on:click={() => openSlotModal('payer')}>Payer</button>
+									{:else}
+										<button class="btn btn-primary btn-sm" on:click={() => openSlotModal('prix')}>Nouveau prix</button>
+									{/if}
+								{/if}
+							{:else if groupedConvs.en_cours.find(c => c.id === selectedConv!.id)}
+								<button class="btn btn-disabled btn-sm" disabled>En cours</button>
+							{:else}
+								<button class="btn btn-disabled btn-sm" disabled>Finalisé</button>
+							{/if}
+						</div>
 					</div>
 
-					{#if groupedConvs.actives.find(c => c.id === selectedConv!.id)}
-						{#if selectedConv!.adType === 'ShoppingAds'}
-							{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
-								<button class="btn btn-outline" on:click={() => openSlotModal('payer')}>Payer</button>
-							{:else}
-								<button class="btn btn-primary" on:click={() => openSlotModal('prix')}>Proposer un nouveau prix</button>
-							{/if}
-						{:else if selectedConv!.adType === 'DeliverySteps'}
-							{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
-								<button class="btn btn-outline" on:click={() => openSlotModal('payer')}>Payer</button>
-							{:else}
-								<button class="btn btn-primary" on:click={() => openSlotModal('prix')}>Proposer un nouveau prix</button>
-							{/if}
-						{:else if selectedConv!.adType === 'ServiceProvisions'}
-							{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
-								<button class="btn btn-outline" on:click={() => openSlotModal('demandes')}>Voir demandes</button>
-							{:else}
-								<button class="btn btn-primary" on:click={() => openSlotModal('créneau')}>Choisir un créneau</button>
-							{/if}
-						{:else if selectedConv!.adType === 'ReleaseCartAds'}
-							{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
-								<button class="btn btn-outline" on:click={() => openSlotModal('payer')}>Payer</button>
-							{:else}
-								<button class="btn btn-primary" on:click={() => openSlotModal('prix')}>Proposer un nouveau prix</button>
-							{/if}
-						{/if}
-					{:else if groupedConvs.en_cours.find(c => c.id === selectedConv!.id)}
-						<button class="btn btn-disabled" disabled>En cours de livraison</button>
-					{:else}
-						<button class="btn btn-disabled" disabled>Finalisé</button>
+					<!-- Version déployée (par-dessus le chat) -->
+					{#if isAdExpanded}
+						<div class="absolute top-0 left-0 right-0 z-10 bg-white border-b border-gray-300 shadow-lg max-h-[80vh] overflow-y-auto">
+							<div class="p-4">
+								<div class="flex items-start justify-between mb-4">
+									<h3 class="text-lg font-bold">Détails de l'annonce</h3>
+									<button 
+										class="btn btn-ghost btn-sm" 
+										on:click={() => isAdExpanded = false}
+									>
+										✕
+									</button>
+								</div>
+								
+								<div class="space-y-4">
+									{#if ad.departureLocation && ad.arrivalLocation}
+										<div class="flex flex-col gap-4 text-sm text-gray-800 sm:flex-row sm:items-start sm:justify-between">
+											<div class="flex-1">
+												<p class="mb-1 font-medium text-gray-900">📍 Départ</p>
+												<p>{ad.departureLocation.name}</p>
+												<p>{ad.departureLocation.address}</p>
+												<p>
+													{ad.departureLocation.cp}
+													{ad.departureLocation.city}, {ad.departureLocation.country}
+												</p>
+											</div>
+
+											<div class="hidden items-center justify-center px-4 sm:flex">
+												<span class="text-xl text-gray-400">→</span>
+											</div>
+
+											<div class="flex-1">
+												<p class="mb-1 font-medium text-gray-900">🎯 Arrivée</p>
+												<p>{ad.arrivalLocation.name}</p>
+												<p>{ad.arrivalLocation.address}</p>
+												<p>
+													{ad.arrivalLocation.cp}
+													{ad.arrivalLocation.city}, {ad.arrivalLocation.country}
+												</p>
+											</div>
+										</div>
+									{/if}
+
+									{#if ad.packageSize}
+										<div>
+											<p class="font-medium text-gray-900 mb-1">📦 Taille du colis</p>
+											<p class="text-sm">{ad.packageSize}</p>
+										</div>
+									{/if}
+									
+									{#if ad.shoppingList && ad.shoppingList.length}
+										<div>
+											<p class="font-medium text-gray-900 mb-2">🛒 Liste de course</p>
+											<ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+												{#each ad.shoppingList as item}
+													<li>{item}</li>
+												{/each}
+											</ul>
+										</div>
+									{/if}
+								</div>
+							</div>
+						</div>
 					{/if}
 				</header>
+
+				<!-- Messages -->
+				<main class="flex-1 space-y-4 overflow-y-auto bg-white p-4 {isAdExpanded ? 'mt-0' : ''}">
+					{#if messages.length}
+						{#each messages as m}
+							{#if !m.sender || !m.sender.id}
+								<div class="chat chat-center">
+									<div class="chat-header text-xs text-gray-500">Ecodeli.fr</div>
+									<div class="chat-bubble bg-base-content text-white">{m.content}</div>
+								</div>
+							{:else if m.sender.id === currentUserId}
+								<div class="chat chat-end">
+									<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+									<div class="chat-bubble bg-primary text-white">{m.content}</div>
+								</div>
+							{:else}
+								<div class="chat chat-start">
+									<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+									<div class="chat-bubble bg-gray-300">{m.content}</div>
+								</div>
+							{/if}
+						{/each}
+					{:else}
+						<p class="mt-4 text-center text-sm text-gray-500">
+							Aucun message dans cette conversation.
+						</p>
+					{/if}
+				</main>
+
+				<footer class="border-t border-gray-300 bg-white p-4">
+					<div class="flex">
+						<input
+							type="text"
+							bind:value={newMessage}
+							placeholder="Tapez un message…"
+							class="input input-bordered flex-1"
+							on:keydown={(e) => e.key === 'Enter' && send()}
+						/>
+						<button class="btn btn-primary ml-2" on:click={send}>→</button>
+					</div>
+				</footer>
 			{:else}
-				<div class="p-4">Chargement de l'annonce…</div>
-			{/if}
-
-			<main class="flex-1 space-y-4 overflow-y-auto bg-white p-4">
-				{#if messages.length}
-					{#each messages as m}
-						{#if !m.sender || !m.sender.id}
-							<div class="chat chat-center">
-								<div class="chat-header text-xs text-gray-500">Ecodeli.fr</div>
-								<div class="chat-bubble bg-base-content text-white">{m.content}</div>
-							</div>
-						{:else if m.sender.id === currentUserId}
-							<div class="chat chat-end">
-								<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
-								<div class="chat-bubble bg-primary text-white">{m.content}</div>
-							</div>
-						{:else}
-							<div class="chat chat-start">
-								<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
-								<div class="chat-bubble bg-gray-300">{m.content}</div>
-							</div>
-						{/if}
-					{/each}
-				{:else}
-					<p class="mt-4 text-center text-sm text-gray-500">
-						Aucun message dans cette conversation.
-					</p>
-				{/if}
-			</main>
-
-			<footer class="border-t border-gray-300 bg-white p-4">
-				<div class="flex">
-					<input
-						type="text"
-						bind:value={newMessage}
-						placeholder="Tapez un message…"
-						class="input input-bordered flex-1"
-						on:keydown={(e) => e.key === 'Enter' && send()}
-					/>
-					<button class="btn btn-primary ml-2" on:click={send}>→</button>
+				<div class="flex items-center justify-center h-full">
+					<span class="loading loading-spinner loading-lg text-primary"></span>
 				</div>
-			</footer>
+			{/if}
 		</div>
+	</div>
+
+	<!-- Version Mobile -->
+	<div class="lg:hidden h-screen">
+		{#if showConversationList}
+			<!-- Liste des conversations -->
+			<div class="h-full bg-white">
+				<div class="p-4 border-b border-gray-200">
+					<h1 class="text-xl font-bold">Conversations</h1>
+				</div>
+				
+				<div class="flex-1 overflow-y-auto">
+					{#if convList.length}
+						{#each Object.entries(groupedConvs) as [key, group]}
+							{#if group.length}
+								<div class="border-b border-gray-200">
+									<button
+										class="flex w-full items-center justify-between bg-gray-100 p-3 font-bold"
+										on:click={() => (groupStates[key as GroupKey] = !groupStates[key as GroupKey])}
+									>
+										<span>{groupLabels[key as GroupKey]}</span>
+										<span class="text-sm text-gray-500"
+											>{groupStates[key as GroupKey] ? '▼' : '▲'}</span
+										>
+									</button>
+									{#if groupStates[key as GroupKey]}
+										{#each group as conv}
+											<button
+												class="flex w-full items-center border-b border-gray-200 p-4 hover:bg-gray-50"
+												on:click={() => selectConv(conv)}
+											>
+												<div
+													class="mr-3 h-3 w-3 rounded-full bg-{groupColors[key as GroupKey]}"
+												></div>
+												<div class="flex flex-col flex-1 text-left">
+													{@html conv.label}
+													<p class="text-sm text-gray-500 mt-1">{conv.price ?? 0} €</p>
+												</div>
+											</button>
+										{/each}
+									{/if}
+								</div>
+							{/if}
+						{/each}
+					{:else if !isLoading}
+						<div class="flex flex-1 items-center justify-center p-8">
+							<p class="text-sm text-gray-500">Aucune conversation pour le moment.</p>
+						</div>
+					{:else}
+						<div class="flex items-center justify-center p-8">
+							<span class="loading loading-spinner loading-lg text-primary"></span>
+						</div>
+					{/if}
+				</div>
+			</div>
+		{:else if selectedConv}
+			<!-- Conversation en pleine écran -->
+			<div class="h-full flex flex-col bg-white">
+				<!-- Header avec bouton retour -->
+				<header class="border-b border-gray-300 bg-white p-4">
+					<div class="flex items-center gap-3">
+						<button 
+							class="btn btn-ghost btn-sm" 
+							on:click={() => showConversationList = true}
+						>
+							← Retour
+						</button>
+						<div class="flex-1 min-w-0">
+							<div class="mb-2 flex items-center space-x-2">
+								{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+									<span class="badge badge-neutral text-xs">Mon annonce</span>
+								{/if}
+								<span class="badge badge-secondary text-xs">{selectedConv!.price ?? 0} €</span>
+							</div>
+							<h2 class="text-base font-bold truncate">{ad?.title || 'Chargement...'}</h2>
+							<p class="text-xs text-gray-600 line-clamp-1">{ad?.description || ''}</p>
+						</div>
+						
+						<div class="flex items-start gap-2">
+							<button 
+								class="btn btn-ghost btn-sm" 
+								on:click={() => isAdExpanded = !isAdExpanded}
+								title={isAdExpanded ? "Réduire" : "Développer"}
+							>
+								{isAdExpanded ? '▼' : '▲'}
+							</button>
+							
+							{#if groupedConvs.actives.find(c => c.id === selectedConv!.id)}
+								{#if selectedConv!.adType === 'ShoppingAds'}
+									{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+										<button class="btn btn-outline btn-sm" on:click={() => openSlotModal('payer')}>Payer</button>
+									{:else}
+										<button class="btn btn-primary btn-sm" on:click={() => openSlotModal('prix')}>Prix</button>
+									{/if}
+								{:else if selectedConv!.adType === 'DeliverySteps'}
+									{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+										<button class="btn btn-outline btn-sm" on:click={() => openSlotModal('payer')}>Payer</button>
+									{:else}
+										<button class="btn btn-primary btn-sm" on:click={() => openSlotModal('prix')}>Prix</button>
+									{/if}
+								{:else if selectedConv!.adType === 'ServiceProvisions'}
+									{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+										<button class="btn btn-outline btn-sm" on:click={() => openSlotModal('demandes')}>Demandes</button>
+									{:else}
+										<button class="btn btn-primary btn-sm" on:click={() => openSlotModal('créneau')}>Créneau</button>
+									{/if}
+								{:else if selectedConv!.adType === 'ReleaseCartAds'}
+									{#if selectedConv!.userFrom && selectedConv!.userFrom.id !== currentUserId}
+										<button class="btn btn-outline btn-sm" on:click={() => openSlotModal('payer')}>Payer</button>
+									{:else}
+										<button class="btn btn-primary btn-sm" on:click={() => openSlotModal('prix')}>Prix</button>
+									{/if}
+								{/if}
+							{:else if groupedConvs.en_cours.find(c => c.id === selectedConv!.id)}
+								<button class="btn btn-disabled btn-sm" disabled>En cours</button>
+							{:else}
+								<button class="btn btn-disabled btn-sm" disabled>Finalisé</button>
+							{/if}
+						</div>
+					</div>
+
+					<!-- Version déployée mobile -->
+					{#if isAdExpanded && ad}
+						<div class="mt-4 p-4 bg-gray-50 rounded-lg">
+							<div class="space-y-4">
+								{#if ad.departureLocation && ad.arrivalLocation}
+									<div class="space-y-3">
+										<div>
+											<p class="font-medium text-gray-900 mb-1">📍 Départ</p>
+											<p class="text-sm">{ad.departureLocation.name}</p>
+											<p class="text-sm">{ad.departureLocation.address}</p>
+											<p class="text-sm">
+												{ad.departureLocation.cp} {ad.departureLocation.city}, {ad.departureLocation.country}
+											</p>
+										</div>
+										<div>
+											<p class="font-medium text-gray-900 mb-1">🎯 Arrivée</p>
+											<p class="text-sm">{ad.arrivalLocation.name}</p>
+											<p class="text-sm">{ad.arrivalLocation.address}</p>
+											<p class="text-sm">
+												{ad.arrivalLocation.cp} {ad.arrivalLocation.city}, {ad.arrivalLocation.country}
+											</p>
+										</div>
+									</div>
+								{/if}
+
+								{#if ad.packageSize}
+									<div>
+										<p class="font-medium text-gray-900 mb-1">📦 Taille du colis</p>
+										<p class="text-sm">{ad.packageSize}</p>
+									</div>
+								{/if}
+								
+								{#if ad.shoppingList && ad.shoppingList.length}
+									<div>
+										<p class="font-medium text-gray-900 mb-2">🛒 Liste de course</p>
+										<ul class="list-disc pl-4 text-sm text-gray-700 space-y-1">
+											{#each ad.shoppingList as item}
+												<li>{item}</li>
+											{/each}
+										</ul>
+									</div>
+								{/if}
+							</div>
+						</div>
+					{/if}
+				</header>
+
+				<!-- Messages -->
+				<main class="flex-1 space-y-3 overflow-y-auto bg-white p-3">
+					{#if messages.length}
+						{#each messages as m}
+							{#if !m.sender || !m.sender.id}
+								<div class="chat chat-center">
+									<div class="chat-header text-xs text-gray-500">Ecodeli.fr</div>
+									<div class="chat-bubble bg-base-content text-white max-w-[85%] break-words">{m.content}</div>
+								</div>
+							{:else if m.sender.id === currentUserId}
+								<div class="chat chat-end">
+									<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+									<div class="chat-bubble bg-primary text-white max-w-[85%] break-words">{m.content}</div>
+								</div>
+							{:else}
+								<div class="chat chat-start">
+									<div class="chat-header text-xs text-gray-500">{m.sender.name}</div>
+									<div class="chat-bubble bg-gray-300 max-w-[85%] break-words">{m.content}</div>
+								</div>
+							{/if}
+						{/each}
+					{:else}
+						<p class="mt-4 text-center text-xs text-gray-500">
+							Aucun message dans cette conversation.
+						</p>
+					{/if}
+				</main>
+
+				<!-- Zone de saisie -->
+				<footer class="border-t border-gray-300 bg-white p-3">
+					<div class="flex gap-2">
+						<input
+							type="text"
+							bind:value={newMessage}
+							placeholder="Tapez un message…"
+							class="input input-bordered flex-1 text-sm"
+							on:keydown={(e) => e.key === 'Enter' && send()}
+						/>
+						<button class="btn btn-primary btn-sm" on:click={send}>→</button>
+					</div>
+				</footer>
+			</div>
+		{:else}
+			<div class="flex items-center justify-center h-full">
+				<span class="loading loading-spinner loading-lg text-primary"></span>
+			</div>
+		{/if}
 	</div>
 
 	{#if showSlotModal}

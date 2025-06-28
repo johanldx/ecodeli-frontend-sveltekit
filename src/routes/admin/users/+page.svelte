@@ -624,7 +624,7 @@
 	}
 </script>
 
-<div class="min-h-screen p-6">
+<div class="p-6">
 	<!-- Utilisateurs -->
 	<h1 class="mt-10 mb-5 text-2xl font-medium">{$users_title}</h1>
 

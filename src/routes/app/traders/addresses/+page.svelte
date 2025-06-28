@@ -18,6 +18,8 @@
 		cp: string;
 		city: string;
 		country: string;
+		price?: number;
+		public?: boolean;
 	};
 
 	let addresses: Address[] = [];
@@ -32,7 +34,9 @@
 		address: '',
 		cp: '',
 		city: '',
-		country: 'France'
+		country: 'France',
+		price: 0,
+		public: false
 	};
 
 	let suggestions: any[] = [];
@@ -89,7 +93,11 @@
 	async function loadAddresses() {
 		try {
 			const res = await fetchFromAPI<Address[]>('/locations', { headers: getHeaders() });
-			addresses = res;
+			// Trier les adresses : privées d'abord, puis publiques
+			addresses = res.sort((a, b) => {
+				if (a.public === b.public) return 0;
+				return a.public ? 1 : -1; // false (privées) avant true (publiques)
+			});
 		} catch {
 			notifications.error('Impossible de charger les adresses.');
 		}
@@ -104,7 +112,9 @@
 			address: '',
 			cp: '',
 			city: '',
-			country: 'France'
+			country: 'France',
+			price: 0,
+			public: false
 		};
 		suggestions = [];
 		showSuggestions = false;
@@ -181,7 +191,7 @@
 </script>
 
 <!-- Page -->
-<div class="min-h-screen bg-[#FEFCF3] p-6">
+<div class="bg-[#FEFCF3] p-6">
 	<div class="mb-6 flex items-center justify-between">
 		<h1 class="font-author text-2xl text-gray-800">{$title}</h1>
 		<button on:click={openAddModal} class="btn btn-secondary">{$add_address}</button>
@@ -194,14 +204,24 @@
 					<h2 class="card-title text-lg">{addr.name}</h2>
 					<p class="text-sm text-gray-700">{addr.address}</p>
 					<p class="text-sm text-gray-700">{addr.cp} {addr.city}, {addr.country}</p>
-					<div class="card-actions mt-4 justify-end">
-						<button class="btn btn-sm btn-primary" on:click={() => openEditModal(addr)}
-							>{$modify}</button
-						>
-						<button class="btn btn-sm btn-error" on:click={() => openDeleteModal(addr)}
-							>{$delete_address}</button
-						>
-					</div>
+					
+					{#if addr.public}
+						<div class="mt-4 flex items-center justify-between">
+							<span class="badge badge-neutral">Spécial</span>
+							{#if addr.price && addr.price > 0}
+								<span class="text-sm font-semibold text-neutral">{addr.price}€</span>
+							{/if}
+						</div>
+					{:else}
+						<div class="card-actions mt-4 justify-end">
+							<button class="btn btn-sm btn-primary" on:click={() => openEditModal(addr)}
+								>{$modify}</button
+							>
+							<button class="btn btn-sm btn-error" on:click={() => openDeleteModal(addr)}
+								>{$delete_address}</button
+							>
+						</div>
+					{/if}
 				</div>
 			</div>
 		{/each}

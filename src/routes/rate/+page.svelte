@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { goto } from '$app/navigation';
-	import { t } from '$lib/utils/t';
+	import { t, tStatic } from '$lib/utils/t';
 	import { tabTitle } from '$lib/utils/tabTitle';
 	import { onDestroy } from 'svelte';
 
@@ -144,11 +144,17 @@
 			{#if selectedRating > 0}
 				<div class="mb-6">
 					<p class="text-lg font-semibold">
-						{selectedRating === 1 && t('rate.stars.1')}
-						{selectedRating === 2 && t('rate.stars.2')}
-						{selectedRating === 3 && t('rate.stars.3')}
-						{selectedRating === 4 && t('rate.stars.4')}
-						{selectedRating === 5 && t('rate.stars.5')}
+						{#if selectedRating === 1}
+							{tStatic('rate.stars.1')}
+						{:else if selectedRating === 2}
+							{tStatic('rate.stars.2')}
+						{:else if selectedRating === 3}
+							{tStatic('rate.stars.3')}
+						{:else if selectedRating === 4}
+							{tStatic('rate.stars.4')}
+						{:else if selectedRating === 5}
+							{tStatic('rate.stars.5')}
+						{/if}
 					</p>
 				</div>
 			{/if}

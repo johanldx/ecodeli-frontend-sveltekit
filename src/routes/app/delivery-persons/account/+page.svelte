@@ -7,7 +7,7 @@
 	onMount(() => onDestroy(tabTitle('app.delivery-persons.account.tab_title')));
 </script>
 
-<div class="ml-0 min-h-screen bg-[#FEFCF3] p-6">
+<div class="ml-0 bg-[#FEFCF3] p-6">
 	<h1 class="font-author mb-6 text-2xl text-gray-800">Mon profil livreur</h1>
 
 	<div class="mb-6 rounded-lg border border-orange-200 bg-orange-50 p-6 shadow-md">

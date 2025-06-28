@@ -19,37 +19,37 @@
 		// Définit les étapes du tutoriel
 		tourSteps.set([
 			{
-				title: 'Bienvenue sur votre espace EcoDeli !',
-				content: "Suivez ce guide rapide pour découvrir les fonctionnalités principales."
+				title: tStatic('app.tutorial.welcome'),
+				content: tStatic('app.tutorial.welcome_content')
 			},
 			{
-				title: 'Menu de Navigation',
-				content: "Utilisez ce menu pour naviguer entre les différentes sections de votre espace.",
+				title: tStatic('app.tutorial.navigation_menu'),
+				content: tStatic('app.tutorial.navigation_content'),
 				targetSelector: '#main-nav'
 			},
 			{
-				title: 'Découvrir des annonces',
-				content: 'La section <b>Découvrir</b> vous permet de trouver toutes les annonces disponibles.',
+				title: tStatic('app.tutorial.discover_announcements'),
+				content: tStatic('app.tutorial.discover_content'),
 				targetSelector: '#nav-discover'
 			},
 			{
-				title: 'Gérer vos annonces',
-				content: 'Dans <b>Mes annonces</b>, vous pouvez créer et gérer toutes les annonces que vous publiez.',
+				title: tStatic('app.tutorial.manage_announcements'),
+				content: tStatic('app.tutorial.manage_content'),
 				targetSelector: '#nav-ads'
 			},
 			{
-				title: 'Messagerie instantanée',
-				content: 'La section <b>Messages</b> contient toutes vos conversations avec les autres utilisateurs.',
+				title: tStatic('app.tutorial.instant_messaging'),
+				content: tStatic('app.tutorial.messaging_content'),
 				targetSelector: '#nav-chat'
 			},
 			{
-				title: 'Gestion du compte',
-				content: 'Dans <b>Mon compte</b>, vous pouvez gérer vos informations, votre portefeuille et vos abonnements.',
+				title: tStatic('app.tutorial.account_management'),
+				content: tStatic('app.tutorial.account_content'),
 				targetSelector: '#nav-account'
 			},
 			{
-				title: 'Vous êtes prêt !',
-				content: 'Vous pouvez maintenant explorer la plateforme. Vous pouvez revoir ce tutoriel à tout moment depuis la page "Mon compte".'
+				title: tStatic('app.tutorial.ready'),
+				content: tStatic('app.tutorial.ready_content')
 			}
 		]);
 

@@ -58,7 +58,7 @@
 		<span class="loading loading-spinner loading-lg text-primary"></span>
 	</div>
 {:else if error}
-	<div class="bg-base-content flex min-h-screen w-full items-center justify-center px-4">
+	<div class="bg-base-content flex w-full items-center justify-center px-4">
 		<div class="card bg-base-200 min-w-md max-w-2xl p-10 shadow-xl">
 			<div class="text-center">
 				<a href="/"><img src="/images/logo/ecodeli-icon-light.png" class="m-auto h-5 w-auto" alt="" /></a>

@@ -400,7 +400,7 @@
 	}
 </script>
 
-<div class="bg-base-200 min-h-screen p-4 md:p-6">
+<div class="bg-base-200 p-4 md:p-6">
 	<div class="mb-6 flex items-center justify-between">
 		<h1 class="font-author text-2xl text-gray-800">{$title}</h1>
 		<button on:click={openAddModal} class="btn btn-primary">Nouvelle demande</button>

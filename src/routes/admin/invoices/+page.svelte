@@ -210,7 +210,7 @@ function handleAction(action: string, row: any) {
 }
 </script>
 
-<div class="mx-auto min-h-screen p-6">
+<div class="mx-auto p-6">
   <div class="flex items-center justify-between mb-6 gap-2 flex-wrap">
     <h1 class="font-author text-2xl text-gray-800">Factures générées</h1>
     <div class="flex gap-2 flex-wrap">

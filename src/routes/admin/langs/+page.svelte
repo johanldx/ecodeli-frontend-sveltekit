@@ -145,7 +145,7 @@
 {/if}
 
 <!-- PAGE -->
-<div class="min-h-screen space-y-6 p-6">
+<div class="space-y-6 p-6">
 	<div class="flex items-center justify-between">
 		<h1 class="mt-10 mb-5 text-2xl font-medium">Langues</h1>
 		<button class="btn btn-accent" on:click={() => showAddModal.set(true)}

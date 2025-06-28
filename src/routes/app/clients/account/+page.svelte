@@ -124,7 +124,7 @@
 	}
 </script>
 
-<div class="ml-0 min-h-screen max-w-2xl bg-[#FEFCF3] p-6">
+<div class="ml-0 max-w-2xl bg-[#FEFCF3] p-6">
 	<h1 class="font-author mb-6 text-2xl text-gray-800">{$account_title}</h1>
 
 	<!-- Bloc abonnement -->

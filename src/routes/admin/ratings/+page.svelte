@@ -89,7 +89,7 @@
 	<title>Gestion des avis - Admin</title>
 </svelte:head>
 
-<div class="container mx-auto h-screen px-4 py-8">
+<div class="container mx-auto px-4 py-8">
 	<div class="mb-8">
 		<h1 class="mt-10 mb-5 text-2xl font-medium">{title}</h1>
 	</div>

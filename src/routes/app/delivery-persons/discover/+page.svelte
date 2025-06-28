@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { t } from '$lib/utils/t';
+	import { t, tStatic } from '$lib/utils/t';
 	import { tabTitle } from '$lib/utils/tabTitle';
 	import { onDestroy, onMount } from 'svelte';
 	import { accessToken } from '$lib/stores/token';
@@ -9,12 +9,32 @@
 	import { user } from '$lib/stores/user';
 	import { notifications } from '$lib/stores/notifications';
 
+	// Traductions
+	const page_title = t('app.delivery-persons.discover.tab_title');
+	const all_label = t('app.delivery-persons.discover.all_services');
+	const shopping_label = t('app.delivery-persons.discover.shopping');
+	const delivery_label = t('app.delivery-persons.discover.delivery');
+	const contact_label = t('app.delivery-persons.discover.contact');
+	const city_placeholder = t('app.delivery-persons.discover.city');
+	const cart_release_label = t('app.traders.requests.cart_release');
+	const no_photo_available = t('landing.global.common.no_photo_available');
+	const shopping_list = t('landing.global.forms.shopping_list');
+	const delivery_request = t('landing.global.forms.delivery_request');
+	const date_label = t('landing.global.common.date');
+	const departure_label = t('landing.global.common.departure');
+	const arrival_label = t('landing.global.common.arrival');
+	const step_label = t('landing.global.common.step');
+	const conversation_creation_error = t('app.delivery-persons.discover.notifications.conversation_creation_error');
+	const already_contacted = t('landing.global.notifications.already_contacted');
+	const stats_in_progress = t('landing.global.stats.in_progress');
+	const stats_completed = t('landing.global.stats.completed');
+
 	// Labels
-	const ALL_LABEL = 'Tout';
-	const SHOPPING_LABEL = 'Shopping';
-	const DELIVERY_LABEL = 'Livraison';
-	const CONTACT_LABEL = 'Contacter';
-	const CITY_PLACEHOLDER = t('app.delivery.announce.city');
+	const ALL_LABEL = $all_label;
+	const SHOPPING_LABEL = $shopping_label;
+	const DELIVERY_LABEL = $delivery_label;
+	const CONTACT_LABEL = $contact_label;
+	const CITY_PLACEHOLDER = $city_placeholder;
 
 	interface Location {
 		id: number;
@@ -72,7 +92,7 @@
 	let steps: DeliveryStep[] = [];
 	let releases: ReleaseCartAd[] = [];
 
-	onMount(() => onDestroy(tabTitle('app.delivery-persons.discover.tab_title')));
+	onMount(() => onDestroy(tabTitle($page_title)));
 
 	onMount(async () => {
 		await loadData();
@@ -204,9 +224,9 @@
 		} catch (err: any) {
 			console.error('Erreur création conversation', err);
 			if (err.status === 403 && err.message?.includes('conversation existe déjà')) {
-				notifications.error('Vous avez déjà contacté cette annonce');
+				notifications.error($already_contacted);
 			} else {
-				notifications.error('Erreur lors de la création de la conversation');
+				notifications.error($conversation_creation_error);
 			}
 		}
 	}
@@ -233,9 +253,9 @@
 		} catch (err: any) {
 			console.error('Erreur création conversation', err);
 			if (err.status === 403 && err.message?.includes('conversation existe déjà')) {
-				notifications.error('Vous avez déjà contacté cette annonce');
+				notifications.error($already_contacted);
 			} else {
-				notifications.error('Erreur lors de la création de la conversation');
+				notifications.error($conversation_creation_error);
 			}
 		}
 	}
@@ -263,26 +283,26 @@
 		} catch (err: any) {
 			console.error('Erreur création conversation', err);
 			if (err.status === 403 && err.message?.includes('conversation existe déjà')) {
-				notifications.error('Vous avez déjà contacté cette annonce');
+				notifications.error($already_contacted);
 			} else {
-				notifications.error('Erreur lors de la création de la conversation');
+				notifications.error($conversation_creation_error);
 			}
 		}
 	}
 </script>
 
-<div class="bg-base-200 min-h-screen p-4 md:p-6">
+<div class="bg-base-200 p-4 md:p-6">
 	<!-- Filters -->
 	<div class="mb-6 flex gap-4">
 		<select bind:value={filterType} class="select select-bordered">
-			<option value="all">{ALL_LABEL}</option>
-			<option value="shopping">{SHOPPING_LABEL}</option>
-			<option value="delivery">{DELIVERY_LABEL}</option>
-			<option value="release">Lâcher de chariot</option>
+			<option value="all">{$all_label}</option>
+			<option value="shopping">{$shopping_label}</option>
+			<option value="delivery">{$delivery_label}</option>
+			<option value="release">{$cart_release_label}</option>
 		</select>
 		<input
 			type="text"
-			placeholder={$CITY_PLACEHOLDER}
+			placeholder={$city_placeholder}
 			bind:value={cityQuery}
 			class="input input-bordered flex-1"
 		/>
@@ -326,27 +346,27 @@
 					</div>
 				{:else}
 					<figure class="flex h-40 items-center justify-center rounded-t-lg bg-gray-200 sm:h-48">
-						<span class="text-gray-500">Aucune photo disponible</span>
+						<span class="text-gray-500">{$no_photo_available}</span>
 					</figure>
 				{/if}
 				<div class="card-body p-4 md:p-6">
 					<div class="mb-2 flex flex-wrap items-center gap-2">
-						<span class="badge badge-neutral badge-outline px-3 py-2">Liste de courses</span>
+						<span class="badge badge-neutral badge-outline px-3 py-2">{$shopping_list}</span>
 						<span class="badge">{ad.price} €</span>
 						<span class="badge">{ad.packageSize}</span>
 					</div>
 					<h2 class="card-title">{ad.title}</h2>
 					<p class="text-sm text-gray-600">{ad.description}</p>
 					<p class="mt-1 text-xs">
-						<strong>Date:</strong>
+						<strong>{$date_label}:</strong>
 						{ad.deliveryDate ? new Date(ad.deliveryDate).toLocaleDateString() : '—'}
 					</p>
 					<p class="mt-1 text-xs">
-						<strong>Départ:</strong>
+						<strong>{$departure_label}:</strong>
 						{ad.departureLocation.name}, {ad.departureLocation.city}
 					</p>
 					<p class="text-xs">
-						<strong>Arrivée:</strong>
+						<strong>{$arrival_label}:</strong>
 						{ad.arrivalLocation.name}, {ad.arrivalLocation.city}
 					</p>
 					{#if ad.shoppingList.length}
@@ -357,7 +377,7 @@
 						</ul>
 					{/if}
 					<button class="btn btn-primary btn-sm mt-4" on:click={() => handleContactShopping(ad)}>
-						{CONTACT_LABEL}
+						{$contact_label}
 					</button>
 				</div>
 			</div>
@@ -399,28 +419,28 @@
 					</div>
 				{:else}
 					<figure class="flex h-40 items-center justify-center rounded-t-lg bg-gray-200 sm:h-48">
-						<span class="text-gray-500">Aucune photo disponible</span>
+						<span class="text-gray-500">{$no_photo_available}</span>
 					</figure>
 				{/if}
 				<div class="card-body p-4 md:p-6">
 					<div class="mb-2 flex flex-wrap items-center gap-2">
-						<span class="badge badge-info badge-outline px-3 py-2">Demande de livraison</span>
+						<span class="badge badge-info badge-outline px-3 py-2">{$delivery_request}</span>
 						<span class="badge">{step.price} €</span>
 						<span class="badge">{step.packageSize}</span>
 					</div>
 					<h2 class="card-title">{step.title}</h2>
 					<p class="text-sm text-gray-600">{step.description}</p>
 					<p class="mt-1 text-xs">
-						<strong>Date:</strong>
+						<strong>{$date_label}:</strong>
 						{step.deliveryDate ? new Date(step.deliveryDate).toLocaleDateString() : '—'}
 					</p>
 					<p class="mt-1 text-xs">
-						<strong>Étape {step.stepNumber}:</strong>
+						<strong>{$step_label} {step.stepNumber}:</strong>
 						{step.departureLocation.name}, {step.departureLocation.city} →
 						{step.arrivalLocation.name}, {step.arrivalLocation.city}
 					</p>
 					<button class="btn btn-primary btn-sm mt-4" on:click={() => handleContactStep(step)}>
-						{CONTACT_LABEL}
+						{$contact_label}
 					</button>
 				</div>
 			</div>
@@ -462,27 +482,27 @@
 					</div>
 				{:else}
 					<figure class="flex h-40 items-center justify-center rounded-t-lg bg-gray-200 sm:h-48">
-						<span class="text-gray-500">Aucune photo disponible</span>
+						<span class="text-gray-500">{$no_photo_available}</span>
 					</figure>
 				{/if}
 				<div class="card-body p-4 md:p-6">
 					<div class="mb-2 flex flex-wrap items-center gap-2">
-						<span class="badge badge-accent badge-outline px-3 py-2">Lâcher de chariot</span>
+						<span class="badge badge-accent badge-outline px-3 py-2">{$cart_release_label}</span>
 						<span class="badge">{ad.price} €</span>
 						<span class="badge">{ad.packageSize}</span>
 					</div>
 					<h2 class="card-title">{ad.title}</h2>
 					<p class="text-sm text-gray-600">{ad.description}</p>
 					<p class="mt-1 text-xs">
-						<strong>Départ:</strong>
+						<strong>{$departure_label}:</strong>
 						{ad.departureLocation.name}, {ad.departureLocation.city}
 					</p>
 					<p class="text-xs">
-						<strong>Arrivée:</strong>
+						<strong>{$arrival_label}:</strong>
 						{ad.arrivalLocation.name}, {ad.arrivalLocation.city}
 					</p>
 					<button class="btn btn-primary btn-sm mt-4" on:click={() => handleContactRelease(ad)}>
-						{CONTACT_LABEL}
+						{$contact_label}
 					</button>
 				</div>
 			</div>
@@ -492,8 +512,8 @@
 	<!-- Statistiques en bas de page -->
 	{#if dataLoaded}
 		<div class="mt-8 text-center text-sm text-gray-600">
-			<p>{totalInProgress} annonce{totalInProgress > 1 ? 's' : ''} en cours grâce à Ecodeli</p>
-			<p>{totalCompleted} annonce{totalCompleted > 1 ? 's' : ''} terminée{totalCompleted > 1 ? 's' : ''} grâce à Ecodeli</p>
+			<p>{totalInProgress} {$stats_in_progress}</p>
+			<p>{totalCompleted} {$stats_completed}</p>
 		</div>
 	{/if}
 </div>

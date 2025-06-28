@@ -104,7 +104,7 @@
   $: if (selectedType) loadAds();
 </script>
 
-<div class="min-h-screen p-6">
+<div class="p-6">
   <div class="flex items-center gap-4 mb-6">
     {#each adTypes as type}
       <button

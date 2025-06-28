@@ -28,8 +28,10 @@
   };
 
   let loading = true;
-  let data: any[] = [];
-  let columns = [
+  let privateAddresses: any[] = [];
+  let publicAddresses: any[] = [];
+  
+  let privateColumns = [
     { Header: 'Nom utilisateur', accessor: 'user_name', sortable: true },
     { Header: 'Email', accessor: 'user_email', sortable: true },
     { Header: 'Nom adresse', accessor: 'name', sortable: true },
@@ -37,7 +39,18 @@
     { Header: 'Code postal', accessor: 'cp', sortable: true },
     { Header: 'Ville', accessor: 'city', sortable: true },
     { Header: 'Pays', accessor: 'country', sortable: true },
-    { Header: 'Publique', accessor: 'public', sortable: true, },
+    { Header: 'Créé le', accessor: 'created_at', sortable: true },
+    { Header: 'Actions', accessor: 'actions', sortable: false }
+  ];
+
+  let publicColumns = [
+    { Header: 'Nom utilisateur', accessor: 'user_name', sortable: true },
+    { Header: 'Email', accessor: 'user_email', sortable: true },
+    { Header: 'Nom adresse', accessor: 'name', sortable: true },
+    { Header: 'Adresse', accessor: 'address', sortable: true },
+    { Header: 'Code postal', accessor: 'cp', sortable: true },
+    { Header: 'Ville', accessor: 'city', sortable: true },
+    { Header: 'Pays', accessor: 'country', sortable: true },
     { Header: 'Prix', accessor: 'price', sortable: true },
     { Header: 'Créé le', accessor: 'created_at', sortable: true },
     { Header: 'Actions', accessor: 'actions', sortable: false }
@@ -117,7 +130,8 @@
 
       console.log('Données reçues :', res);
 
-      data = res.map((a) => ({
+      // Séparer les adresses en deux tableaux
+      const allAddresses = res.map((a) => ({
         ...a,
         user_name: `${a.user.first_name} ${a.user.last_name}`,
         user_email: a.user.email,
@@ -127,6 +141,12 @@
           { label: 'Supprimer', class: 'btn btn-error' }
         ]
       }));
+
+      // Adresses privées (public = false)
+      privateAddresses = allAddresses.filter(addr => !addr.public);
+      
+      // Adresses publiques (public = true, peu importe le prix)
+      publicAddresses = allAddresses.filter(addr => addr.public);
 
       loading = false;
     } catch {
@@ -219,8 +239,8 @@
       return;
     }
 
-    if (!newLocation.price || newLocation.price <= 0) {
-      notifications.error('Le prix est obligatoire et doit être positif.');
+    if (newLocation.price < 0) {
+      notifications.error('Le prix ne peut pas être négatif.');
       return;
     }
 
@@ -247,7 +267,7 @@
   }
 </script>
 
-<div class="min-h-screen p-6">
+<div class="p-6">
 <div class="flex items-center justify-between mt-10 mb-5">
 	<h1 class="text-2xl font-medium">Adresses</h1>
 	<button class="btn btn-primary" on:click={openCreateModal}>Créer une nouvelle location</button>
@@ -258,7 +278,29 @@
       <span class="loading loading-spinner loading-lg text-primary"></span>
     </div>
   {:else}
-    <Table {columns} {data} pageSize={10} onAction={handleAction} />
+    <!-- Tableau des adresses privées -->
+    <div class="mb-8">
+      <h2 class="mb-4 text-xl font-semibold text-gray-800">Adresses privées</h2>
+      {#if privateAddresses.length > 0}
+        <Table columns={privateColumns} data={privateAddresses} pageSize={10} onAction={handleAction} />
+      {:else}
+        <div class="text-center py-8 text-gray-500">
+          <p>Aucune adresse privée trouvée</p>
+        </div>
+      {/if}
+    </div>
+
+    <!-- Tableau des adresses publiques avec prix -->
+    <div class="mb-8">
+      <h2 class="mb-4 text-xl font-semibold text-gray-800">Adresses publiques</h2>
+      {#if publicAddresses.length > 0}
+        <Table columns={publicColumns} data={publicAddresses} pageSize={10} onAction={handleAction} />
+      {:else}
+        <div class="text-center py-8 text-gray-500">
+          <p>Aucune adresse publique trouvée</p>
+        </div>
+      {/if}
+    </div>
   {/if}
 
   <!-- Bouton pour ouvrir la modale de création -->
@@ -316,7 +358,7 @@
           <input
             class="input input-bordered w-full"
             type="number"
-            min="1"
+            min="0"
             bind:value={newLocation.price}
             placeholder="Prix"
           />
