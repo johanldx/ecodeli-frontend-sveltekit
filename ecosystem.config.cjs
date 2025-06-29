@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'ecodeli-frontend',
+      name: 'frontend',
       script: 'start.js',
       instances: 1,
       exec_mode: 'fork',
