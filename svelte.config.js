@@ -11,13 +11,14 @@ const config = {
 		adapter: adapter({
 			// Configuration pour la production
 			out: 'build',
-			precompress: true, // Compression gzip/brotli
-			envPrefix: 'ECODELI_', // Préfixe pour les variables d'environnement
-			polyfill: true // Polyfills pour les navigateurs plus anciens
+			precompress: false, // Désactiver la compression pour éviter les problèmes
+			envPrefix: '', // Pas de préfixe pour simplifier
+			polyfill: false // Désactiver les polyfills pour éviter les conflits
 		}),
-		// Configuration pour la production
+		// Configuration des chemins pour éviter les boucles
 		paths: {
-			base: process.env.ECODELI_BASE_PATH || ''
+			base: '',
+			relative: true
 		}
 	}
 };

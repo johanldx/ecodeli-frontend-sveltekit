@@ -1,34 +1,30 @@
+import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import monacoEditorPlugin from 'vite-plugin-monaco-editor';
 
 export default defineConfig({
 	plugins: [
-		sveltekit(),
-		monacoEditorPlugin({
-			publicPath: 'monaco-editor'
-		})
+		tailwindcss(),
+		sveltekit()
 	],
 	// Configuration pour la production
 	build: {
 		target: 'esnext',
-		minify: 'terser',
-		rollupOptions: {
-			output: {
-				manualChunks: {
-					vendor: ['svelte', '@sveltejs/kit'],
-					ui: ['daisyui', 'tailwindcss']
-				}
-			}
-		}
+		minify: 'terser'
 	},
-	// Optimisations pour la production
+	// Configuration du serveur
 	server: {
-		port: 3000,
+		port: 3001,
 		host: '0.0.0.0'
 	},
 	preview: {
-		port: 3000,
+		port: 3001,
 		host: '0.0.0.0'
+	},
+	// Configuration pour corriger les chemins d'assets
+	base: '/',
+	// Configuration pour éviter les problèmes de cache
+	define: {
+		'process.env.NODE_ENV': '"production"'
 	}
 });
