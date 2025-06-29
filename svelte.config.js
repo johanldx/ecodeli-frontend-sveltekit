@@ -8,7 +8,17 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		adapter: adapter()
+		adapter: adapter({
+			// Configuration pour la production
+			out: 'build',
+			precompress: true, // Compression gzip/brotli
+			envPrefix: 'ECODELI_', // Préfixe pour les variables d'environnement
+			polyfill: true // Polyfills pour les navigateurs plus anciens
+		}),
+		// Configuration pour la production
+		paths: {
+			base: process.env.ECODELI_BASE_PATH || ''
+		}
 	}
 };
 

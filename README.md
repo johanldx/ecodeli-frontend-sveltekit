@@ -21,13 +21,14 @@ Interface utilisateur web pour la plateforme Ecodeli, une application de livrais
 - 📊 **Tableau de bord** - Statistiques et gestion des commandes
 - ⭐ **Système de notation** - Évaluation des services
 
-## Prérequis
+## 🚀 Développement
 
-- Node.js (version 18 ou supérieure)
+### Prérequis
+
+- Node.js 18+ 
 - npm ou yarn
-- Backend Ecodeli en cours d'exécution
 
-## Installation
+### Installation
 
 ```bash
 # Cloner le repository
@@ -43,50 +44,113 @@ cp .env.example .env
 # Configurer les variables d'environnement dans .env
 ```
 
-## Configuration
-
-Créez un fichier `.env` à la racine du projet avec les variables suivantes :
-
-```env
-# API Backend
-PUBLIC_API_URL=http://localhost:3000
-PUBLIC_WS_URL=ws://localhost:3000
-
-# Application
-PUBLIC_APP_NAME=Ecodeli
-PUBLIC_APP_VERSION=1.0.0
-
-# Fonctionnalités
-PUBLIC_ENABLE_ANALYTICS=false
-PUBLIC_ENABLE_DEBUG=false
-```
-
-## Démarrage
+### Lancement en développement
 
 ```bash
-# Mode développement
 npm run dev
-
-# Mode développement avec ouverture automatique du navigateur
-npm run dev -- --open
-
-# Mode production
-npm run build
-npm run preview
 ```
 
-## Scripts disponibles
+L'application sera disponible sur `http://localhost:5173`
 
-- `npm run dev` - Démarrer le serveur de développement
-- `npm run build` - Construire l'application pour la production
-- `npm run preview` - Prévisualiser la version de production
-- `npm run check` - Vérifier les types TypeScript
-- `npm run check:watch` - Vérifier les types en mode watch
-- `npm run format` - Formater le code avec Prettier
-- `npm run lint` - Linter le code
-- `npm run machine-translate` - Traduire automatiquement les textes
+## 🏭 Production
 
-## Structure du projet
+### Prérequis
+
+- Node.js 18+
+- PM2 (gestionnaire de processus)
+- Serveur Linux/Unix
+
+### Installation de PM2
+
+```bash
+npm install -g pm2
+```
+
+### Configuration
+
+1. **Variables d'environnement** : Créez un fichier `.env.production` avec vos variables de production
+2. **Configuration PM2** : Modifiez `ecosystem.config.js` selon votre environnement
+
+### Déploiement
+
+#### Build et démarrage
+
+```bash
+# Build de l'application
+npm run build
+
+# Démarrage avec PM2
+npm run pm2:start
+```
+
+#### Scripts PM2 disponibles
+
+```bash
+npm run pm2:start    # Démarrer l'application
+npm run pm2:stop     # Arrêter l'application
+npm run pm2:restart  # Redémarrer l'application
+npm run pm2:reload   # Recharger l'application (zero-downtime)
+npm run pm2:delete   # Supprimer l'application de PM2
+npm run pm2:logs     # Voir les logs
+npm run pm2:monit    # Monitorer l'application
+```
+
+#### Déploiement complet
+
+```bash
+npm run deploy:prod
+```
+
+### Configuration serveur
+
+#### Nginx (recommandé)
+
+```nginx
+server {
+    listen 80;
+    server_name votre-domaine.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+#### Variables d'environnement
+
+Créez un fichier `.env.production` :
+
+```env
+NODE_ENV=production
+PORT=3000
+HOST=0.0.0.0
+ECODELI_BASE_PATH=
+# Ajoutez vos autres variables d'environnement
+```
+
+### Monitoring
+
+- **PM2 Monitor** : `pm2 monit`
+- **Logs** : `pm2 logs ecodeli-frontend`
+- **Statut** : `pm2 status`
+
+### Optimisations de production
+
+- Compression gzip/brotli activée
+- Polyfills pour compatibilité navigateurs
+- Chunking automatique des bundles
+- Minification avec Terser
+- Mode cluster pour utilisation multi-cœurs
+
+## 📁 Structure du projet
 
 ```
 src/
@@ -114,6 +178,49 @@ src/
     └── images/          # Images et assets
 ```
 
+## 🔧 Scripts disponibles
+
+- `npm run dev` - Développement
+- `npm run build` - Build de production
+- `npm run preview` - Prévisualisation du build
+- `npm run start` - Démarrage en production
+- `npm run pm2:start` - Démarrage avec PM2
+- `npm run deploy:prod` - Déploiement complet
+
+## 📝 Logs
+
+Les logs sont stockés dans le dossier `logs/` :
+- `combined.log` - Tous les logs
+- `out.log` - Logs de sortie
+- `error.log` - Logs d'erreur
+
+## 🚨 Dépannage
+
+### Problèmes courants
+
+1. **Port déjà utilisé** : Changez le port dans `ecosystem.config.js`
+2. **Permissions** : Assurez-vous que PM2 a les bonnes permissions
+3. **Variables d'environnement** : Vérifiez votre fichier `.env.production`
+
+### Commandes utiles
+
+```bash
+# Vérifier le statut PM2
+pm2 status
+
+# Redémarrer tous les processus
+pm2 restart all
+
+# Voir les logs en temps réel
+pm2 logs --lines 100
+
+# Sauvegarder la configuration PM2
+pm2 save
+
+# Restaurer la configuration PM2
+pm2 resurrect
+```
+
 ## Technologies utilisées
 
 - **SvelteKit** - Framework web moderne
@@ -125,37 +232,6 @@ src/
 - **FullCalendar** - Composant de calendrier
 - **Inlang** - Internationalisation
 - **JWT Decode** - Gestion des tokens JWT
-
-## Déploiement
-
-### Avec Vercel
-
-```bash
-# Installer Vercel CLI
-npm i -g vercel
-
-# Déployer
-vercel
-```
-
-### Avec Netlify
-
-```bash
-# Construire l'application
-npm run build
-
-# Déployer le dossier build/
-```
-
-### Avec Docker
-
-```bash
-# Construire l'image
-docker build -t ecodeli-frontend .
-
-# Lancer le conteneur
-docker run -p 4173:4173 ecodeli-frontend
-```
 
 ## Internationalisation
 
