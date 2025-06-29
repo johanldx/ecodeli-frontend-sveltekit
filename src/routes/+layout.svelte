@@ -93,13 +93,13 @@
 			<div class="flex flex-col space-y-4 p-6">
 				<button class="btn btn-ghost self-end" onclick={() => isOpen.set(false)}> {$close_btn} </button>
 				<a
-					href="/register"
+					href="/auth/register"
 					class="relative transition duration-200 ease-in-out after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 after:bg-current after:transition-all after:duration-200 after:ease-in-out hover:after:w-full"
 				>
 					{$header_register_btn}
 				</a>
 				<a
-					href="/login"
+					href="/auth/login"
 					class="relative transition duration-200 ease-in-out after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 after:bg-current after:transition-all after:duration-200 after:ease-in-out hover:after:w-full"
 				>
 					{$header_login_btn}
@@ -121,7 +121,7 @@
 						<p class="text-3xl font-medium text-neutral-100 md:w-2/3 md:text-6xl">
 							{$footer_title}
 						</p>
-						<a href="auth/space" class="btn btn-primary mt-10 font-normal">{$footer_cta_button}</a>
+						<a href="/app/clients" class="btn btn-primary mt-10 font-normal">{$footer_cta_button}</a>
 					</div>
 
 					<hr class="border-base-200 my-6" />
@@ -135,8 +135,8 @@
 							</p>
 						</div>
 						<div class="flex flex-col text-neutral-100 md:flex-row md:gap-5">
-							<a href="/clients">{$footer_menu_private_space}</a>
-							<a href="/traders">{$footer_menu_business_space}</a>
+							<a href="/app/clients">{$footer_menu_private_space}</a>
+							<a href="/app/traders">{$footer_menu_business_space}</a>
 							<a href="/legal">{$footer_menu_legal_mentions}</a>
 							<a href="/admin">{$footer_menu_admin}</a>
 							<a href="/track">{$footer_menu_track}</a>

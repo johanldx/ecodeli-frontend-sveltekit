@@ -61,25 +61,25 @@
 		{$hero_section_title}
 	</h1>
 	<p class="text-md text-nexus-blue m-auto mt-10 text-center md:w-3/4">{$hero_section_subtitle}</p>
-	<a href="login" class="btn btn-primary mt-10 font-normal">{$hero_section_cta_btn}</a>
+	<a href="/app/clients" class="btn btn-primary mt-10 font-normal">{$hero_section_cta_btn}</a>
 </div>
 
 <div class="bg-neutral text-base-200 mt-20 w-full">
-	<div class="container mx-auto flex flex-col items-start justify-between gap-10 py-20 md:flex-row">
-		<div class="top-10 flex w-full flex-col items-center text-center md:sticky md:w-1/2">
-			<h2 class="text-4xl font-medium text-neutral-100 md:w-2/3">{$features_section_title}</h2>
-			<img class="mt-10 w-75" src="images/illustrations/package.webp" alt="" />
+	<div class="container mx-auto flex flex-col items-start justify-between gap-10 px-4 py-20 md:flex-row md:px-8">
+		<div class="flex w-full flex-col items-center text-center md:sticky md:top-10 md:w-1/2">
+			<h2 class="text-3xl font-medium text-neutral-100 md:text-4xl md:w-2/3">{$features_section_title}</h2>
+			<img class="mt-10 w-full max-w-md" src="images/illustrations/package.webp" alt="" />
 		</div>
-		<div class="flex w-full flex-col items-start text-left md:w-1/2">
+		<div class="flex w-full flex-col items-start gap-8 text-left md:w-1/2">
 			<div>
-				<h3 class="flex items-center gap-x-2 text-2xl text-neutral-100">
+				<h3 class="flex items-center gap-x-2 text-xl text-neutral-100 md:text-2xl">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke-width="1"
 						stroke="currentColor"
-						class="h-15 w-15"
+						class="h-8 w-8 md:h-12 md:w-12"
 					>
 						<path
 							stroke-linecap="round"
@@ -89,18 +89,18 @@
 					</svg>
 					{$features_section_collaborative_delivery_title}
 				</h3>
-				<p class="mt-2 text-neutral-100">{$features_section_collaborative_delivery_description}</p>
+				<p class="mt-2 text-sm text-neutral-100 md:text-base">{$features_section_collaborative_delivery_description}</p>
 				<hr class="my-5 w-full border-emerald-900" />
 			</div>
 			<div>
-				<h3 class="flex items-center gap-x-2 text-2xl text-neutral-100">
+				<h3 class="flex items-center gap-x-2 text-xl text-neutral-100 md:text-2xl">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke-width="1"
 						stroke="currentColor"
-						class="h-15 w-15"
+						class="h-8 w-8 md:h-12 md:w-12"
 					>
 						<path
 							stroke-linecap="round"
@@ -110,18 +110,18 @@
 					</svg>
 					{$features_section_personal_services_title}
 				</h3>
-				<p class="mt-2 text-neutral-100">{$features_section_personal_services_description}</p>
+				<p class="mt-2 text-sm text-neutral-100 md:text-base">{$features_section_personal_services_description}</p>
 				<hr class="my-5 w-full border-emerald-900" />
 			</div>
 			<div>
-				<h3 class="flex items-center gap-x-2 text-2xl text-neutral-100">
+				<h3 class="flex items-center gap-x-2 text-xl text-neutral-100 md:text-2xl">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke-width="1"
 						stroke="currentColor"
-						class="h-15 w-15"
+						class="h-8 w-8 md:h-12 md:w-12"
 					>
 						<path
 							stroke-linecap="round"
@@ -131,18 +131,18 @@
 					</svg>
 					{$features_section_product_repatriation_title}
 				</h3>
-				<p class="mt-2 text-neutral-100">{$features_section_product_repatriation_description}</p>
+				<p class="mt-2 text-sm text-neutral-100 md:text-base">{$features_section_product_repatriation_description}</p>
 				<hr class="my-5 w-full border-emerald-900" />
 			</div>
 			<div>
-				<h3 class="flex items-center gap-x-2 text-2xl text-neutral-100">
+				<h3 class="flex items-center gap-x-2 text-xl text-neutral-100 md:text-2xl">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke-width="1"
 						stroke="currentColor"
-						class="h-15 w-15"
+						class="h-8 w-8 md:h-12 md:w-12"
 					>
 						<path
 							stroke-linecap="round"
@@ -152,33 +152,33 @@
 					</svg>
 					{$features_section_chariot_rental_title}
 				</h3>
-				<p class="mt-2 text-neutral-100">{$features_section_chariot_rental_description}</p>
+				<p class="mt-2 text-sm text-neutral-100 md:text-base">{$features_section_chariot_rental_description}</p>
 			</div>
 		</div>
 	</div>
 </div>
 
 <div class="bg-neutral text-base-200 w-full pt-20">
-	<div class="container mx-auto px-30">
-		<h2 class="mb-10 text-center text-4xl font-medium">{$faq_section_title}</h2>
+	<div class="container mx-auto px-4 md:px-8">
+		<h2 class="mb-10 text-center text-3xl font-medium md:text-4xl">{$faq_section_title}</h2>
 
-		<div class="collapse-arrow collapse">
+		<div class="collapse-arrow collapse mb-4">
 			<input type="radio" name="my-accordion-2" checked />
-			<div class="collapse-title font-medium">{$faq_section_what_is_ecodeli_question}</div>
-			<div class="collapse-content">{$faq_section_what_is_ecodeli_answer}</div>
+			<div class="collapse-title text-base font-medium md:text-lg">{$faq_section_what_is_ecodeli_question}</div>
+			<div class="collapse-content text-sm md:text-base">{$faq_section_what_is_ecodeli_answer}</div>
+			<hr class="my-5 w-full border-emerald-900" />
+		</div>
+		<div class="collapse-arrow collapse mb-4">
+			<input type="radio" name="my-accordion-2" />
+			<div class="collapse-title text-base font-medium md:text-lg">{$faq_section_become_delivery_person_question}</div>
+			<div class="collapse-content text-sm md:text-base">{$faq_section_become_delivery_person_answer}</div>
 			<hr class="my-5 w-full border-emerald-900" />
 		</div>
 		<div class="collapse-arrow collapse">
 			<input type="radio" name="my-accordion-2" />
-			<div class="collapse-title font-medium">{$faq_section_become_delivery_person_question}</div>
-			<div class="collapse-content">{$faq_section_become_delivery_person_answer}</div>
-			<hr class="my-5 w-full border-emerald-900" />
-		</div>
-		<div class="collapse-arrow collapse">
-			<input type="radio" name="my-accordion-2" />
-			<div class="collapse-title font-medium">{$faq_section_delivery_security_question}</div>
-			<div class="collapse-content">{$faq_section_delivery_security_answer}</div>
-			<hr class="my-5 w-full border-emerald-900" />
+			<div class="collapse-title text-base font-medium md:text-lg">{$faq_section_delivery_security_question}</div>
+			<div class="collapse-content text-sm md:text-base">{$faq_section_delivery_security_answer}</div>
+			<hr class=" w-full border-emerald-900" />
 		</div>
 	</div>
 </div>

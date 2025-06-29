@@ -12,10 +12,6 @@
 		availableLangs.set(langs);
 	});
 
-	function flag(code: string): string {
-		return code.toUpperCase().replace(/./g, (c) => String.fromCodePoint(c.charCodeAt(0) + 127397));
-	}
-
 	async function switchLang(code: string) {
 		if (code === $currentLang) return;
 
@@ -39,7 +35,7 @@
 		on:click={() => dropdownOpen.set(!$dropdownOpen)}
 		on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && dropdownOpen.set(!$dropdownOpen)}
 	>
-		<span class="text-xl">{flag($currentLang)}</span>
+		<span class="text-sm uppercase font-medium">{$currentLang}</span>
 		<svg
 			class="ml-2 h-4 w-4"
 			xmlns="http://www.w3.org/2000/svg"
@@ -51,12 +47,11 @@
 		</svg>
 	</button>
 
-	<ul class="dropdown-content menu bg-base-100 rounded-box z-[1] w-40 p-2 shadow">
+	<ul class="dropdown-content menu bg-base-100 rounded-box z-[1] w-32 p-2 shadow">
 		{#each $availableLangs as code}
 			<li>
-				<button on:click={() => switchLang(code)} class="flex items-center gap-2">
-					<span class="text-lg">{flag(code)}</span>
-					<span class="text-sm uppercase">{code}</span>
+				<button on:click={() => switchLang(code)} class="flex items-center justify-center py-2">
+					<span class="text-sm uppercase font-medium">{code}</span>
 				</button>
 			</li>
 		{/each}

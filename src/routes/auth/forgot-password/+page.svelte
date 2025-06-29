@@ -37,7 +37,7 @@
 	};
 
 	onMount(() => {
-		onDestroy(tabTitle('auth.forgot_password'));
+		onDestroy(tabTitle('auth.forgot_password.title'));
 	});
 </script>
 

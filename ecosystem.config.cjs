@@ -8,12 +8,12 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3001,
-        HOST: '0.0.0.0'
+        HOST: 'localhost'
       },
       env_production: {
         NODE_ENV: 'production',
         PORT: 3001,
-        HOST: '0.0.0.0'
+        HOST: 'localhost'
       },
       watch: false,
       max_memory_restart: '1G',

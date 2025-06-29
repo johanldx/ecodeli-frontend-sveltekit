@@ -17,7 +17,7 @@
 	});
 
 	onMount(() => {
-		onDestroy(tabTitle('auth.register'));
+		onDestroy(tabTitle('auth.register.title'));
 	});
 
 	const register_title = t('auth.register.title');

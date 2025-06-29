@@ -42,7 +42,7 @@
 	};
 
 	onMount(() => {
-		onDestroy(tabTitle('auth.reset_password'));
+		onDestroy(tabTitle('auth.reset_password.title'));
 	});
 </script>
 

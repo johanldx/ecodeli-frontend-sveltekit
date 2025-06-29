@@ -16,7 +16,7 @@
 			goto('/auth/space');
 		}
 
-		onDestroy(tabTitle('auth.login'));
+		onDestroy(tabTitle('auth.login.title'));
 	});
 
 	const login_title = t('auth.login.title');
