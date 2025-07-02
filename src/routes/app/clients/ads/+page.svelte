@@ -25,6 +25,13 @@
 	let showModal = false;
 	let selectedType = '';
 
+	let showDetailsModal = false;
+	let selectedAd: any = null;
+	let selectedAdType: 'shopping' | 'delivery' | null = null;
+	let deliveryStepsDetails: any[] = [];
+	let deliveryStepsLoading = false;
+	let locationsCache: Record<number, any> = {};
+
 	interface Location {
 		id: number;
 		name: string;
@@ -80,7 +87,7 @@
 		imageUrls: [] as string[],
 		steps: [] as DeliveryStepInput[],
 		newStep: {
-			price: 0,
+			price: 1,
 			departureLocationId: -1,
 			arrivalLocationId: -1,
 			status: 'pending'
@@ -106,12 +113,12 @@
 	async function loadAds() {
 		try {
 			// shoppingAds inchangé
-			shoppingAds = await fetchFromAPI<ShoppingAd[]>('/shopping-ads', {
+			shoppingAds = await fetchFromAPI<ShoppingAd[]>('/shopping-ads/mine', {
 				headers: getAuthHeaders()
 			});
 
 			// on récupère "cru" et on mappe en normalisé
-			const raw = await fetchFromAPI<any[]>('/delivery-ads', {
+			const raw = await fetchFromAPI<any[]>('/delivery-ads/mine', {
 				headers: getAuthHeaders()
 			});
 
@@ -206,7 +213,7 @@
 			files: [],
 			imageUrls: [],
 			steps: [],
-			newStep: { price: 0, departureLocationId: -1, arrivalLocationId: -1, status: 'pending' }
+			newStep: { price: 1, departureLocationId: -1, arrivalLocationId: -1, status: 'pending' }
 		};
 	}
 
@@ -232,11 +239,16 @@
 
 	async function handleCreate() {
 		try {
-			// Attendre le token
 			await waitUntil(() => !!get(accessToken));
 			const token = get(accessToken)!;
 
 			if (selectedType === 'shopping-ads') {
+				if (!form_title.trim() || !form_description.trim() || form_departureLocationId === -1 || form_arrivalLocationId === -1 || form_price < 0) {
+					return notifications.error('Merci de remplir tous les champs obligatoires pour la course.');
+				}
+				if (form_delivery.deliveryDate && new Date(form_delivery.deliveryDate) < new Date()) {
+					return notifications.error('La date ne peut pas être dans le passé.');
+				}
 				// Création d'une annonce de course
 				const form = new FormData();
 				const currentUser = get(user)!;
@@ -264,6 +276,12 @@
 					body: form
 				});
 			} else if (selectedType === 'delivery-request') {
+				if (!form_delivery.title.trim() || !form_delivery.description.trim() || !form_delivery.deliveryDate || form_delivery.steps.length === 0) {
+					return notifications.error('Merci de remplir tous les champs obligatoires pour la livraison.');
+				}
+				if (new Date(form_delivery.deliveryDate) < new Date()) {
+					return notifications.error('La date de livraison ne peut pas être dans le passé.');
+				}
 				await createDeliveryRequest(token);
 			} else {
 				throw new Error('Type de formulaire invalide');
@@ -326,18 +344,21 @@
 	function addDeliveryStep() {
 		const { price, departureLocationId, arrivalLocationId, status } = form_delivery.newStep;
 
+		if (price < 1) {
+			return notifications.error('Le prix d\'une étape doit être au moins 1€');
+		}
 		// Si on a déjà au moins une étape, la nouvelle doit démarrer là où la précédente s'est arrêtée
 		if (form_delivery.steps.length > 0) {
 			const last = form_delivery.steps[form_delivery.steps.length - 1];
 			if (departureLocationId !== last.arrivalLocationId) {
 				return notifications.error(
 					`Le départ de l'étape ${form_delivery.steps.length + 1} doit être ` +
-						`l'arrivée de l'étape ${last.stepNumber} (${locations.find((l) => l.id === last.arrivalLocationId)?.name})`
+					`l'arrivée de l'étape ${last.stepNumber} (${locations.find((l) => l.id === last.arrivalLocationId)?.name})`
 				);
 			}
 		}
 
-		if (price >= 0 && departureLocationId > 0 && arrivalLocationId > 0) {
+		if (price >= 1 && departureLocationId > 0 && arrivalLocationId > 0) {
 			const stepNumber = form_delivery.steps.length + 1;
 			form_delivery.steps.push({
 				stepNumber,
@@ -347,7 +368,7 @@
 				status
 			});
 			form_delivery.newStep = {
-				price: 0,
+				price: 1,
 				departureLocationId: arrivalLocationId,
 				arrivalLocationId: -1,
 				status: 'pending'
@@ -359,6 +380,11 @@
 
 	function removeDeliveryStep(index: number) {
 		form_delivery.steps.splice(index, 1);
+		// Réindexer les numéros d'étape
+		form_delivery.steps = form_delivery.steps.map((step, i) => ({
+			...step,
+			stepNumber: i + 1
+		}));
 	}
 
 	// État pour la modale de suppression
@@ -396,6 +422,46 @@
 		} finally {
 			showDeleteModal = false;
 			deleteId = null;
+		}
+	}
+
+	function openDetailsModal(ad: any, type: 'shopping' | 'delivery') {
+		selectedAd = ad;
+		selectedAdType = type;
+		showDetailsModal = true;
+		if (type === 'delivery') {
+			loadDeliverySteps(ad.id);
+		}
+	}
+	function closeDetailsModal() {
+		showDetailsModal = false;
+		selectedAd = null;
+		selectedAdType = null;
+		deliveryStepsDetails = [];
+		deliveryStepsLoading = false;
+	}
+
+	async function loadDeliverySteps(deliveryAdId: number) {
+		deliveryStepsLoading = true;
+		try {
+			const token = get(accessToken);
+			const authHeaders = { Authorization: `Bearer ${token}` };
+			const steps = await fetchFromAPI<any[]>(`/delivery-steps/delivery-ad/${deliveryAdId}`, { headers: authHeaders });
+			for (const step of steps) {
+				if (!locationsCache[step.departureLocationId]) {
+					locationsCache[step.departureLocationId] = await fetchFromAPI(`/locations/${step.departureLocationId}`, { headers: authHeaders });
+				}
+				if (!locationsCache[step.arrivalLocationId]) {
+					locationsCache[step.arrivalLocationId] = await fetchFromAPI(`/locations/${step.arrivalLocationId}`, { headers: authHeaders });
+				}
+				step.departureLocation = locationsCache[step.departureLocationId];
+				step.arrivalLocation = locationsCache[step.arrivalLocationId];
+			}
+			deliveryStepsDetails = steps;
+		} catch (e) {
+			deliveryStepsDetails = [];
+		} finally {
+			deliveryStepsLoading = false;
 		}
 	}
 </script>
@@ -459,12 +525,15 @@
 					</div>
 					<h2 class="card-title text-sm sm:text-base">{ad.title}</h2>
 					<p class="text-xs text-gray-600 sm:text-sm">{ad.description}</p>
-					<button
-						on:click={() => openDeleteModal('shopping', ad.id)}
-						class="btn btn-xs btn-error top-2 right-2"
-					>
-						Supprimer
-					</button>
+					<button class="btn btn-xs btn-outline mt-2" on:click={() => openDetailsModal(ad, 'shopping')}>Plus de détails</button>
+					{#if ad.status === 'pending' || ad.status === 'Pending'}
+						<button
+							on:click={() => openDeleteModal('shopping', ad.id)}
+							class="btn btn-xs btn-error top-2 right-2"
+						>
+							Supprimer
+						</button>
+					{/if}
 				</div>
 			</div>
 		{/each}
@@ -525,12 +594,15 @@
 					</div>
 					<h2 class="card-title text-sm sm:text-base">{ad.title}</h2>
 					<p class="text-xs text-gray-600 sm:text-sm">{ad.description}</p>
-					<button
-						on:click={() => openDeleteModal('delivery', ad.id)}
-						class="btn btn-xs btn-error top-2 right-2"
-					>
-						Supprimer
-					</button>
+					<button class="btn btn-xs btn-outline mt-2" on:click={() => openDetailsModal(ad, 'delivery')}>Plus de détails</button>
+					{#if ad.status === 'pending' || ad.status === 'Pending'}
+						<button
+							on:click={() => openDeleteModal('delivery', ad.id)}
+							class="btn btn-xs btn-error top-2 right-2"
+						>
+							Supprimer
+						</button>
+					{/if}
 
 					<!-- 3) Étapes -->
 					{#if ad.deliverySteps?.length}
@@ -705,6 +777,7 @@
 									type="datetime-local"
 									class="input input-bordered w-full"
 									bind:value={form_delivery.deliveryDate}
+									min={new Date().toISOString().slice(0, 16)}
 								/>
 							</div>
 							<div class="form-control">
@@ -731,6 +804,7 @@
 									placeholder="Prix (€)"
 									class="input input-bordered"
 									bind:value={form_delivery.newStep.price}
+									min={1}
 								/>
 								<select
 									class="select select-bordered"
@@ -821,6 +895,65 @@
 				<div class="modal-action">
 					<button class="btn" on:click={cancelDelete}>Annuler</button>
 					<button class="btn btn-error" on:click={confirmDelete}>Supprimer</button>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	{#if showDetailsModal && selectedAd}
+		<div class="modal modal-open">
+			<div class="modal-box max-w-2xl">
+				<h3 class="text-lg font-bold mb-4">Détails de l'annonce</h3>
+				{#if selectedAdType === 'shopping'}
+					<!-- Détails pour une annonce de course -->
+					<div class="flex flex-col md:flex-row md:justify-between gap-6">
+						<div>
+							<p class="font-semibold mb-1">📍 Départ</p>
+							<p>{selectedAd.departureLocation?.name}</p>
+							<p>{selectedAd.departureLocation?.address}</p>
+							<p>{selectedAd.departureLocation?.cp} {selectedAd.departureLocation?.city}, {selectedAd.departureLocation?.country}</p>
+						</div>
+						<div class="flex items-center justify-center text-2xl text-gray-400">→</div>
+						<div>
+							<p class="font-semibold mb-1">🎯 Arrivée</p>
+							<p>{selectedAd.arrivalLocation?.name}</p>
+							<p>{selectedAd.arrivalLocation?.address}</p>
+							<p>{selectedAd.arrivalLocation?.cp} {selectedAd.arrivalLocation?.city}, {selectedAd.arrivalLocation?.country}</p>
+						</div>
+					</div>
+					<p class="mt-4 font-semibold">📦 Taille du colis</p>
+					<p>{selectedAd.packageSize}</p>
+					<p class="mt-4 font-semibold">🛒 Liste de course</p>
+					<ul class="list-disc ml-6">
+						{#each selectedAd.shoppingList ?? [] as item}
+							<li>{item}</li>
+						{/each}
+					</ul>
+				{/if}
+				{#if selectedAdType === 'delivery'}
+					<p class="font-semibold mb-1">📦 Taille du colis</p>
+					<p>{selectedAd.packageSize}</p>
+					<p class="font-semibold mt-2">🚚 Étapes</p>
+					{#if deliveryStepsLoading}
+						<p>Chargement des étapes...</p>
+					{:else if deliveryStepsDetails.length === 0}
+						<p>Aucune étape trouvée.</p>
+					{:else}
+						<ul class="list-disc ml-6">
+							{#each deliveryStepsDetails as step}
+								<li class="mb-2">
+									<strong>Étape {step.stepNumber}</strong> :
+									Départ : {step.departureLocation?.name}, {step.departureLocation?.address}
+									→ Arrivée : {step.arrivalLocation?.name}, {step.arrivalLocation?.address}
+									({step.price}€)
+									<span class="ml-2">[{step.status}]</span>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				{/if}
+				<div class="modal-action mt-6">
+					<button class="btn" on:click={closeDetailsModal}>Fermer</button>
 				</div>
 			</div>
 		</div>

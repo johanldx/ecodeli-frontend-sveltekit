@@ -345,7 +345,7 @@
 
 	function connectWS(convId: number) {
 		const token = get(accessToken);
-		const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+		const BACKEND = import.meta.env.VITE_BACKEND_API_URL || 'https://api.ecodeli.fr';
 		socket = io(`${BACKEND}/ws`, { auth: { token } });
 
 		socket.emit('joinConversation', { conversationId: convId });

@@ -16,7 +16,7 @@
 		
 		// Redirection automatique vers l'accueil après 5 secondes
 		const timer = setTimeout(() => {
-			goto('/');
+			goto('/clients/discover');
 		}, 5000);
 
 		return () => clearTimeout(timer);

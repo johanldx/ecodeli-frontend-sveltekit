@@ -20,6 +20,7 @@
 	const delete_account = t('auth.account.actions.delete_account');
 	const personal_info = t('auth.account.actions.personal_info');
 	const return_to_app_link = t('auth.account.actions.return_to_app_link');
+	const support_rgpd = t('auth.account.support_rgpd');
 
 	let first_name: string = '';
 	let last_name: string = '';
@@ -120,7 +121,7 @@
 		>
 		<h1 class="mt-10 text-xl font-semibold">{$title}</h1>
 
-		<div class="my-5 grid grid-cols-1 gap-6 text-left md:grid-cols-3">
+		<div class="my-5 grid grid-cols-1 gap-6 text-left md:grid-cols-2">
 			<!-- Formulaire de mise à jour du profil -->
 			<form class="space-y-4" on:submit|preventDefault={handleProfileUpdate}>
 				<div class="flex gap-2">
@@ -169,14 +170,14 @@
 			</form>
 
 			<!-- Actions supplémentaires -->
-			<div class="space-y-4">
-				<a href="/account/delete" class="btn btn-error w-full">{$delete_account}</a>
-				<a href="/account/info" class="btn btn-neutral w-full">{$personal_info}</a>
-			</div>
+			<!-- Les boutons de suppression de compte et d'informations personnelles ont été retirés -->
 		</div>
 
 		<div class="mt-6">
 			<a href="/auth/space">{$return_to_app_link}</a>
 		</div>
+
+		<!-- Ajout de la mention support RGPD -->
+		<p class="mt-8 text-center text-sm text-gray-500">{@html $support_rgpd}</p>
 	</div>
 </GuardWrapper>

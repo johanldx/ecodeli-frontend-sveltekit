@@ -152,25 +152,22 @@
 			case 'Free':
 				return [
 					'Accès aux fonctionnalités de base',
-					'Création d\'annonces limitées',
-					'Support communautaire'
+					'Création d\'annonces illimitées',
+					'Support classique'
 				];
 			case 'Starter':
 				return [
 					'Tout du plan Free',
-					'Annonces illimitées',
+					'Assurance jusqu\'à 115€/envoi',
+					'5% de réduction sur les frais de livraison',
 					'Support prioritaire',
-					'Statistiques avancées',
-					'Notifications push'
 				];
 			case 'Premium':
 				return [
 					'Tout du plan Starter',
-					'Fonctionnalités premium',
-					'Support dédié',
-					'Analytics avancés',
-					'API personnalisée',
-					'Accès anticipé aux nouvelles fonctionnalités'
+					'Assurance jusqu\'à 3000€/envoi',
+					'9% de réduction sur les frais de livraison',
+					'Support prioritaire'
 				];
 			default:
 				return [];

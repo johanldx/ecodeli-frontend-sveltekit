@@ -116,7 +116,7 @@
 	}
 
 	function getStatusText(isActive: boolean): string {
-		return isActive ? 'Actif' : 'Inactif';
+		return 'Actif';
 	}
 
 	function getStatusColor(isActive: boolean): string {

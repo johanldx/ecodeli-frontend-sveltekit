@@ -66,11 +66,9 @@
 	});
 
 	async function loadAds() {
-		const fetchedAds = await fetchFromAPI<PersonalServiceAd[]>('/personal-service-ads', {
+		const fetchedAds = await fetchFromAPI<PersonalServiceAd[]>('/personal-service-ads/mine', {
 			headers: { Authorization: `Bearer ${get(accessToken)}` }
 		});
-
-		console.log(fetchedAds);
 
 		ads = await Promise.all(
 			fetchedAds.map(async (ad: any) => {
@@ -86,8 +84,6 @@
 				return ad;
 			})
 		);
-
-		console.log(ads);
 	}
 
 	async function loadServiceTypes() {
@@ -329,12 +325,14 @@
 					<p class="mt-2 text-xs text-gray-500">
 						{ad.type.name} – Créé le {new Date(ad.createdAt).toLocaleDateString()}
 					</p>
-					<button
-						on:click={() => openDeleteModal(ad.id)}
-						class="btn btn-xs btn-error top-2 right-2"
-					>
-						{$delete_btn}
-					</button>
+					{#if ad.status === 'pending' || ad.status === 'Pending'}
+						<button
+							on:click={() => openDeleteModal(ad.id)}
+							class="btn btn-xs btn-error top-2 right-2"
+						>
+							{$delete_btn}
+						</button>
+					{/if}
 				</div>
 			</div>
 		{/each}

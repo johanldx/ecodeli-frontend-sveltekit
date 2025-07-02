@@ -103,7 +103,7 @@
 	});
 
 	async function loadAds() {
-		ads = await fetchFromAPI<TraderAd[]>('/release-cart-ads', {
+		ads = await fetchFromAPI<TraderAd[]>('/release-cart-ads/mine', {
 			headers: getAuthHeaders()
 		});
 	}
@@ -305,9 +305,11 @@
 						{$departure} : {ad.departureLocation.name} → {$arrival} : {ad.arrivalLocation.name}
 					</p>
 					<div class="mt-2 flex justify-end">
-						<button class="btn btn-xs btn-error" on:click={() => openDeleteModal(ad.id)}
-							>{$delete_btn}</button
-						>
+						{#if ad.status === 'pending' || ad.status === 'Pending'}
+							<button class="btn btn-xs btn-error" on:click={() => openDeleteModal(ad.id)}>
+								{$delete_btn}
+							</button>
+						{/if}
 					</div>
 				</div>
 			</div>

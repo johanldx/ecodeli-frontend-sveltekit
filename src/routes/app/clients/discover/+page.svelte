@@ -6,6 +6,7 @@
 	import { fetchFromAPI } from '$lib/utils/api';
 	import { goto } from '$app/navigation';
 	import { tabTitle } from '$lib/utils/tabTitle';
+	import { notifications } from '$lib/stores/notifications';
 
 	interface PersonalServiceType {
 		id: number;
@@ -80,7 +81,7 @@
 			});
 			goto(`/app/clients/chat?id=${convId}`);
 		} catch (err) {
-			console.error('Erreur création conversation', err);
+			notifications.error((err as Error).message);
 		}
 	}
 </script>

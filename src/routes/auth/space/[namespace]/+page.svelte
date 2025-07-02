@@ -82,11 +82,12 @@
 			}
 		} catch (error: any) {
 			if (namespace === 'clients' && error?.status === 404) {
-				await fetchFromAPI('/clients', {
+				const res: any = await fetchFromAPI('/clients', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
 					body: JSON.stringify({ user_id: currentUser.id })
 				});
+				profileIds.update((ids) => ({ ...ids, clientId: res.id }));
 			} else {
 				notifications.warning(tStatic(`auth.space_validation.${namespace}.not_found`));
 			}

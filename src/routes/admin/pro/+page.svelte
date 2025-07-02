@@ -198,13 +198,13 @@
 			const authChecks = await Promise.all(
 				serviceTypes.map(async (st) => {
 					try {
-						await fetchFromAPI(`/personal-service-type-authorizations/${row.id}/${st.id}`, {
+						const auth = await fetchFromAPI(`/personal-service-type-authorizations/${row.id}/${st.id}`, {
 							method: 'GET',
 							headers: {
 								'Content-Type': 'application/json',
 								Authorization: `Bearer ${get(accessToken)}`
 							}
-						});
+						}) as { price: number };
 						return st.id;
 					} catch {
 						return null;
@@ -212,9 +212,25 @@
 				})
 			);
 			currentAuthIds = authChecks.filter((id) => id !== null) as number[];
-			selectedAuths = serviceTypes
-				.filter((st) => currentAuthIds.includes(st.id))
-				.map((st) => ({ id: st.id, price: st.price }));
+
+			selectedAuths = await Promise.all(
+				serviceTypes
+					.filter((st) => currentAuthIds.includes(st.id))
+					.map(async (st) => {
+						try {
+							const auth = await fetchFromAPI(`/personal-service-type-authorizations/${row.id}/${st.id}`, {
+								method: 'GET',
+								headers: {
+									'Content-Type': 'application/json',
+									Authorization: `Bearer ${get(accessToken)}`
+								}
+							}) as { price: number };
+							return { id: st.id, price: auth.price };
+						} catch {
+							return { id: st.id, price: st.price };
+						}
+					})
+			);
 			showModalAuth = true;
 		}
 	}
