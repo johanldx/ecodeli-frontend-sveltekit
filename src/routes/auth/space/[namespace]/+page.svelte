@@ -236,7 +236,7 @@
 				{#if namespace === 'clients'}
 					<iframe
 						class="mx-auto aspect-video w-full rounded-xl shadow-md"
-						src="https://www.youtube.com/embed/MV_3Dpw-BRY?si=5TAQ3lDVCYVfbG7G&amp;controls=0"
+						src="https://www.youtube.com/embed/sxj--flJGrY?si=X-R9p4b-QztsUK9r"
 						title="Vidéo d'onboarding"
 						frameborder="0"
 						allowfullscreen
