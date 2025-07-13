@@ -173,20 +173,35 @@
 			return;
 		}
 
-		await fetchFromAPI('/provider-schedules', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` },
-			body: JSON.stringify({
-				providerId,
-				personalServiceTypeId: newSchedule.personalServiceTypeId,
-				startTime,
-				endTime,
-				status: 'available'
-			})
-		});
+		// Calculer la durée en heures
+		const startHour = parseInt(newSchedule.startSlot.replace('h', ''));
+		const endHour = parseInt(newSchedule.endSlot.replace('h', ''));
+		const duration = endHour - startHour;
+
+		// Créer un créneau de 1h pour chaque heure
+		for (let i = 0; i < duration; i++) {
+			const slotStartHour = startHour + i;
+			const slotEndHour = slotStartHour + 1;
+			
+			const slotStartTime = parseSlot(base, `${slotStartHour}h`);
+			const slotEndTime = parseSlot(base, `${slotEndHour}h`);
+
+			await fetchFromAPI('/provider-schedules', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get(accessToken)}` },
+				body: JSON.stringify({
+					providerId,
+					personalServiceTypeId: newSchedule.personalServiceTypeId,
+					startTime: slotStartTime,
+					endTime: slotEndTime,
+					status: 'available'
+				})
+			});
+		}
 
 		await loadSchedules();
-		notifications.success('Créneau ajouté');
+		const message = duration === 1 ? 'Créneau ajouté' : `${duration} créneaux de 1h ajoutés`;
+		notifications.success(message);
 		showAddModal = false;
 	}
 
@@ -281,6 +296,10 @@
 		<dialog class="modal modal-open">
 			<div class="modal-box">
 				<h3 class="font-author mb-4 text-lg">{addSlotLabel}</h3>
+				<p class="text-sm text-gray-600 mb-4">
+					💡 Les créneaux sont automatiquement divisés en créneaux de 1h. 
+					Si vous sélectionnez une durée de 4h, cela créera 4 créneaux de 1h consécutifs.
+				</p>
 				<div class="form-control mb-2">
 					<label class="label" for="service-type"
 						><span class="label-text">Type de service</span></label

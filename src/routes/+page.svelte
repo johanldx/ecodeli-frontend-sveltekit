@@ -2,6 +2,7 @@
 	import { t } from '$lib/utils/t';
 	import { tabTitle } from '$lib/utils/tabTitle';
 	import { onDestroy, onMount } from 'svelte';
+	import VehicleShooter from '$lib/components/VehicleShooter.svelte';
 
 	onMount(() => onDestroy(tabTitle('landing.index.tab_title')));
 
@@ -182,3 +183,10 @@
 		</div>
 	</div>
 </div>
+
+<!-- Game overlay component -->
+<VehicleShooter 
+  carImage="/images/game/voiture.png"
+  truckImage="/images/game/camion.png"
+  backgroundImage="/images/game/background.png"
+/>

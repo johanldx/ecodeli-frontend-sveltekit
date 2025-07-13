@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { get } from 'svelte/store';
-	import { accessToken } from '$lib/stores/token';
-	import { profileIds } from '$lib/stores/profiles';
-	import { fetchFromAPI } from '$lib/utils/api';
-	import { notifications } from '$lib/stores/notifications';
-	import { tabTitle } from '$lib/utils/tabTitle';
-	import { t } from '$lib/utils/t';
+import { get } from 'svelte/store';
+import { accessToken } from '$lib/stores/token';
+import { profileIds } from '$lib/stores/profiles';
+import { fetchFromAPI } from '$lib/utils/api';
+import { notifications } from '$lib/stores/notifications';
+import { tabTitle } from '$lib/utils/tabTitle';
+import { t } from '$lib/utils/t';
+import { validateFilesSize } from '$lib/utils/fileValidation';
 
 	type ServiceType = {
 		id: number;
@@ -116,8 +117,13 @@
 	function handleFilesSelected(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (input.files) {
-			files = Array.from(input.files);
-			imageUrls = files.map((f) => URL.createObjectURL(f));
+			const selectedFiles = Array.from(input.files);
+			if (validateFilesSize(selectedFiles)) {
+				files = selectedFiles;
+				imageUrls = files.map((f) => URL.createObjectURL(f));
+			} else {
+				input.value = '';
+			}
 		}
 	}
 

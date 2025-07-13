@@ -28,8 +28,15 @@
 	const calculation_error = t('components.co2_calculator.notifications.calculation_error');
 	const load_addresses_error = t('components.co2_calculator.notifications.load_addresses_error');
 
+	interface Address {
+		id: number;
+		name: string;
+		city: string;
+		public?: boolean;
+	}
+
 	let isOpen = false;
-	let userAddresses: any[] = [];
+	let userAddresses: Address[] = [];
 	let fromAddressId: number | null = null;
 	let toAddressId: number | null = null;
 	let result: { distance: number; co2Saved: number; co2SavedPerKm: number } | null = null;
@@ -38,9 +45,11 @@
 
 	onMount(async () => {
 		try {
-			userAddresses = await fetchFromAPI('/locations', {
+			const allAddresses = await fetchFromAPI<Address[]>('/locations', {
 				headers: { Authorization: `Bearer ${get(accessToken)}` }
 			});
+			// Filtrer les adresses publiques (public=true)
+			userAddresses = allAddresses.filter((address: Address) => !address.public);
 		} catch (error) {
 			console.error($load_addresses_error, error);
 		} finally {

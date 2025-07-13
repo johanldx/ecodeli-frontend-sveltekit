@@ -41,7 +41,6 @@
 	};
 
 	const account_title = t('app.providers.account.title');
-	const customer_service = t('app.providers.service.customer_service');
 
 	function getHeaders() {
 		return {
@@ -165,9 +164,6 @@
 							</p>
 						</div>
 					{/each}
-					<a href="mailto:hello@ecodeli.fr" class="btn btn-neutral mt-2 w-full"
-						>{$customer_service}</a
-					>
 				</div>
 			</div>
 		</div>

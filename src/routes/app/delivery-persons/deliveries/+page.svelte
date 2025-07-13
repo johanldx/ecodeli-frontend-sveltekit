@@ -22,6 +22,7 @@
 	type Location = {
 		id: number;
 		name: string;
+		public?: boolean;
 	};
 
 	let routes: Route[] = [];
@@ -42,7 +43,9 @@
 
 	async function loadLocations() {
 		try {
-			locations = await fetchFromAPI<Location[]>('/locations', { headers: getHeaders() });
+			const allLocations = await fetchFromAPI<Location[]>('/locations', { headers: getHeaders() });
+			// Filtrer les adresses publiques (public=true)
+			locations = allLocations.filter(location => !location.public);
 		} catch {
 			notifications.error('Impossible de charger les lieux.');
 		}

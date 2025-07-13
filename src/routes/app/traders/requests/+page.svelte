@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { get } from 'svelte/store';
-	import { v4 as uuidv4 } from 'uuid';
-	import { accessToken } from '$lib/stores/token';
-	import { user } from '$lib/stores/user';
-	import { notifications } from '$lib/stores/notifications';
-	import { fetchFromAPI } from '$lib/utils/api';
-	import { tabTitle } from '$lib/utils/tabTitle';
-	import { t, tStatic } from '$lib/utils/t';
+import { get } from 'svelte/store';
+import { v4 as uuidv4 } from 'uuid';
+import { accessToken } from '$lib/stores/token';
+import { user } from '$lib/stores/user';
+import { notifications } from '$lib/stores/notifications';
+import { fetchFromAPI } from '$lib/utils/api';
+import { tabTitle } from '$lib/utils/tabTitle';
+import { t, tStatic } from '$lib/utils/t';
+import { validateFilesSize } from '$lib/utils/fileValidation';
+import { validatePrice } from '$lib/utils/priceValidation';
 
 	// Traductions
 	const page_title = t('app.traders.requests.tab_title');
@@ -51,6 +53,7 @@
 		id: number;
 		name: string;
 		cp: string;
+		public?: boolean;
 	}
 
 	interface TraderAd {
@@ -109,9 +112,11 @@
 	}
 
 	async function loadLocations() {
-		locations = await fetchFromAPI<Location[]>('/locations', {
+		const allLocations = await fetchFromAPI<Location[]>('/locations', {
 			headers: getAuthHeaders()
 		});
+		// Filtrer les adresses publiques (public=true)
+		locations = allLocations.filter(location => !location.public);
 	}
 
 	function getAuthHeaders() {
@@ -155,8 +160,13 @@
 	function handleFiles(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (input.files) {
-			form.files = Array.from(input.files);
-			form.imageUrls = form.files.map((f) => URL.createObjectURL(f));
+			const selectedFiles = Array.from(input.files);
+			if (validateFilesSize(selectedFiles)) {
+				form.files = selectedFiles;
+				form.imageUrls = form.files.map((f) => URL.createObjectURL(f));
+			} else {
+				input.value = '';
+			}
 		}
 	}
 
@@ -183,6 +193,10 @@
 			form.arrivalLocationId === -1
 		) {
 			return notifications.error(tStatic('app.traders.requests.notifications.all_fields_required'));
+		}
+
+		if (!validatePrice(form.price)) {
+			return;
 		}
 
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -357,6 +371,7 @@
 						type="number"
 						class="input input-bordered w-full"
 						bind:value={form.price}
+						min={1}
 					/>
 					<p class="mt-1 text-xs text-gray-500">{$price_advice}</p>
 				</div>

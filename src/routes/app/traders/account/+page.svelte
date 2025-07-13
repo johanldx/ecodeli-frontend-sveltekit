@@ -12,17 +12,12 @@
 
 	const title = t('app.traders.account.title');
 	const pricing_title = t('app.traders.pricing.title');
-	const customer_contact = t('app.traders.pricing.customer_contact');
 	const reduction_title = t('app.traders.account.reduction_title');
 	const standard_rate = t('app.traders.account.standard_rate');
 	const reduction_rate = t('app.traders.account.reduction_rate');
 
 	let traderData: any = null;
 	let loading = true;
-
-	function handleContactSupport() {
-		window.location.href = 'mailto:hello@ecodeli.fr';
-	}
 
 	onMount(async () => {
 		try {
@@ -78,13 +73,6 @@
 						<h2 class="font-author mb-2 text-xl text-gray-600">{$pricing_title}</h2>
 						<p class="mb-4 text-sm text-gray-600">{$standard_rate}</p>
 					{/if}
-
-					<button
-						on:click={handleContactSupport}
-						class="bg-neutral w-full rounded-md px-4 py-2 text-sm text-white transition-colors hover:bg-gray-700"
-					>
-						{$customer_contact}
-					</button>
 				</div>
 			</div>
 

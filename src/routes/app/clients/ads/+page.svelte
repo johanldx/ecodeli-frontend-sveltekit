@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { notifications } from '$lib/stores/notifications';
-	import { accessToken } from '$lib/stores/token';
-	import { user } from '$lib/stores/user';
-	import { fetchFromAPI } from '$lib/utils/api';
-	import { t } from '$lib/utils/t';
-	import { get } from 'svelte/store';
-	import { onDestroy, onMount } from 'svelte';
-	import { tabTitle } from '$lib/utils/tabTitle';
+import { accessToken } from '$lib/stores/token';
+import { user } from '$lib/stores/user';
+import { fetchFromAPI } from '$lib/utils/api';
+import { t } from '$lib/utils/t';
+import { get } from 'svelte/store';
+import { onDestroy, onMount } from 'svelte';
+import { tabTitle } from '$lib/utils/tabTitle';
+import { validateFilesSize } from '$lib/utils/fileValidation';
+import { validatePrice } from '$lib/utils/priceValidation';
 
 	onMount(() => onDestroy(tabTitle('app.clients.ads.tab_title')));
 
@@ -39,6 +41,7 @@
 		cp: string;
 		city: string;
 		country: string;
+		public?: boolean;
 	}
 
 	interface ShoppingAd {
@@ -77,6 +80,7 @@
 
 	let shoppingAds: ShoppingAd[] = [];
 	let locations: Location[] = [];
+	let allLocations: Location[] = []; // Pour les étapes de livraison (inclut les adresses publiques)
 	let deliveryAds: DeliveryAd[] = [];
 	let form_delivery = {
 		title: '',
@@ -108,6 +112,7 @@
 	onMount(async () => {
 		await loadAds();
 		await loadLocations();
+		await loadAllLocations();
 	});
 
 	async function loadAds() {
@@ -154,7 +159,21 @@
 
 	async function loadLocations() {
 		try {
-			locations = await fetchFromAPI<Location[]>('/locations', {
+			const allLocations = await fetchFromAPI<Location[]>('/locations', {
+				headers: getAuthHeaders()
+			});
+			// Filtrer les adresses publiques (public=true) seulement pour les annonces de courses
+			// Pour les étapes de livraison, on garde toutes les adresses
+			locations = allLocations.filter(location => !location.public);
+		} catch {
+			notifications.error('Erreur lors du chargement des adresses');
+		}
+	}
+
+	// Fonction pour charger toutes les adresses (y compris publiques) pour les étapes de livraison
+	async function loadAllLocations() {
+		try {
+			allLocations = await fetchFromAPI<Location[]>('/locations', {
 				headers: getAuthHeaders()
 			});
 		} catch {
@@ -220,8 +239,13 @@
 	function handleFilesSelected(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (input.files) {
-			form_files = Array.from(input.files);
-			form_imageUrls = form_files.map((file) => URL.createObjectURL(file));
+			const selectedFiles = Array.from(input.files);
+			if (validateFilesSize(selectedFiles)) {
+				form_files = selectedFiles;
+				form_imageUrls = form_files.map((file) => URL.createObjectURL(file));
+			} else {
+				input.value = '';
+			}
 		}
 	}
 
@@ -243,8 +267,11 @@
 			const token = get(accessToken)!;
 
 			if (selectedType === 'shopping-ads') {
-				if (!form_title.trim() || !form_description.trim() || form_departureLocationId === -1 || form_arrivalLocationId === -1 || form_price < 0) {
+				if (!form_title.trim() || !form_description.trim() || form_departureLocationId === -1 || form_arrivalLocationId === -1) {
 					return notifications.error('Merci de remplir tous les champs obligatoires pour la course.');
+				}
+				if (!validatePrice(form_price)) {
+					return;
 				}
 				if (form_delivery.deliveryDate && new Date(form_delivery.deliveryDate) < new Date()) {
 					return notifications.error('La date ne peut pas être dans le passé.');
@@ -336,16 +363,21 @@
 	function handleFiles(event: Event, target: 'delivery') {
 		const input = event.target as HTMLInputElement;
 		if (input.files) {
-			form_delivery.files = Array.from(input.files);
-			form_delivery.imageUrls = form_delivery.files.map((f) => URL.createObjectURL(f));
+			const selectedFiles = Array.from(input.files);
+			if (validateFilesSize(selectedFiles)) {
+				form_delivery.files = selectedFiles;
+				form_delivery.imageUrls = form_delivery.files.map((f) => URL.createObjectURL(f));
+			} else {
+				input.value = '';
+			}
 		}
 	}
 
 	function addDeliveryStep() {
 		const { price, departureLocationId, arrivalLocationId, status } = form_delivery.newStep;
 
-		if (price < 1) {
-			return notifications.error('Le prix d\'une étape doit être au moins 1€');
+		if (!validatePrice(price)) {
+			return;
 		}
 		// Si on a déjà au moins une étape, la nouvelle doit démarrer là où la précédente s'est arrêtée
 		if (form_delivery.steps.length > 0) {
@@ -353,7 +385,7 @@
 			if (departureLocationId !== last.arrivalLocationId) {
 				return notifications.error(
 					`Le départ de l'étape ${form_delivery.steps.length + 1} doit être ` +
-					`l'arrivée de l'étape ${last.stepNumber} (${locations.find((l) => l.id === last.arrivalLocationId)?.name})`
+					`l'arrivée de l'étape ${last.stepNumber} (${allLocations.find((l) => l.id === last.arrivalLocationId)?.name})`
 				);
 			}
 		}
@@ -702,7 +734,7 @@
 
 						<div class="form-control">
 							<label class="label"><span class="label-text">Prix (€)</span></label>
-							<input type="number" class="input input-bordered w-full" bind:value={form_price} />
+							<input type="number" class="input input-bordered w-full" bind:value={form_price} min={1} />
 						</div>
 
 						<div class="flex gap-4">
@@ -811,8 +843,13 @@
 									bind:value={form_delivery.newStep.departureLocationId}
 								>
 									<option value={-1} disabled>Départ</option>
-									{#each locations as loc}
-										<option value={loc.id}>{loc.name} ({loc.cp})</option>
+									{#each allLocations as loc}
+										<option value={loc.id}>
+											{loc.name} ({loc.cp})
+											{#if loc.public}
+												- Public
+											{/if}
+										</option>
 									{/each}
 								</select>
 								<select
@@ -820,8 +857,13 @@
 									bind:value={form_delivery.newStep.arrivalLocationId}
 								>
 									<option value={-1} disabled>Arrivée</option>
-									{#each locations as loc}
-										<option value={loc.id}>{loc.name} ({loc.cp})</option>
+									{#each allLocations as loc}
+										<option value={loc.id}>
+											{loc.name} ({loc.cp})
+											{#if loc.public}
+												- Public
+											{/if}
+										</option>
 									{/each}
 								</select>
 								<button type="button" class="btn btn-outline" on:click={addDeliveryStep}>
@@ -838,8 +880,8 @@
 												<strong>Étape {step.stepNumber}:</strong>
 												{step.price}€
 												<span class="text-sm">
-													({locations.find((l) => l.id === step.departureLocationId)?.name}
-													→ {locations.find((l) => l.id === step.arrivalLocationId)?.name})
+													({allLocations.find((l) => l.id === step.departureLocationId)?.name}
+													→ {allLocations.find((l) => l.id === step.arrivalLocationId)?.name})
 												</span>
 											</div>
 											<button

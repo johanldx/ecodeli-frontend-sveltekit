@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
-	import { get, writable } from 'svelte/store';
-	import GuardWrapper from '$lib/components/GuardWrapper.svelte';
-	import { notifications } from '$lib/stores/notifications';
-	import { t, tStatic } from '$lib/utils/t';
-	import { fetchFromAPI } from '$lib/utils/api';
-	import { accessToken } from '$lib/stores/token';
-	import { user, type User } from '$lib/stores/user';
-	import { profileIds } from '$lib/stores/profiles';
+import { page } from '$app/stores';
+import { goto } from '$app/navigation';
+import { get, writable } from 'svelte/store';
+import GuardWrapper from '$lib/components/GuardWrapper.svelte';
+import { notifications } from '$lib/stores/notifications';
+import { t, tStatic } from '$lib/utils/t';
+import { fetchFromAPI } from '$lib/utils/api';
+import { accessToken } from '$lib/stores/token';
+import { user, type User } from '$lib/stores/user';
+import { profileIds } from '$lib/stores/profiles';
+import { validateFileSize, validateFilesSize } from '$lib/utils/fileValidation';
 
 	function waitUntil(conditionFn: () => boolean, interval = 50): Promise<void> {
 		return new Promise((resolve) => {
@@ -188,7 +189,13 @@
 	const handleFileChange = (event: Event) => {
 		const input = event.target as HTMLInputElement;
 		if (input?.files) {
-			files.set(Array.from(input.files));
+			const selectedFiles = Array.from(input.files);
+			if (validateFilesSize(selectedFiles)) {
+				files.set(selectedFiles);
+			} else {
+				// Réinitialiser l'input si les fichiers ne sont pas valides
+				input.value = '';
+			}
 		}
 	};
 
@@ -236,7 +243,7 @@
 				{#if namespace === 'clients'}
 					<iframe
 						class="mx-auto aspect-video w-full rounded-xl shadow-md"
-						src="https://www.youtube.com/embed/sxj--flJGrY?si=X-R9p4b-QztsUK9r"
+						src="https://www.youtube.com/embed/4zKbWQqNMuU?si=ZkNggg0t2OJyP9st"
 						title="Vidéo d'onboarding"
 						frameborder="0"
 						allowfullscreen
@@ -279,7 +286,12 @@
 							on:change={(e) => {
 								const input = e.target as HTMLInputElement;
 								if (input?.files?.[0]) {
-									formData.identity_card_document = input.files[0];
+									const file = input.files[0];
+									if (validateFileSize(file)) {
+										formData.identity_card_document = file;
+									} else {
+										input.value = '';
+									}
 								}
 							}}
 							required
@@ -297,7 +309,12 @@
 							on:change={(e) => {
 								const input = e.target as HTMLInputElement;
 								if (input?.files?.[0]) {
-									formData.proof_of_business_document = input.files[0];
+									const file = input.files[0];
+									if (validateFileSize(file)) {
+										formData.proof_of_business_document = file;
+									} else {
+										input.value = '';
+									}
 								}
 							}}
 							required
@@ -341,7 +358,12 @@
 							on:change={(e) => {
 								const input = e.target as HTMLInputElement;
 								if (input?.files?.[0]) {
-									formData.identity_card_document = input.files[0];
+									const file = input.files[0];
+									if (validateFileSize(file)) {
+										formData.identity_card_document = file;
+									} else {
+										input.value = '';
+									}
 								}
 							}}
 							required
@@ -359,7 +381,12 @@
 							on:change={(e) => {
 								const input = e.target as HTMLInputElement;
 								if (input?.files?.[0]) {
-									formData.proof_of_business_document = input.files[0];
+									const file = input.files[0];
+									if (validateFileSize(file)) {
+										formData.proof_of_business_document = file;
+									} else {
+										input.value = '';
+									}
 								}
 							}}
 							required
@@ -390,7 +417,12 @@
 							on:change={(e) => {
 								const input = e.target as HTMLInputElement;
 								if (input?.files?.[0]) {
-									formData.identity_card_document = input.files[0];
+									const file = input.files[0];
+									if (validateFileSize(file)) {
+										formData.identity_card_document = file;
+									} else {
+										input.value = '';
+									}
 								}
 							}}
 							required
@@ -408,7 +440,12 @@
 							on:change={(e) => {
 								const input = e.target as HTMLInputElement;
 								if (input?.files?.[0]) {
-									formData.driver_license_document = input.files[0];
+									const file = input.files[0];
+									if (validateFileSize(file)) {
+										formData.driver_license_document = file;
+									} else {
+										input.value = '';
+									}
 								}
 							}}
 							required
