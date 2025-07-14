@@ -9,7 +9,6 @@
 	import { user } from '$lib/stores/user';
 	import { notifications } from '$lib/stores/notifications';
 
-	// Traductions
 	const page_title = t('app.delivery-persons.discover.tab_title');
 	const all_label = t('app.delivery-persons.discover.all_services');
 	const shopping_label = t('app.delivery-persons.discover.shopping');
@@ -29,7 +28,6 @@
 	const stats_in_progress = t('landing.global.stats.in_progress');
 	const stats_completed = t('landing.global.stats.completed');
 
-	// Labels
 	const ALL_LABEL = $all_label;
 	const SHOPPING_LABEL = $shopping_label;
 	const DELIVERY_LABEL = $delivery_label;
@@ -85,7 +83,6 @@
 
 	let dataLoaded = false;
 
-	// Filter state
 	let filterType: 'all' | 'shopping' | 'delivery' | 'release' = 'all';
 	let cityQuery = '';
 	let shoppingAds: ShoppingAd[] = [];
@@ -147,7 +144,6 @@
 		}
 	}
 
-	// Compute filtered lists
 	$: filteredShopping = dataLoaded
 		? shoppingAds.filter(
 				(ad) =>

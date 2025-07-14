@@ -10,7 +10,6 @@
 
 	onMount(() => onDestroy(tabTitle('app.clients.subscription.tab_title')));
 
-	// Typages
 	type CurrentSubscription = {
 		subscription: {
 			id: number;
@@ -35,11 +34,10 @@
 		updated_at: string;
 	};
 
-	// État local
 	let currentSubscription: CurrentSubscription | null = null;
 	let availableSubscriptions: Subscription[] = [];
 	let isLoading = true;
-	let isChanging = false; // Pour désactiver les boutons pendant une action
+	let isChanging = false;
 
 	const getHeaders = () => ({
 		'Content-Type': 'application/json',
@@ -52,7 +50,7 @@
 			const [subscriptionResponse, subscriptions] = await Promise.all([
 				fetchFromAPI<CurrentSubscription>('/subscriptions/me', {
 					headers: getHeaders()
-				}).catch(() => null), // Retourne null si pas d'abonnement
+				}).catch(() => null),
 				fetchFromAPI<Subscription[]>('/subscriptions', {
 					headers: getHeaders()
 				})

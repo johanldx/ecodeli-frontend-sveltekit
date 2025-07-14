@@ -85,7 +85,6 @@
 	let loadingUsers = true;
 	let loadingClients = true;
 
-	// modales
 	let showModalEdit = false;
 	let showModalUserDelete = false;
 	let showModalClientDelete = false;

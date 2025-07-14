@@ -29,7 +29,6 @@
 
 	onMount(async () => {
 		await waitUntil(() => !!get(profileIds));
-		console.log(get(profileIds));
 		onDestroy(tabTitle('auth.space.tab_title'));
 	});
 

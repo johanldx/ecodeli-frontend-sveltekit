@@ -11,7 +11,6 @@ import { t, tStatic } from '$lib/utils/t';
 import { validateFilesSize } from '$lib/utils/fileValidation';
 import { validatePrice } from '$lib/utils/priceValidation';
 
-	// Traductions
 	const page_title = t('app.traders.requests.tab_title');
 	const title = t('app.traders.requests.title');
 	const new_announcement = t('app.traders.requests.new_announcement');
@@ -22,7 +21,6 @@ import { validatePrice } from '$lib/utils/priceValidation';
 	const arrival = t('app.traders.requests.arrival');
 	const delete_btn = t('app.traders.requests.delete');
 	
-	// Modal traductions
 	const modal_title = t('app.traders.requests.modal.title');
 	const title_label = t('app.traders.requests.modal.title_label');
 	const description_label = t('app.traders.requests.modal.description_label');
@@ -37,12 +35,10 @@ import { validatePrice } from '$lib/utils/priceValidation';
 	const cancel = t('app.traders.requests.modal.cancel');
 	const create = t('app.traders.requests.modal.create');
 	
-	// Delete modal traductions
 	const delete_modal_title = t('app.traders.requests.delete_modal.title');
 	const delete_modal_cancel = t('app.traders.requests.delete_modal.cancel');
 	const delete_modal_delete = t('app.traders.requests.delete_modal.delete');
 	
-	// Notifications traductions
 	const all_fields_required = t('app.traders.requests.notifications.all_fields_required');
 	const invalid_email = t('app.traders.requests.notifications.invalid_email');
 	const user_not_authenticated = t('app.traders.requests.notifications.user_not_authenticated');
@@ -115,7 +111,6 @@ import { validatePrice } from '$lib/utils/priceValidation';
 		const allLocations = await fetchFromAPI<Location[]>('/locations', {
 			headers: getAuthHeaders()
 		});
-		// Filtrer les adresses publiques (public=true)
 		locations = allLocations.filter(location => !location.public);
 	}
 
@@ -224,8 +219,6 @@ import { validatePrice } from '$lib/utils/priceValidation';
 		formData.append('packageSize', form.packageSize);
 		formData.append('price', form.price.toString());
 		form.files.forEach((file) => formData.append('images', file));
-
-		console.log(formData);
 
 		await fetchFromAPI('/release-cart-ads', {
 			method: 'POST',

@@ -101,7 +101,7 @@
 
 	let modalContext: 'payer' | 'prix' | 'demandes' | 'créneau' | null = null;
 	let isAdExpanded = false;
-	let showConversationList = true; // Pour mobile: true = liste, false = conversation
+	let showConversationList = true;
 
 	async function openSlotModal(context: typeof modalContext) {
 		modalContext = context;
@@ -492,7 +492,6 @@
 		<div class="flex flex-1 flex-col rounded-r-lg border-gray-300 relative">
 			{#if ad}
 				<header class="border-b border-gray-300 bg-white">
-					<!-- Version compacte (toujours visible) -->
 					<div class="flex items-start justify-between p-4">
 						<div class="flex-1 min-w-0">
 							<div class="mb-2 flex items-center space-x-2">
@@ -548,7 +547,6 @@
 						</div>
 					</div>
 
-					<!-- Version déployée (par-dessus le chat) -->
 					{#if isAdExpanded}
 						<div class="absolute top-0 left-0 right-0 z-10 bg-white border-b border-gray-300 shadow-lg max-h-[80vh] overflow-y-auto">
 							<div class="p-4">
@@ -614,7 +612,6 @@
 					{/if}
 				</header>
 
-				<!-- Messages -->
 				<main class="flex-1 space-y-4 overflow-y-auto bg-white p-4 {isAdExpanded ? 'mt-0' : ''}">
 					{#if messages.length}
 						{#each messages as m}
@@ -662,10 +659,8 @@
 		</div>
 	</div>
 
-	<!-- Version Mobile -->
 	<div class="lg:hidden h-screen">
 		{#if showConversationList}
-			<!-- Liste des conversations -->
 			<div class="h-full bg-white">
 				<div class="p-4 border-b border-gray-200">
 					<h1 class="text-xl font-bold">Conversations</h1>
@@ -716,9 +711,7 @@
 				</div>
 			</div>
 		{:else if selectedConv}
-			<!-- Conversation en pleine écran -->
 			<div class="h-full flex flex-col bg-white">
-				<!-- Header avec bouton retour -->
 				<header class="border-b border-gray-300 bg-white p-4">
 					<div class="flex items-center gap-3">
 						<button 
@@ -781,7 +774,6 @@
 						</div>
 					</div>
 
-					<!-- Version déployée mobile -->
 					{#if isAdExpanded && ad}
 						<div class="mt-4 p-4 bg-gray-50 rounded-lg">
 							<div class="space-y-4">
@@ -828,7 +820,6 @@
 					{/if}
 				</header>
 
-				<!-- Messages -->
 				<main class="flex-1 space-y-3 overflow-y-auto bg-white p-3">
 					{#if messages.length}
 						{#each messages as m}
@@ -856,7 +847,6 @@
 					{/if}
 				</main>
 
-				<!-- Zone de saisie -->
 				<footer class="border-t border-gray-300 bg-white p-3">
 					<div class="flex gap-2">
 						<input

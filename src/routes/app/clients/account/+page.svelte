@@ -12,13 +12,11 @@
 
 	onMount(() => onDestroy(tabTitle('app.clients.account.tab_title')));
 
-	// Traductions
 	const account_title = t('app.clients.account.my_account.title');
 	const my_sub = t('app.clients.account.my_account.my_sub');
 	const manage = t('app.clients.account.my_account.manage');
 	const wallet_title = t('app.clients.account.my_electronic_wallet.title');
 
-	// Typages
 	type CurrentSubscription = {
 		subscription: {
 			id: number;
@@ -43,7 +41,6 @@
 		updated_at: string;
 	};
 
-	// État local
 	let currentSubscription: CurrentSubscription | null = null;
 	let availableSubscriptions: Subscription[] = [];
 	let isLoading = true;
@@ -76,7 +73,6 @@
 
 	async function handleManageSubscription() {
 		try {
-			// Redirection vers la page de gestion des abonnements
 			goto('/app/clients/subscription');
 		} catch (err) {
 			console.error('Erreur lors de la redirection', err);
@@ -98,7 +94,6 @@
 				})
 			});
 
-			// Redirection vers le checkout Stripe
 			window.location.href = response.url;
 		} catch (err) {
 			console.error('Erreur lors de la redirection vers le checkout', err);
@@ -127,7 +122,6 @@
 <div class="ml-0 max-w-2xl bg-[#FEFCF3] p-6">
 	<h1 class="font-author mb-6 text-2xl text-gray-800">{$account_title}</h1>
 
-	<!-- Bloc abonnement -->
 	<div class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-md">
 		<p class="mb-2 text-sm text-gray-600">{$my_sub}</p>
 
@@ -138,7 +132,6 @@
 			</div>
 		{:else if currentSubscription}
 			<div class="space-y-4">
-				<!-- Abonnement actuel -->
 				<div class="flex items-center justify-between">
 					<div class="mr-2 flex-grow rounded-md bg-gray-100 px-4 py-2">
 						<div class="flex items-center justify-between">
@@ -173,7 +166,6 @@
 					</button>
 				</div>
 
-				<!-- Plans disponibles -->
 				{#if currentSubscription.subscription.name === 'Free' && availableSubscriptions.length > 0}
 					<div class="border-t pt-4">
 						<p class="mb-3 text-sm font-medium text-gray-700">Plans disponibles :</p>
@@ -208,7 +200,6 @@
 				</button>
 			</div>
 
-			<!-- Lien vers la page des abonnements -->
 			<div class="mt-4 text-center">
 				<button
 					on:click={() => goto('/app/clients/subscription')}
@@ -220,10 +211,8 @@
 		{/if}
 	</div>
 
-	<!-- Bloc Wallet -->
 	<WalletBox profileType="clients" />
 
-	<!-- Bloc Actions -->
 	<div class="mt-8 rounded-lg border border-gray-200 bg-white p-6 shadow-md">
 		<h2 class="text-lg font-medium text-gray-800">Actions</h2>
 		<div class="mt-4">

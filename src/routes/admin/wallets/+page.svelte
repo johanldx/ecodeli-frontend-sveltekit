@@ -9,7 +9,6 @@
 	import { tabTitle } from '$lib/utils/tabTitle';
 	import { t, tStatic } from '$lib/utils/t';
 
-	// Traductions pour la gestion des wallets
 	const tab_title = t('admin.wallets.tab_title');
 	const wallets_title = t('admin.wallets.wallets_title');
 	const search_bar = t('admin.wallets.search_bar');
@@ -27,7 +26,7 @@
 
 	onMount(() => onDestroy(tabTitle('admin.wallets.tab_title')));
 
-	let walletsData: any[] = []; // Stockage des données complètes
+	let walletsData: any[] = [];
 	let data: {
 		id: string;
 		user_name: string;

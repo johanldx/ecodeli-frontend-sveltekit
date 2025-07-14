@@ -44,7 +44,6 @@
 	async function loadLocations() {
 		try {
 			const allLocations = await fetchFromAPI<Location[]>('/locations', { headers: getHeaders() });
-			// Filtrer les adresses publiques (public=true)
 			locations = allLocations.filter(location => !location.public);
 		} catch {
 			notifications.error('Impossible de charger les lieux.');
@@ -61,7 +60,6 @@
 				}
 			);
 
-			console.log(routes);
 		} catch {
 			notifications.error('Impossible de charger vos trajets.');
 		}
@@ -93,14 +91,6 @@
 		isSubmitting = true;
 
 		try {
-			console.log(
-				JSON.stringify({
-					delivery_person_id: get(profileIds).deliveryPersonId,
-					departure_location,
-					arrival_location,
-					day
-				})
-			);
 			await fetchFromAPI('/routes', {
 				method: 'POST',
 				headers: getHeaders(),

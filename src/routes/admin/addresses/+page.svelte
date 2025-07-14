@@ -73,8 +73,6 @@
   let showModalEdit = false;
   let showModalDelete = false;
   let showModalCreate = false;
-
-  // Variables pour l'autocomplétion d'adresse
   let suggestions: any[] = [];
   let showSuggestions = false;
   let addressValid = false;
@@ -89,7 +87,7 @@
     cp: '',
     city: '',
     country: '',
-    public: true, // Forcé à true
+    public: true,
     price: 0,
   };
 
@@ -224,7 +222,7 @@
       cp: '',
       city: '',
       country: '',
-      public: true, // Forcé à true
+      public: true,
       price: 0,
     };
   }
@@ -278,7 +276,6 @@
       <span class="loading loading-spinner loading-lg text-primary"></span>
     </div>
   {:else}
-    <!-- Tableau des adresses privées -->
     <div class="mb-8">
       <h2 class="mb-4 text-xl font-semibold text-gray-800">Adresses privées</h2>
       {#if privateAddresses.length > 0}
@@ -290,7 +287,6 @@
       {/if}
     </div>
 
-    <!-- Tableau des adresses publiques avec prix -->
     <div class="mb-8">
       <h2 class="mb-4 text-xl font-semibold text-gray-800">Adresses publiques</h2>
       {#if publicAddresses.length > 0}
@@ -303,9 +299,6 @@
     </div>
   {/if}
 
-  <!-- Bouton pour ouvrir la modale de création -->
-
-  <!-- Modale Création -->
   {#if showModalCreate}
     <div class="modal modal-open">
       <div class="modal-box relative w-full max-w-2xl">
@@ -364,7 +357,6 @@
           />
         </div>
 
-        <!-- Champ Public forcé à true -->
         <div class="form-control mt-4">
           <label class="label cursor-pointer">
             <span class="label-text">Public (obligatoire)</span>
@@ -408,7 +400,6 @@
     </div>
   {/if}
 
-  <!-- Modale Édition -->
   {#if showModalEdit}
     <div class="modal modal-open">
       <div class="modal-box">
@@ -446,7 +437,6 @@
     </div>
   {/if}
 
-  <!-- Modale Suppression -->
   {#if showModalDelete}
     <div class="modal modal-open">
       <div class="modal-box">

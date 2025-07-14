@@ -184,7 +184,6 @@
 	</div>
 </div>
 
-<!-- Game overlay component -->
 <VehicleShooter 
   carImage="/images/game/voiture.png"
   truckImage="/images/game/camion.png"

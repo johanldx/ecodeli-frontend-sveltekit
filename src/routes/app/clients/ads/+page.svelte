@@ -80,7 +80,7 @@ import { validatePrice } from '$lib/utils/priceValidation';
 
 	let shoppingAds: ShoppingAd[] = [];
 	let locations: Location[] = [];
-	let allLocations: Location[] = []; // Pour les étapes de livraison (inclut les adresses publiques)
+	let allLocations: Location[] = [];
 	let deliveryAds: DeliveryAd[] = [];
 	let form_delivery = {
 		title: '',
@@ -98,7 +98,6 @@ import { validatePrice } from '$lib/utils/priceValidation';
 		} as Omit<DeliveryStepInput, 'stepNumber'>
 	};
 
-	// formulaire
 	let form_title = '';
 	let form_description = '';
 	let form_price = 0;
@@ -117,12 +116,10 @@ import { validatePrice } from '$lib/utils/priceValidation';
 
 	async function loadAds() {
 		try {
-			// shoppingAds inchangé
 			shoppingAds = await fetchFromAPI<ShoppingAd[]>('/shopping-ads/mine', {
 				headers: getAuthHeaders()
 			});
 
-			// on récupère "cru" et on mappe en normalisé
 			const raw = await fetchFromAPI<any[]>('/delivery-ads/mine', {
 				headers: getAuthHeaders()
 			});
@@ -222,8 +219,6 @@ import { validatePrice } from '$lib/utils/priceValidation';
 	function openAddModal() {
 		showModal = true;
 		selectedType = '';
-		// reset shopping...
-		// reset delivery 👇
 		form_delivery = {
 			title: '',
 			description: '',
@@ -574,7 +569,6 @@ import { validatePrice } from '$lib/utils/priceValidation';
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
 		{#each deliveryAds as ad}
 			<div class="card bg-base-100 mx-auto mt-10 w-full shadow-sm">
-				<!-- 1) Carousel d'images -->
 				{#if ad.imageUrls?.length > 0}
 					<div class="carousel h-40 w-full rounded-t-lg sm:h-48">
 						{#each ad.imageUrls as url, i}
@@ -613,7 +607,6 @@ import { validatePrice } from '$lib/utils/priceValidation';
 					</figure>
 				{/if}
 
-				<!-- 2) Corps de la carte -->
 				<div class="card-body p-4 md:p-6">
 					<div>
 						<p class="badge badge-info badge-outline mt-2 mr-2 px-3 py-2">Demande de livraison</p>
@@ -636,7 +629,6 @@ import { validatePrice } from '$lib/utils/priceValidation';
 						</button>
 					{/if}
 
-					<!-- 3) Étapes -->
 					{#if ad.deliverySteps?.length}
 						<ul class="steps steps-vertical mt-4 space-y-2">
 							{#each ad.deliverySteps as step}
@@ -947,7 +939,6 @@ import { validatePrice } from '$lib/utils/priceValidation';
 			<div class="modal-box max-w-2xl">
 				<h3 class="text-lg font-bold mb-4">Détails de l'annonce</h3>
 				{#if selectedAdType === 'shopping'}
-					<!-- Détails pour une annonce de course -->
 					<div class="flex flex-col md:flex-row md:justify-between gap-6">
 						<div>
 							<p class="font-semibold mb-1">📍 Départ</p>

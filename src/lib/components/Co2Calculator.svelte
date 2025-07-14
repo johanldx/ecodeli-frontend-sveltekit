@@ -6,7 +6,6 @@
 	import { notifications } from '$lib/stores/notifications';
 	import { t } from '$lib/utils/t';
 
-	// Traductions
 	const title = t('components.co2_calculator.title');
 	const description = t('components.co2_calculator.description');
 	const departure_address = t('components.co2_calculator.departure_address');
@@ -22,7 +21,6 @@
 	const thank_planet = t('components.co2_calculator.thank_planet');
 	const open_calculator = t('components.co2_calculator.open_calculator');
 	
-	// Notifications
 	const select_addresses = t('components.co2_calculator.notifications.select_addresses');
 	const different_addresses = t('components.co2_calculator.notifications.different_addresses');
 	const calculation_error = t('components.co2_calculator.notifications.calculation_error');
@@ -57,9 +55,6 @@
 		}
 	});
 
-	/**
-	 * Convertit les grammes en kg si la valeur est supérieure à 1000g
-	 */
 	function formatCo2(grams: number): string {
 		if (grams >= 1000) {
 			return `${(grams / 1000).toFixed(2)} kg`;

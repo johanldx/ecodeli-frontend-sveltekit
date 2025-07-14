@@ -163,11 +163,6 @@ import { validateFileSize, validateFilesSize } from '$lib/utils/fileValidation';
 				}
 			}
 
-			console.log('Contenu FormData :');
-			for (const pair of form.entries()) {
-				console.log(pair[0], pair[1]);
-			}
-
 			await fetchFromAPI(endpoint, {
 				method,
 				headers: {
@@ -179,7 +174,6 @@ import { validateFileSize, validateFilesSize } from '$lib/utils/fileValidation';
 			notifications.success(tStatic('api_responses.namespace.request_success'));
 			status = 'pending';
 		} catch (err) {
-			console.error(err);
 			notifications.error(tStatic('api_responses.namespace.request_error'));
 		}
 	};
@@ -193,7 +187,6 @@ import { validateFileSize, validateFilesSize } from '$lib/utils/fileValidation';
 			if (validateFilesSize(selectedFiles)) {
 				files.set(selectedFiles);
 			} else {
-				// Réinitialiser l'input si les fichiers ne sont pas valides
 				input.value = '';
 			}
 		}

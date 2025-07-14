@@ -12,7 +12,6 @@
   <div class="container mx-auto flex w-full items-center justify-between py-3">
     <a href="/app"><img src="/images/logo/ecodeli-light.png" alt="Logo" class="h-8 w-auto" /></a>
 
-    <!-- Mobile burger -->
     <div class="flex items-center lg:hidden">
       <button
         class="btn btn-ghost"
@@ -25,7 +24,6 @@
       </button>
     </div>
 
-    <!-- Desktop menu -->
     <div class="ml-auto hidden items-center space-x-6 lg:flex">
       {#each groups as groupBlock}
         <div class="relative group">
@@ -62,7 +60,6 @@
   </button>
 {/if}
 
-<!-- Mobile menu -->
 <div
   class="bg-base-100 fixed top-0 right-0 z-50 h-full w-64 transform shadow-lg transition-transform duration-300 ease-in-out {$isOpen ? 'translate-x-0' : 'translate-x-full'}"
 >

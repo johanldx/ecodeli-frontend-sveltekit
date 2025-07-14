@@ -16,7 +16,6 @@
 	let loading = true;
 	let expandedProvider: number | null = null;
 
-	// Traductions
 	const title = tStatic('admin.ratings.title') || 'Gestion des avis des prestataires';
 	const subtitle = tStatic('admin.ratings.subtitle') || 'Consultez et gérez les évaluations des prestataires';
 	const provider_label = tStatic('admin.ratings.provider') || 'Prestataire';

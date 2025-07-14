@@ -35,7 +35,6 @@
 				headers: { Authorization: `Bearer ${get(accessToken)}` }
 			});
 			user.set(userData);
-			console.log(userData);
 			first_name = userData.first_name;
 			last_name = userData.last_name;
 			email = userData.email;
@@ -77,7 +76,6 @@
 		}
 	}
 
-	// Fonction de mise à jour du mot de passe
 	async function handlePasswordUpdate(e: Event) {
 		e.preventDefault();
 		try {
@@ -122,7 +120,6 @@
 		<h1 class="mt-10 text-xl font-semibold">{$title}</h1>
 
 		<div class="my-5 grid grid-cols-1 gap-6 text-left md:grid-cols-2">
-			<!-- Formulaire de mise à jour du profil -->
 			<form class="space-y-4" on:submit|preventDefault={handleProfileUpdate}>
 				<div class="flex gap-2">
 					<input
@@ -150,7 +147,6 @@
 				<button type="submit" class="btn btn-primary w-full">{$save_profile_button}</button>
 			</form>
 
-			<!-- Formulaire de mise à jour du mot de passe -->
 			<form class="space-y-4" on:submit|preventDefault={handlePasswordUpdate}>
 				<input
 					type="password"
@@ -169,15 +165,12 @@
 				<button type="submit" class="btn btn-primary w-full">{$save_password_button}</button>
 			</form>
 
-			<!-- Actions supplémentaires -->
-			<!-- Les boutons de suppression de compte et d'informations personnelles ont été retirés -->
 		</div>
 
 		<div class="mt-6">
 			<a href="/auth/space">{$return_to_app_link}</a>
 		</div>
 
-		<!-- Ajout de la mention support RGPD -->
 		<p class="mt-8 text-center text-sm text-gray-500">{@html $support_rgpd}</p>
 	</div>
 </GuardWrapper>

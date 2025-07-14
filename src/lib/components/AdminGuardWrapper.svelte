@@ -27,7 +27,6 @@
 				}
 			});
 
-			// Si on arrive ici, l'utilisateur a les droits admin
 			hasAccess = true;
 		} catch (err: any) {
 			console.error('Erreur d\'accès admin:', err);

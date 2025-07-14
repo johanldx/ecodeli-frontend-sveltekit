@@ -9,7 +9,6 @@
 	onMount(() => {
 		onDestroy(tabTitle('track.tab_title'));
 
-		// Pré-remplissage via query params
 		const urlParams = new URLSearchParams(window.location.search);
 		const emailParam = urlParams.get('email');
 		const refParam = urlParams.get('ref');
@@ -51,7 +50,6 @@
 		conversationId = null;
 
 		try {
-			// On suppose que la référence saisie est l'ID de conversation
 			const response = await fetchFromAPI<any>(
 				`/order-tracking?email=${encodeURIComponent(email)}&conversationId=${encodeURIComponent(ref)}`,
 				{ method: 'GET' }
@@ -79,7 +77,6 @@
 					headers: { 'Content-Type': 'application/json' }
 				}
 			);
-			// Ne pas mettre à jour le statut de l'annonce pour les ServiceProvisions
 			if (trackingInfo.typeAnnonce !== 'ServiceProvisions') {
 				trackingInfo.statutAnnonce = 'completed';
 			}
@@ -95,17 +92,14 @@
 	}
 
 	function refreshPage() {
-		// Recharge la page sans les query params
 		window.location.href = '/track';
 	}
 
-	// Fonction utilitaire pour vérifier si un paiement est validé
 	function isPaymentValidated(status: string): boolean {
 		const validatedStatuses = ['COMPLETED', 'PAID', 'completed'];
 		return validatedStatuses.includes(status);
 	}
 
-	// Fonctions utilitaires pour badges
 	function getStatusBadge(status: string) {
 		if (!status) return '';
 		const map: Record<string, { label: string; color: string }> = {
@@ -173,7 +167,6 @@
 
 	{#if trackingInfo}
 		<div class="my-10 card bg-base-200 p-6 shadow-xl inline-block text-left max-w-lg w-full">
-			<!-- Titre et type d'annonce -->
 			<div class="flex items-center gap-2 mb-2">
 				<span class="font-bold text-lg">{trackingInfo.titreAnnonce}</span>
 				{@html getTypeBadge(trackingInfo.typeAnnonce)}

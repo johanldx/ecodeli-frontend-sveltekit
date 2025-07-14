@@ -2,8 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { notifications } from '$lib/stores/notifications';
 	import { fetchFromAPI } from '$lib/utils/api';
-	import { clearTokens } from '$lib/utils/auth';
-	import { t, tStatic } from '$lib/utils/t';
+	import { tStatic } from '$lib/utils/t';
 	import { tabTitle } from '$lib/utils/tabTitle';
 	import { onMount, onDestroy } from 'svelte';
 

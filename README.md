@@ -4,61 +4,102 @@
   <img src="static/images/logo/ecodeli-logo.png" width="200" alt="Ecodeli Logo" />
 </p>
 
-## Description
+## Présentation du projet
 
-Interface utilisateur web pour la plateforme Ecodeli, une application de livraison écologique et de services personnalisés. Cette application est construite avec [SvelteKit](https://kit.svelte.dev/) et offre une expérience utilisateur moderne et responsive.
+**Ecodeli** est une plateforme web dédiée à la livraison écologique et aux services personnalisés. L’application propose une expérience moderne, fluide et responsive, permettant aux utilisateurs de commander, suivre leurs livraisons, communiquer avec les livreurs et gérer leurs services depuis une interface intuitive.
+
+Ce dépôt contient le code source du frontend, développé avec **SvelteKit**, et s’intègre à un backend NestJS et une application mobile Kotlin.
+
+---
 
 ## Fonctionnalités principales
 
-- 🏠 **Page d'accueil** - Présentation de la plateforme et services
-- 🔐 **Authentification** - Connexion/inscription sécurisée
-- 👤 **Espace utilisateur** - Gestion du profil et des commandes
-- 🚚 **Suivi de livraison** - Suivi en temps réel des commandes
-- 💬 **Messagerie** - Communication avec les livreurs et fournisseurs
-- 📱 **Interface responsive** - Optimisée pour mobile et desktop
-- 🌍 **Internationalisation** - Support multi-langues avec Inlang
-- 🎨 **Design moderne** - Interface utilisateur avec Tailwind CSS et DaisyUI
-- 📊 **Tableau de bord** - Statistiques et gestion des commandes
-- ⭐ **Système de notation** - Évaluation des services
+- **Accueil** : Présentation de la plateforme et de ses valeurs écologiques.
+- **Authentification** : Inscription, connexion sécurisée, gestion des sessions.
+- **Espace utilisateur** : Gestion du profil, des commandes et des préférences.
+- **Suivi de livraison** : Visualisation en temps réel de l’état des commandes.
+- **Messagerie** : Chat intégré entre clients, livreurs et fournisseurs.
+- **Tableau de bord** : Statistiques, historique et gestion avancée.
+- **Notation** : Système d’évaluation des services et des intervenants.
+- **Internationalisation** : Interface multilingue (Inlang).
+- **Design moderne** : UI basée sur Tailwind CSS et DaisyUI.
 
-## 🚀 Développement
+---
 
-### Prérequis
+## Structure du code
 
-- Node.js 18+ 
-- npm ou yarn
+Le projet est organisé pour favoriser la clarté, la réutilisabilité et la scalabilité :
 
-### Installation
-
-```bash
-# Cloner le repository
-git clone <repository-url>
-cd ecodeli-frontend-sveltekit
-
-# Installer les dépendances
-npm install
-
-# Copier le fichier d'environnement
-cp .env.example .env
-
-# Configurer les variables d'environnement dans .env
+```
+src/
+├── app.html              # Template HTML principal
+├── app.css               # Styles globaux (Tailwind, DaisyUI)
+├── app.d.ts              # Types globaux
+├── lib/
+│   ├── components/       # Composants UI réutilisables (boutons, formulaires, layouts, etc.)
+│   ├── stores/           # Stores Svelte pour la gestion d’état global (auth, user, notifications…)
+│   ├── types/            # Définition des types TypeScript partagés
+│   └── utils/            # Fonctions utilitaires (API, helpers, formatteurs…)
+├── routes/
+│   ├── +layout.svelte    # Layout principal de l’application
+│   ├── +page.svelte      # Page d’accueil
+│   ├── auth/             # Pages d’authentification (login, register, reset…)
+│   ├── app/              # Pages principales de l’application (profil, commandes…)
+│   ├── admin/            # Pages d’administration
+│   ├── track/            # Suivi de commandes
+│   ├── rate/             # Système de notation
+│   └── legal/            # Pages légales (CGU, politique de confidentialité…)
+└── static/
+    └── images/           # Images et assets statiques
 ```
 
-### Lancement en développement
+---
 
-```bash
-npm run dev
-```
+## Technologies principales
 
-L'application sera disponible sur `http://localhost:5173`
+- **SvelteKit** : Framework web moderne, SSR et SPA.
+- **TypeScript** : Sécurité et robustesse du typage.
+- **Tailwind CSS & DaisyUI** : Design rapide et cohérent.
+- **Socket.IO** : Communication temps réel (messagerie, notifications).
+- **Inlang** : Gestion multilingue.
+- **Monaco Editor, FullCalendar** : Composants avancés pour l’édition et la gestion de calendrier.
 
-## 🏭 Production
+---
+
+## Démarrage rapide
 
 ### Prérequis
 
 - Node.js 18+
-- PM2 (gestionnaire de processus)
-- Serveur Linux/Unix
+- npm ou yarn
+
+### Installation & lancement
+
+```bash
+git clone <repository-url>
+cd ecodeli-frontend-sveltekit
+npm install
+cp .env.example .env
+# Configurer les variables d’environnement dans .env
+npm run dev
+```
+
+L’application sera accessible sur [http://localhost:5173](http://localhost:5173).
+
+---
+
+## Déploiement & production
+
+- Build : `npm run build`
+- Démarrage : `npm run start` ou via PM2 (`npm run pm2:start`)
+- Configuration serveur recommandée : Nginx en reverse proxy
+- Variables d’environnement à adapter dans `.env.production`
+
+---
+
+## Configuration et utilisation de PM2 (SSR)
+
+Pour un déploiement en mode SSR (Server Side Rendering), il est recommandé d’utiliser **PM2** pour gérer le processus Node.js en production.
 
 ### Installation de PM2
 
@@ -66,44 +107,29 @@ L'application sera disponible sur `http://localhost:5173`
 npm install -g pm2
 ```
 
-### Configuration
+### Configuration de l’environnement
 
-1. **Variables d'environnement** : Créez un fichier `.env.production` avec vos variables de production
-2. **Configuration PM2** : Modifiez `ecosystem.config.js` selon votre environnement
+- Créez un fichier `.env.production` à la racine du projet avec vos variables d’environnement (voir `.env.example`).
+- Vérifiez ou adaptez le port et l’hôte selon vos besoins (ex : `PORT=3000`, `HOST=0.0.0.0`).
 
-### Déploiement
-
-#### Build et démarrage
+### Build et lancement avec PM2
 
 ```bash
-# Build de l'application
 npm run build
-
-# Démarrage avec PM2
 npm run pm2:start
 ```
 
-#### Scripts PM2 disponibles
+### Scripts PM2 disponibles
 
-```bash
-npm run pm2:start    # Démarrer l'application
-npm run pm2:stop     # Arrêter l'application
-npm run pm2:restart  # Redémarrer l'application
-npm run pm2:reload   # Recharger l'application (zero-downtime)
-npm run pm2:delete   # Supprimer l'application de PM2
-npm run pm2:logs     # Voir les logs
-npm run pm2:monit    # Monitorer l'application
-```
+- `npm run pm2:start`    : Démarrer l’application en mode production SSR
+- `npm run pm2:stop`     : Arrêter l’application
+- `npm run pm2:restart`  : Redémarrer l’application
+- `npm run pm2:reload`   : Recharger l’application (zero-downtime)
+- `npm run pm2:delete`   : Supprimer l’application de PM2
+- `npm run pm2:logs`     : Voir les logs
+- `npm run pm2:monit`    : Monitorer l’application
 
-#### Déploiement complet
-
-```bash
-npm run deploy:prod
-```
-
-### Configuration serveur
-
-#### Nginx (recommandé)
+### Exemple de configuration Nginx (reverse proxy)
 
 ```nginx
 server {
@@ -124,168 +150,27 @@ server {
 }
 ```
 
-#### Variables d'environnement
-
-Créez un fichier `.env.production` :
-
-```env
-NODE_ENV=production
-PORT=3000
-HOST=0.0.0.0
-ECODELI_BASE_PATH=
-# Ajoutez vos autres variables d'environnement
-```
-
-### Monitoring
+### Monitoring et logs
 
 - **PM2 Monitor** : `pm2 monit`
 - **Logs** : `pm2 logs ecodeli-frontend`
 - **Statut** : `pm2 status`
 
-### Optimisations de production
+---
 
-- Compression gzip/brotli activée
-- Polyfills pour compatibilité navigateurs
-- Chunking automatique des bundles
-- Minification avec Terser
-- Mode cluster pour utilisation multi-cœurs
+## Tests & qualité
 
-## 📁 Structure du projet
+- Les tests sont à implémenter (`npm run test`)
+- Optimisations : lazy loading, code splitting, préchargement des routes, optimisation des images
 
-```
-src/
-├── app.html              # Template HTML principal
-├── app.css               # Styles globaux
-├── app.d.ts              # Types globaux
-├── lib/
-│   ├── components/       # Composants réutilisables
-│   │   ├── ui/          # Composants d'interface
-│   │   ├── forms/       # Composants de formulaires
-│   │   └── layout/      # Composants de mise en page
-│   ├── stores/          # Stores Svelte (état global)
-│   ├── types/           # Types TypeScript
-│   └── utils/           # Utilitaires et helpers
-├── routes/
-│   ├── +layout.svelte   # Layout principal
-│   ├── +page.svelte     # Page d'accueil
-│   ├── auth/            # Pages d'authentification
-│   ├── app/             # Pages de l'application
-│   ├── admin/           # Pages d'administration
-│   ├── track/           # Suivi de commandes
-│   ├── rate/            # Système de notation
-│   └── legal/           # Pages légales
-└── static/
-    └── images/          # Images et assets
-```
+---
 
-## 🔧 Scripts disponibles
+## Support & contact
 
-- `npm run dev` - Développement
-- `npm run build` - Build de production
-- `npm run preview` - Prévisualisation du build
-- `npm run start` - Démarrage en production
-- `npm run pm2:start` - Démarrage avec PM2
-- `npm run deploy:prod` - Déploiement complet
+Pour toute question ou contribution, merci de contacter l’équipe de développement Ecodeli.
 
-## 📝 Logs
-
-Les logs sont stockés dans le dossier `logs/` :
-- `combined.log` - Tous les logs
-- `out.log` - Logs de sortie
-- `error.log` - Logs d'erreur
-
-## 🚨 Dépannage
-
-### Problèmes courants
-
-1. **Port déjà utilisé** : Changez le port dans `ecosystem.config.js`
-2. **Permissions** : Assurez-vous que PM2 a les bonnes permissions
-3. **Variables d'environnement** : Vérifiez votre fichier `.env.production`
-
-### Commandes utiles
-
-```bash
-# Vérifier le statut PM2
-pm2 status
-
-# Redémarrer tous les processus
-pm2 restart all
-
-# Voir les logs en temps réel
-pm2 logs --lines 100
-
-# Sauvegarder la configuration PM2
-pm2 save
-
-# Restaurer la configuration PM2
-pm2 resurrect
-```
-
-## Technologies utilisées
-
-- **SvelteKit** - Framework web moderne
-- **TypeScript** - Typage statique
-- **Tailwind CSS** - Framework CSS utilitaire
-- **DaisyUI** - Composants UI pour Tailwind
-- **Socket.IO** - Communication en temps réel
-- **Monaco Editor** - Éditeur de code intégré
-- **FullCalendar** - Composant de calendrier
-- **Inlang** - Internationalisation
-- **JWT Decode** - Gestion des tokens JWT
-
-## Internationalisation
-
-L'application utilise Inlang pour la gestion des traductions :
-
-```bash
-# Ajouter une nouvelle langue
-npm run machine-translate
-
-# Les fichiers de traduction se trouvent dans :
-# - src/lib/i18n/
-```
-
-## Développement
-
-### Ajouter un nouveau composant
-
-1. Créer le fichier dans `src/lib/components/`
-2. Exporter le composant depuis `src/lib/components/index.ts`
-3. Importer et utiliser dans les pages
-
-### Ajouter une nouvelle page
-
-1. Créer le fichier dans `src/routes/`
-2. Suivre la convention de nommage SvelteKit
-3. Ajouter la navigation si nécessaire
-
-### Styles
-
-- Utiliser Tailwind CSS pour les styles
-- Créer des classes personnalisées dans `src/app.css` si nécessaire
-- Utiliser DaisyUI pour les composants UI
-
-## Tests
-
-```bash
-# Lancer les tests (à implémenter)
-npm run test
-
-# Tests en mode watch
-npm run test:watch
-```
-
-## Performance
-
-- Lazy loading des composants
-- Optimisation des images
-- Code splitting automatique avec SvelteKit
-- Préchargement des routes importantes
-
-## Support
-
-Pour toute question ou problème, veuillez contacter l'équipe de développement Ecodeli.
+---
 
 ## Licence
 
-Ce projet est privé et propriétaire d'Ecodeli.
+Projet privé et propriétaire d’Ecodeli.

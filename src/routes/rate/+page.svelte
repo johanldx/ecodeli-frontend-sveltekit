@@ -31,7 +31,6 @@
 	let comment = '';
 	let submitting = false;
 
-	// Traductions
 	const rate_title = t('rate.title');
 	const rate_subtitle = t('rate.subtitle');
 	const rate_comment_label = t('rate.comment.label');
@@ -90,7 +89,6 @@
 				})
 			});
 
-			// Redirection vers une page de confirmation
 			goto('/rate/success');
 		} catch (err) {
 			error = $rate_error_submission;
@@ -122,7 +120,6 @@
 				{$rate_subtitle.replace('{providerName}', `${ratingData.provider.first_name} ${ratingData.provider.last_name}`)}
 			</p>
 
-			<!-- Système d'étoiles -->
 			<div class="flex justify-center mb-6">
 				<div class="flex gap-2">
 					{#each Array(5) as _, i}
@@ -140,7 +137,6 @@
 				</div>
 			</div>
 
-			<!-- Labels des étoiles -->
 			{#if selectedRating > 0}
 				<div class="mb-6">
 					<p class="text-lg font-semibold">
@@ -159,7 +155,6 @@
 				</div>
 			{/if}
 
-			<!-- Commentaire optionnel -->
 			<div class="form-control mb-6">
 				<label for="comment" class="label">
 					<span class="label-text">{$rate_comment_label}</span>

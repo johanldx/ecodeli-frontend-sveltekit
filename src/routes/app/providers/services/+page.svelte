@@ -44,7 +44,6 @@ import { validateFilesSize } from '$lib/utils/fileValidation';
 		price: number;
 	};
 
-	// Traductions
 	const page_title = t('app.providers.service.tab_title');
 	const new_announcement = t('landing.global.forms.new_announcement');
 	const new_service_announcement = t('landing.global.forms.new_service_announcement');
@@ -76,7 +75,6 @@ import { validateFilesSize } from '$lib/utils/fileValidation';
 				const typeId = ad.typeId ?? -1;
 				const serviceType = serviceTypes.find((st) => st.id === typeId);
 
-				// Injecter un objet type cohérent
 				ad.type = {
 					id: typeId,
 					name: serviceType ? serviceType.name : 'Type inconnu'
@@ -100,7 +98,6 @@ import { validateFilesSize } from '$lib/utils/fileValidation';
 			);
 			authorizedTypeIds = auths.map((a) => a.personalServiceTypeId);
 			
-			// Créer une liste des services autorisés avec leurs prix
 			authorizedServicesWithPrices = auths.map(auth => {
 				const serviceType = serviceTypes.find(st => st.id === auth.personalServiceTypeId);
 				return {

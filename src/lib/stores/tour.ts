@@ -1,13 +1,10 @@
 import { writable } from 'svelte/store';
 import type { TourStep } from '$lib/types/tour';
 
-// Gère si le tour est actuellement visible
 export const isTourActive = writable(false);
 
-// Gère l'étape actuelle du tour
 export const tourStep = writable(0);
 
-// Les étapes du tutoriel, définies dans le layout principal
 export const tourSteps = writable<TourStep[]>([]);
 
 /**

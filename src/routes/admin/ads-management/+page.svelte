@@ -124,7 +124,6 @@
     <Table {columns} {data} pageSize={10} onAction={handleAction} />
   {/if}
 
-  <!-- Modale édition -->
   {#if showEditModal}
     <div class="modal modal-open">
       <div class="modal-box max-w-2xl">
@@ -200,7 +199,6 @@
     </div>
   {/if}
 
-  <!-- Modale suppression -->
   {#if showDeleteModal}
     <div class="modal modal-open">
       <div class="modal-box">

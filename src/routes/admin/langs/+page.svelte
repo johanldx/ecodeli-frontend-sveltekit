@@ -112,7 +112,6 @@
 	});
 </script>
 
-<!-- MODALES -->
 {#if $showAddModal}
 	<div class="modal modal-open">
 		<div class="modal-box">
@@ -144,7 +143,6 @@
 	</div>
 {/if}
 
-<!-- PAGE -->
 <div class="space-y-6 p-6">
 	<div class="flex items-center justify-between">
 		<h1 class="mt-10 mb-5 text-2xl font-medium">Langues</h1>

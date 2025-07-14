@@ -92,10 +92,9 @@
 	async function loadAddresses() {
 		try {
 			const res = await fetchFromAPI<Address[]>('/locations', { headers: getHeaders() });
-			// Trier les adresses : privées d'abord, puis publiques
 			addresses = res.sort((a, b) => {
 				if (a.public === b.public) return 0;
-				return a.public ? 1 : -1; // false (privées) avant true (publiques)
+				return a.public ? 1 : -1;
 			});
 		} catch {
 			notifications.error('Impossible de charger les adresses.');
@@ -189,7 +188,6 @@
 	}
 </script>
 
-<!-- Page -->
 <div class="bg-[#FEFCF3] p-6">
 	<div class="mb-6 flex items-center justify-between">
 		<h1 class="font-author text-2xl text-gray-800">{$title}</h1>
@@ -226,7 +224,6 @@
 		{/each}
 	</div>
 
-	<!-- Modale Ajout/Modif -->
 	{#if modalVisible}
 		<div class="modal modal-open">
 			<div class="modal-box relative w-full max-w-2xl">
@@ -315,7 +312,6 @@
 		</div>
 	{/if}
 
-	<!-- Modale suppression -->
 	{#if deleteModalVisible}
 		<div class="modal modal-open">
 			<div class="modal-box">

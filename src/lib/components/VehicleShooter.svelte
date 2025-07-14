@@ -2,12 +2,10 @@
   import { onMount, onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
 
-  // Props
   export let carImage = '/images/game/voiture.png';
   export let truckImage = '/images/game/camion.png';
   export let backgroundImage = '/images/game/background.png';
 
-  // Game state
   let score = writable(0);
   let gameActive = writable(false);
   let showGame = writable(false);
@@ -26,17 +24,15 @@
     speed: number;
     width: number;
     height: number;
-    direction: 'diagonal1' | 'diagonal2' | 'diagonal3' | 'diagonal4'; // 4 diagonales différentes
+    direction: 'diagonal1' | 'diagonal2' | 'diagonal3' | 'diagonal4';
   }
 
-  // Game settings
   const GAME_DURATION = 20;
-  const VEHICLE_SPAWN_RATE = 800; // ms - Plus de véhicules
+  const VEHICLE_SPAWN_RATE = 800;
   const BASE_VEHICLE_SPEED = 2;
-  const VEHICLE_WIDTH = 80; // Plus gros
-  const VEHICLE_HEIGHT = 60; // Plus gros
-  const SCREEN_SIZE = 600; // Carré
-  const COLLISION_DISTANCE = 100; // Distance pour détecter une collision
+  const VEHICLE_WIDTH = 80;
+  const VEHICLE_HEIGHT = 60;
+  const SCREEN_SIZE = 600;
 
   function showGameRules() {
     $showRules = true;
@@ -50,14 +46,12 @@
     $timeLeft = GAME_DURATION;
     vehicles = [];
 
-    // Spawn vehicles
     vehicleInterval = setInterval(() => {
       if ($gameActive) {
         spawnVehicle();
       }
     }, VEHICLE_SPAWN_RATE);
 
-    // Update time
     timeInterval = setInterval(() => {
       if ($gameActive) {
         $timeLeft--;
@@ -67,12 +61,11 @@
       }
     }, 1000);
 
-    // Game loop
     gameInterval = setInterval(() => {
       if ($gameActive) {
         updateVehicles();
       }
-    }, 16); // ~60 FPS
+    }, 16);
   }
 
   function endGame() {
@@ -100,19 +93,19 @@
     
     let x, y;
     switch (direction) {
-      case 'diagonal1': // Haut-gauche vers bas-droite
+      case 'diagonal1':
         x = -VEHICLE_WIDTH;
         y = -VEHICLE_HEIGHT;
         break;
-      case 'diagonal2': // Bas-gauche vers haut-droite
+      case 'diagonal2':
         x = -VEHICLE_WIDTH;
         y = SCREEN_SIZE;
         break;
-      case 'diagonal3': // Haut-droite vers bas-gauche
+      case 'diagonal3':
         x = SCREEN_SIZE;
         y = -VEHICLE_HEIGHT;
         break;
-      case 'diagonal4': // Bas-droite vers haut-gauche
+      case 'diagonal4':
         x = SCREEN_SIZE;
         y = SCREEN_SIZE;
         break;
@@ -132,24 +125,23 @@
   }
 
   function updateVehicles() {
-    // Mettre à jour les positions
     vehicles = vehicles.map(vehicle => {
       let newX, newY;
       
       switch (vehicle.direction) {
-        case 'diagonal1': // Haut-gauche vers bas-droite
+        case 'diagonal1':
           newX = vehicle.x + vehicle.speed;
           newY = vehicle.y + vehicle.speed;
           break;
-        case 'diagonal2': // Bas-gauche vers haut-droite
+        case 'diagonal2':
           newX = vehicle.x + vehicle.speed;
           newY = vehicle.y - vehicle.speed;
           break;
-        case 'diagonal3': // Haut-droite vers bas-gauche
+        case 'diagonal3':
           newX = vehicle.x - vehicle.speed;
           newY = vehicle.y + vehicle.speed;
           break;
-        case 'diagonal4': // Bas-droite vers haut-gauche
+        case 'diagonal4':
           newX = vehicle.x - vehicle.speed;
           newY = vehicle.y - vehicle.speed;
           break;
@@ -161,15 +153,14 @@
         y: newY
       };
     }).filter(vehicle => {
-      // Supprimer les véhicules seulement quand ils ont complètement quitté l'image
       switch (vehicle.direction) {
-        case 'diagonal1': // Haut-gauche vers bas-droite
+        case 'diagonal1':
           return !(vehicle.x > SCREEN_SIZE + VEHICLE_WIDTH && vehicle.y > SCREEN_SIZE + VEHICLE_HEIGHT);
-        case 'diagonal2': // Bas-gauche vers haut-droite
+        case 'diagonal2':
           return !(vehicle.x > SCREEN_SIZE + VEHICLE_WIDTH && vehicle.y < -VEHICLE_HEIGHT);
-        case 'diagonal3': // Haut-droite vers bas-gauche
+        case 'diagonal3':
           return !(vehicle.x < -VEHICLE_WIDTH && vehicle.y > SCREEN_SIZE + VEHICLE_HEIGHT);
-        case 'diagonal4': // Bas-droite vers haut-gauche
+        case 'diagonal4':
           return !(vehicle.x < -VEHICLE_WIDTH && vehicle.y < -VEHICLE_HEIGHT);
         default:
           return true;
@@ -181,14 +172,11 @@
     if (!$gameActive) return;
 
     if (vehicle.type === 'truck') {
-      // Correct: shot a truck
       $score++;
     } else {
-      // Wrong: shot a car
       $score--;
     }
 
-    // Remove vehicle
     vehicles = vehicles.filter(v => v.id !== vehicle.id);
   }
 
@@ -196,14 +184,11 @@
     if (!$gameActive) return;
 
     if (vehicle.type === 'car') {
-      // Correct: let car pass
       $score++;
     } else {
-      // Wrong: let truck pass
       $score--;
     }
 
-    // Remove vehicle
     vehicles = vehicles.filter(v => v.id !== vehicle.id);
   }
 
@@ -214,7 +199,6 @@
   });
 </script>
 
-<!-- Fixed button in bottom right -->
 <button 
   class="fixed bottom-6 right-6 btn btn-primary btn-circle btn-lg shadow-lg hover:scale-110 transition-transform duration-200 z-50"
   on:click={showGameRules}
@@ -225,7 +209,6 @@
   </svg>
 </button>
 
-<!-- Rules overlay -->
 {#if $showRules}
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60]">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md mx-4 p-8">
@@ -273,11 +256,9 @@
   </div>
 {/if}
 
-<!-- Game overlay -->
 {#if $showGame}
   <div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60]">
     <div class="relative w-full h-full flex items-center justify-center">
-      <!-- Close button -->
       <button 
         class="absolute top-6 right-6 btn btn-circle btn-ghost text-white hover:bg-white/20"
         on:click={closeGame}
@@ -288,7 +269,6 @@
       </button>
 
       {#if !$gameActive && $timeLeft === 0}
-        <!-- Game over screen -->
         <div class="bg-white rounded-2xl shadow-2xl max-w-md mx-4 p-8 text-center">
           <div class="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-warning">
@@ -305,7 +285,6 @@
           </div>
         </div>
       {:else}
-        <!-- Game screen -->
         <div class="text-center">
           <div class="flex justify-between items-center mb-6 text-lg font-semibold text-white max-w-2xl mx-auto">
             <div class="bg-success/20 backdrop-blur-sm px-4 py-2 rounded-lg">
@@ -320,14 +299,12 @@
             class="relative border-2 border-white/30 rounded-xl overflow-hidden mx-auto"
             style="width: {SCREEN_SIZE}px; height: {SCREEN_SIZE}px;"
           >
-            <!-- Background image -->
             <img 
               src={backgroundImage} 
               alt="Game background"
               class="absolute inset-0 w-full h-full object-cover"
             />
             
-            <!-- Vehicles -->
             {#each vehicles as vehicle (vehicle.id)}
               <div 
                 class="absolute cursor-pointer transition-all duration-200 rounded-lg hover:scale-110 {vehicle.type === 'car' ? 'drop-shadow-lg drop-shadow-green-500' : 'drop-shadow-lg drop-shadow-red-500'}"

@@ -39,7 +39,6 @@
 	<div class="mx-auto">
 		<h1 class="font-author mb-6 text-2xl text-gray-800">{$title}</h1>
 
-		<!-- Encadré de contact support -->
 		<div class="mb-6 rounded-lg border border-orange-200 bg-orange-50 p-6 shadow-md">
 			<div class="flex items-center">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

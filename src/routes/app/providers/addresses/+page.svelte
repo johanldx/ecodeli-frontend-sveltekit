@@ -94,10 +94,9 @@
 	async function loadAddresses() {
 		try {
 			const res = await fetchFromAPI<Address[]>('/locations', { headers: getHeaders() });
-			// Trier les adresses : privées d'abord, puis publiques
 			addresses = res.sort((a, b) => {
 				if (a.public === b.public) return 0;
-				return a.public ? 1 : -1; // false (privées) avant true (publiques)
+				return a.public ? 1 : -1;
 			});
 		} catch {
 			notifications.error('Impossible de charger les adresses.');

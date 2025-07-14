@@ -4,34 +4,27 @@
 
 	export let columns: { Header: string; accessor: string; sortable?: boolean; hidden?: boolean }[] =
 		[];
-	export let data: any[] = []; // Assurez-vous que `data` est correctement initialisé avant d'être utilisé
+	export let data: any[] = [];
 	export let pageSize: number = 5;
-	export let onAction: (action: string, row: any) => void; // Event for button actions
+	export let onAction: (action: string, row: any) => void;
 
-	// constantes des traductions
 	const next = t('admin.users.next');
 	const previous = t('admin.users.previous');
 	const page = t('admin.users.page');
 	const on = tStatic('admin.users.on');
 
-	// Pagination
 	let currentPage = 0;
 	let totalPages = Math.ceil(data.length / pageSize);
 	let currentData: any[] = [];
 
-	// Recherche
 	let searchQuery = '';
 
-	// Tri
 	let sortColumn: string | null = null;
 	let sortOrder: 'asc' | 'desc' = 'asc';
 
-	// Dispatcher pour gérer les événements
 	const dispatch = createEventDispatcher();
 
-	// Filtrer les données en fonction de la recherche
 	function filterData() {
-		// Si la recherche est vide, retourner toutes les données
 		if (searchQuery === '') {
 			return data;
 		}
@@ -43,9 +36,7 @@
 		);
 	}
 
-	// Mettre à jour la page actuelle
 	function updatePage(page: number) {
-		// Si la page est hors des limites, réinitialiser à la première page
 		if (page < 0) {
 			currentPage = 0;
 		} else if (page >= totalPages) {
@@ -56,23 +47,20 @@
 		updateCurrentData();
 	}
 
-	// Mettre à jour les données de la page actuelle
 	function updateCurrentData() {
-		const filteredData = filterData(); // Obtenir les données filtrées
-		totalPages = Math.ceil(filteredData.length / pageSize); // Mettre à jour le nombre total de pages
-		currentData = filteredData.slice(currentPage * pageSize, (currentPage + 1) * pageSize); // Sélectionner les données de la page actuelle
+		const filteredData = filterData();
+		totalPages = Math.ceil(filteredData.length / pageSize);
+		currentData = filteredData.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 	}
 
-	// Tri des données par colonne
 	function sortData(column: string) {
 		if (sortColumn === column) {
-			sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; // Inverse l'ordre du tri si la même colonne
+			sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
 		} else {
 			sortColumn = column;
-			sortOrder = 'asc'; // Définit l'ordre croissant par défaut
+			sortOrder = 'asc';
 		}
 
-		// Trier les données
 		const filteredData = filterData();
 		filteredData.sort((a, b) => {
 			const valA = a[column];
@@ -83,12 +71,10 @@
 			return 0;
 		});
 
-		// Mise à jour de la page après le tri
 		totalPages = Math.ceil(filteredData.length / pageSize);
 		currentData = filteredData.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 	}
 
-	// Lors du montage, mettre à jour les données de la page initiale
 	onMount(() => {
 		updateCurrentData();
 	});

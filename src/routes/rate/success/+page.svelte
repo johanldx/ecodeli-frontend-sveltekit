@@ -5,7 +5,6 @@
 	import { tabTitle } from '$lib/utils/tabTitle';
 	import { onDestroy } from 'svelte';
 
-	// Traductions
 	const rate_success_title = t('rate.success.title');
 	const rate_success_message = t('rate.success.message');
 	const rate_success_redirect = t('rate.success.redirect_message');
@@ -14,7 +13,6 @@
 	onMount(() => {
 		onDestroy(tabTitle('rate.success.tab_title'));
 		
-		// Redirection automatique vers l'accueil après 5 secondes
 		const timer = setTimeout(() => {
 			goto('/clients/discover');
 		}, 5000);

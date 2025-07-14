@@ -23,10 +23,9 @@
 			localStorage.setItem('lang', code);
 		}
 
-		currentLang.set(code); // Déclenche le rechargement dans TranslationProvider
+		currentLang.set(code);
 	}
 
-	// Fermer le menu quand les traductions sont prêtes après changement
 	$: if ($translationsReady && $dropdownOpen) {
 		dropdownOpen.set(false);
 	}

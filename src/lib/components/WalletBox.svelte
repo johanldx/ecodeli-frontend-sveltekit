@@ -7,7 +7,6 @@
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 
-	// Paramètre passé au composant
 	export let profileType: 'clients' | 'providers' | 'delivery-persons' | 'traders';
 
 	type WalletResponse = {
@@ -26,7 +25,6 @@
 	const available = t('app.clients.account.my_electronic_wallet.available');
 	const pending = t('app.clients.account.my_electronic_wallet.pending');
 
-	// Notifications traductions
 	const iban_sent_success = t('components.wallet.iban_sent_success');
 	const iban_validation_error = t('components.wallet.iban_validation_error');
 	const no_amount_available = t('components.wallet.no_amount_available');
